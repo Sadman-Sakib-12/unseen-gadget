@@ -1,0 +1,22 @@
+{
+    "name": "unseen-gadget",
+    "private": true,
+    "packageManager": "pnpm@9.12.0",
+    "scripts": {
+                    "build": "turbo run build",
+                    "dev": "turbo run dev",
+                    "dev:admin": "pnpm --filter @unseen-gadget/admin dev",
+                    "dev:frontend": "pnpm --filter @unseen-gadget/frontend dev",
+                    "dev:backend": "pnpm --filter @unseen-gadget/backend dev",
+                    "lint": "turbo run lint",
+                    "db:generate": "pnpm --filter @unseen-gadget/database db:generate",
+                    "db:push": "pnpm --filter @unseen-gadget/database db:push",
+                    "db:seed": "pnpm --filter @unseen-gadget/database db:seed",
+                    "clean": "rimraf --glob \"**/{node_modules,dist,.next,.turbo}\""
+                },
+    "devDependencies": {
+                            "turbo": "^2.0.0",
+                            "typescript": "^5.5.0",
+                            "rimraf": "^5.0.0"
+                        }
+}
