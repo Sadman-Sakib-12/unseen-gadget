@@ -1,0 +1,13 @@
+[
+  { "id": 1, "productId": 1, "productName": "iPhone 16 Pro Max", "type": "IN", "quantity": 10, "date": "2025-08-01", "reference": "PO-2025-001", "note": "Restocked from supplier" },
+  { "id": 2, "productId": 3, "productName": "Samsung S25 Ultra", "type": "IN", "quantity": 20, "date": "2025-08-05", "reference": "PO-2025-003", "note": "Weekly restock" },
+  { "id": 3, "productId": 2, "productName": "MacBook Air M4", "type": "OUT", "quantity": 5, "date": "2025-08-06", "reference": "ORD-2025-089", "note": "Sold via online orders" },
+  { "id": 4, "productId": 4, "productName": "AirPods Pro 2", "type": "OUT", "quantity": 12, "date": "2025-08-06", "reference": "ORD-2025-090", "note": "Sold via POS" },
+  { "id": 5, "productId": 5, "productName": "iPad Air M3", "type": "ADJUSTMENT", "quantity": -2, "date": "2025-08-05", "reference": "ADJ-001", "note": "Damaged units removed" },
+  { "id": 6, "productId": 8, "productName": "Apple Watch Ultra 2", "type": "IN", "quantity": 15, "date": "2025-08-03", "reference": "PO-2025-002", "note": "New stock arrival" },
+  { "id": 7, "productId": 10, "productName": "Logitech MX Master 3S", "type": "OUT", "quantity": 8, "date": "2025-08-06", "reference": "ORD-2025-091", "note": "Corporate order" },
+  { "id": 8, "productId": 9, "productName": "Samsung Galaxy Tab S9", "type": "OUT", "quantity": 3, "date": "2025-08-04", "reference": "ORD-2025-085", "note": "Walk-in customer" },
+  { "id": 9, "productId": 13, "productName": "Samsung 990 Pro 2TB", "type": "IN", "quantity": 25, "date": "2025-08-04", "reference": "PO-2025-004", "note": "High demand restock" },
+  { "id": 10, "productId": 15, "productName": "LG UltraFine 5K", "type": "ADJUSTMENT", "quantity": 1, "date": "2025-08-03", "reference": "ADJ-002", "note": "Found missing unit in stock count" }
+]
+
