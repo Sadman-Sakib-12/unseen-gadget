@@ -1,0 +1,15 @@
+[
+  { "month": "Jan", "orders": 65, "revenue": 1200000, "cost": 720000, "profit": 240000 },
+  { "month": "Feb", "orders": 78, "revenue": 1450000, "cost": 870000, "profit": 290000 },
+  { "month": "Mar", "orders": 90, "revenue": 1800000, "cost": 1080000, "profit": 360000 },
+  { "month": "Apr", "orders": 85, "revenue": 1600000, "cost": 960000, "profit": 320000 },
+  { "month": "May", "orders": 95, "revenue": 1950000, "cost": 1170000, "profit": 390000 },
+  { "month": "Jun", "orders": 110, "revenue": 2200000, "cost": 1320000, "profit": 440000 },
+  { "month": "Jul", "orders": 125, "revenue": 2450000, "cost": 1470000, "profit": 490000 },
+  { "month": "Aug", "orders": 130, "revenue": 2600000, "cost": 1560000, "profit": 520000 },
+  { "month": "Sep", "orders": 115, "revenue": 2300000, "cost": 1380000, "profit": 460000 },
+  { "month": "Oct", "orders": 140, "revenue": 2800000, "cost": 1680000, "profit": 560000 },
+  { "month": "Nov", "orders": 155, "revenue": 3100000, "cost": 1860000, "profit": 620000 },
+  { "month": "Dec", "orders": 170, "revenue": 3400000, "cost": 2040000, "profit": 680000 }
+]
+

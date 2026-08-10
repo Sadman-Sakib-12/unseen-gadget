@@ -1,0 +1,123 @@
+[
+  {
+    "id": "ORD-001",
+    "customerName": "Rahim Ahmed",
+    "email": "rahim@example.com",
+    "phone": "+8801712345678",
+    "product": "iPhone 16 Pro Max",
+    "amount": 185000,
+    "status": "DELIVERED",
+    "paymentStatus": "PAID",
+    "date": "2026-08-10",
+    "city": "Dhaka"
+  },
+  {
+    "id": "ORD-002",
+    "customerName": "Karim Hassan",
+    "email": "karim@example.com",
+    "phone": "+8801812345678",
+    "product": "MacBook Air M4",
+    "amount": 165000,
+    "status": "SHIPPED",
+    "paymentStatus": "PAID",
+    "date": "2026-08-09",
+    "city": "Chittagong"
+  },
+  {
+    "id": "ORD-003",
+    "customerName": "Sadia Islam",
+    "email": "sadia@example.com",
+    "phone": "+8801912345678",
+    "product": "AirPods Pro 2",
+    "amount": 25000,
+    "status": "PROCESSING",
+    "paymentStatus": "PAID",
+    "date": "2026-08-09",
+    "city": "Dhaka"
+  },
+  {
+    "id": "ORD-004",
+    "customerName": "Tanvir Rahman",
+    "email": "tanvir@example.com",
+    "phone": "+8801612345678",
+    "product": "Samsung S25 Ultra",
+    "amount": 145000,
+    "status": "PENDING",
+    "paymentStatus": "PENDING",
+    "date": "2026-08-08",
+    "city": "Sylhet"
+  },
+  {
+    "id": "ORD-005",
+    "customerName": "Nusrat Jahan",
+    "email": "nusrat@example.com",
+    "phone": "+8801512345678",
+    "product": "iPad Air M3",
+    "amount": 95000,
+    "status": "DELIVERED",
+    "paymentStatus": "PAID",
+    "date": "2026-08-08",
+    "city": "Rajshahi"
+  },
+  {
+    "id": "ORD-006",
+    "customerName": "Imran Hossain",
+    "email": "imran@example.com",
+    "phone": "+8801312345678",
+    "product": "Sony WH-1000XM5",
+    "amount": 35000,
+    "status": "CANCELLED",
+    "paymentStatus": "REFUNDED",
+    "date": "2026-08-07",
+    "city": "Khulna"
+  },
+  {
+    "id": "ORD-007",
+    "customerName": "Farzana Akter",
+    "email": "farzana@example.com",
+    "phone": "+8801412345678",
+    "product": "Dell XPS 15",
+    "amount": 195000,
+    "status": "DELIVERED",
+    "paymentStatus": "PAID",
+    "date": "2026-08-07",
+    "city": "Dhaka"
+  },
+  {
+    "id": "ORD-008",
+    "customerName": "Mehedi Hasan",
+    "email": "mehedi@example.com",
+    "phone": "+8801712345679",
+    "product": "Apple Watch Ultra 2",
+    "amount": 85000,
+    "status": "SHIPPED",
+    "paymentStatus": "PAID",
+    "date": "2026-08-06",
+    "city": "Chittagong"
+  },
+  {
+    "id": "ORD-009",
+    "customerName": "Taslima Begum",
+    "email": "taslima@example.com",
+    "phone": "+8801812345679",
+    "product": "Samsung Tab S9",
+    "amount": 75000,
+    "status": "PROCESSING",
+    "paymentStatus": "PAID",
+    "date": "2026-08-06",
+    "city": "Sylhet"
+  },
+  {
+    "id": "ORD-010",
+    "customerName": "Arif Khan",
+    "email": "arif@example.com",
+    "phone": "+8801912345679",
+    "product": "Logitech MX Master 3S",
+    "amount": 12000,
+    "status": "DELIVERED",
+    "paymentStatus": "PAID",
+    "date": "2026-08-05",
+    "city": "Rajshahi"
+  }
+]
+

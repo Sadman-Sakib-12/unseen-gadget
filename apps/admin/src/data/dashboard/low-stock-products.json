@@ -1,0 +1,9 @@
+[
+  { "id": 1, "name": "iPhone 16 Pro Max", "sku": "IPH-16-PM-256", "stock": 3, "minStock": 5, "status": "CRITICAL" },
+  { "id": 2, "name": "MacBook Air M4", "sku": "MBA-M4-13", "stock": 4, "minStock": 5, "status": "CRITICAL" },
+  { "id": 3, "name": "Samsung S25 Ultra", "sku": "SAM-S25-U-256", "stock": 7, "minStock": 10, "status": "LOW" },
+  { "id": 4, "name": "AirPods Pro 2", "sku": "APP-2-USB-C", "stock": 8, "minStock": 15, "status": "LOW" },
+  { "id": 5, "name": "iPad Air M3", "sku": "IPA-M3-11", "stock": 5, "minStock": 8, "status": "LOW" },
+  { "id": 6, "name": "Sony WH-1000XM5", "sku": "SNY-WH1K-XM5", "stock": 2, "minStock": 4, "status": "CRITICAL" }
+]
+

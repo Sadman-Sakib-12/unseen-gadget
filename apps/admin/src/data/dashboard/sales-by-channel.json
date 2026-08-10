@@ -1,0 +1,7 @@
+[
+  { "channel": "Website", "orders": 85, "revenue": 1700000, "percentage": 54.5 },
+  { "channel": "POS", "orders": 45, "revenue": 900000, "percentage": 28.9 },
+  { "channel": "Facebook", "orders": 18, "revenue": 360000, "percentage": 11.5 },
+  { "channel": "Other", "orders": 8, "revenue": 160000, "percentage": 5.1 }
+]
+
