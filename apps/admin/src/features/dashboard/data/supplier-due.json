@@ -1,0 +1,8 @@
+[
+  { "id": 1, "supplierName": "Tech Solutions Ltd", "amount": 250000, "dueDate": "2026-08-15", "status": "PENDING" },
+  { "id": 2, "supplierName": "Global Electronics", "amount": 180000, "dueDate": "2026-08-10", "status": "OVERDUE" },
+  { "id": 3, "supplierName": "Smart Gadgets BD", "amount": 320000, "dueDate": "2026-08-20", "status": "PENDING" },
+  { "id": 4, "supplierName": "Digital World", "amount": 95000, "dueDate": "2026-08-05", "status": "PAID" },
+  { "id": 5, "supplierName": "Future Tech", "amount": 410000, "dueDate": "2026-08-18", "status": "PENDING" }
+]
+

@@ -1,0 +1,15 @@
+[
+  { "month": "Jan", "sales": 1200000, "orders": 65 },
+  { "month": "Feb", "sales": 1450000, "orders": 78 },
+  { "month": "Mar", "sales": 1800000, "orders": 90 },
+  { "month": "Apr", "sales": 1600000, "orders": 85 },
+  { "month": "May", "sales": 1950000, "orders": 95 },
+  { "month": "Jun", "sales": 2200000, "orders": 110 },
+  { "month": "Jul", "sales": 2450000, "orders": 125 },
+  { "month": "Aug", "sales": 2600000, "orders": 130 },
+  { "month": "Sep", "sales": 2300000, "orders": 115 },
+  { "month": "Oct", "sales": 2800000, "orders": 140 },
+  { "month": "Nov", "sales": 3100000, "orders": 155 },
+  { "month": "Dec", "sales": 3400000, "orders": 170 }
+]
+
