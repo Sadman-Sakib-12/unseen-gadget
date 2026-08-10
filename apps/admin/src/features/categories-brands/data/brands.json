@@ -1,0 +1,11 @@
+[
+  {"id":"BRAND-001","name":"TechPro","slug":"techpro","logo":null,"description":"Premium technology products","status":"active"},
+  {"id":"BRAND-002","name":"SoundMax","slug":"soundmax","logo":null,"description":"High-quality audio equipment","status":"active"},
+  {"id":"BRAND-003","name":"SmartLife","slug":"smartlife","logo":null,"description":"Smart home and lifestyle gadgets","status":"active"},
+  {"id":"BRAND-004","name":"GameX","slug":"gamex","logo":null,"description":"Gaming peripherals and accessories","status":"active"},
+  {"id":"BRAND-005","name":"ChargeFast","slug":"chargefast","logo":null,"description":"Fast charging and power solutions","status":"active"},
+  {"id":"BRAND-006","name":"ViewClear","slug":"viewclear","logo":null,"description":"Display and monitor technologies","status":"inactive"},
+  {"id":"BRAND-007","name":"DataVault","slug":"datavault","logo":null,"description":"Secure storage and backup solutions","status":"active"},
+  {"id":"BRAND-008","name":"ConnectPro","slug":"connectpro","logo":null,"description":"Connectivity and networking gear","status":"active"}
+]
+

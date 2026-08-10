@@ -1,0 +1,13 @@
+[
+  {"id":"CAT-001","name":"Electronics","slug":"electronics","description":"Electronic devices and gadgets","image":null,"parentId":null,"status":"active"},
+  {"id":"CAT-002","name":"Audio","slug":"audio","description":"Headphones, speakers and audio accessories","image":null,"parentId":"CAT-001","status":"active"},
+  {"id":"CAT-003","name":"Smartphones","slug":"smartphones","description":"Mobile phones and accessories","image":null,"parentId":"CAT-001","status":"active"},
+  {"id":"CAT-004","name":"Laptops","slug":"laptops","description":"Laptops and computing devices","image":null,"parentId":"CAT-001","status":"active"},
+  {"id":"CAT-005","name":"Accessories","slug":"accessories","description":"Phone cases, cables and other accessories","image":null,"parentId":null,"status":"active"},
+  {"id":"CAT-006","name":"Gaming","slug":"gaming","description":"Gaming consoles, accessories and gear","image":null,"parentId":null,"status":"active"},
+  {"id":"CAT-007","name":"Smart Home","slug":"smart-home","description":"Home automation and IoT devices","image":null,"parentId":null,"status":"inactive"},
+  {"id":"CAT-008","name":"Wearables","slug":"wearables","description":"Smartwatches and fitness trackers","image":null,"parentId":"CAT-001","status":"active"},
+  {"id":"CAT-009","name":"Cameras","slug":"cameras","description":"Digital cameras and photography gear","image":null,"parentId":"CAT-001","status":"active"},
+  {"id":"CAT-010","name":"Storage","slug":"storage","description":"Hard drives, SSDs and memory cards","image":null,"parentId":"CAT-005","status":"active"}
+]
+
