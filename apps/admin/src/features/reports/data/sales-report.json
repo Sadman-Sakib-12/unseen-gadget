@@ -1,0 +1,4 @@
+[
+  {"id":"SALES-001","period":"January 2024","totalSales":1250000,"totalOrders":342,"totalCustomers":189,"averageOrderValue":3655,"topProducts":[{"name":"Wireless Headphones","revenue":245000},{"name":"Smart Watch","revenue":198000},{"name":"Bluetooth Speaker","revenue":156000}],"salesByChannel":[{"channel":"Website","revenue":750000},{"channel":"Mobile App","revenue":350000},{"channel":"Social Media","revenue":150000}],"dailyData":[{"date":"2024-01-01","revenue":35000,"orders":12},{"date":"2024-01-02","revenue":42000,"orders":15},{"date":"2024-01-03","revenue":38000,"orders":14},{"date":"2024-01-04","revenue":45000,"orders":16},{"date":"2024-01-05","revenue":52000,"orders":18}]}
+]
+
