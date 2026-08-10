@@ -1,0 +1,13 @@
+[
+  { "id": 1, "supplierId": 1, "supplierName": "Rahim Uddin", "type": "PURCHASE", "amount": 250000, "date": "2025-08-01", "reference": "PO-2025-001", "note": "iPhone and MacBook purchase" },
+  { "id": 2, "supplierId": 2, "supplierName": "Karim Hassan", "type": "PURCHASE", "amount": 320000, "date": "2025-08-03", "reference": "PO-2025-002", "note": "Samsung products batch" },
+  { "id": 3, "supplierId": 1, "supplierName": "Rahim Uddin", "type": "PAYMENT", "amount": 100000, "date": "2025-08-05", "reference": "PAY-001", "note": "Partial payment" },
+  { "id": 4, "supplierId": 3, "supplierName": "Fatima Akter", "type": "PURCHASE", "amount": 180000, "date": "2025-08-04", "reference": "PO-2025-003", "note": "Accessories bulk order" },
+  { "id": 5, "supplierId": 4, "supplierName": "Masud Rana", "type": "PURCHASE", "amount": 95000, "date": "2025-07-28", "reference": "PO-2025-004", "note": "Cables and adapters" },
+  { "id": 6, "supplierId": 5, "supplierName": "Nusrat Jahan", "type": "PAYMENT", "amount": 200000, "date": "2025-08-02", "reference": "PAY-002", "note": "Full settlement" },
+  { "id": 7, "supplierId": 6, "supplierName": "Arif Billah", "type": "PURCHASE", "amount": 145000, "date": "2025-08-06", "reference": "PO-2025-005", "note": "Gaming accessories" },
+  { "id": 8, "supplierId": 7, "supplierName": "Shahina Begum", "type": "REFUND", "amount": 12000, "date": "2025-08-05", "reference": "REF-001", "note": "Defective units return" },
+  { "id": 9, "supplierId": 9, "supplierName": "Roksana Parvin", "type": "PURCHASE", "amount": 210000, "date": "2025-08-06", "reference": "PO-2025-006", "note": "Audio equipment batch" },
+  { "id": 10, "supplierId": 10, "supplierName": "Imran Khan", "type": "PURCHASE", "amount": 380000, "date": "2025-07-30", "reference": "PO-2025-007", "note": "Premium electronics order" }
+]
+
