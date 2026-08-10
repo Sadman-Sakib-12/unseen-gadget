@@ -1,0 +1,11 @@
+[
+  {"id":"CPN-001","code":"WELCOME10","discountType":"percentage","discountValue":10,"minimumOrder":500,"maximumDiscount":200,"usageLimit":1000,"usedCount":234,"expiryDate":"2024-12-31","status":"active"},
+  {"id":"CPN-002","code":"FLAT500","discountType":"fixed","discountValue":500,"minimumOrder":2000,"maximumDiscount":500,"usageLimit":500,"usedCount":89,"expiryDate":"2024-06-30","status":"active"},
+  {"id":"CPN-003","code":"NEWYEAR25","discountType":"percentage","discountValue":25,"minimumOrder":1000,"maximumDiscount":1000,"usageLimit":200,"usedCount":200,"expiryDate":"2024-01-01","status":"expired"},
+  {"id":"CPN-004","code":"FREESHIP","discountType":"fixed","discountValue":80,"minimumOrder":800,"maximumDiscount":80,"usageLimit":5000,"usedCount":1567,"expiryDate":"2024-12-31","status":"active"},
+  {"id":"CPN-005","code":"SUMMER15","discountType":"percentage","discountValue":15,"minimumOrder":1200,"maximumDiscount":600,"usageLimit":300,"usedCount":45,"expiryDate":"2024-08-31","status":"active"},
+  {"id":"CPN-006","code":"VIP20","discountType":"percentage","discountValue":20,"minimumOrder":3000,"maximumDiscount":1500,"usageLimit":100,"usedCount":12,"expiryDate":"2024-09-30","status":"active"},
+  {"id":"CPN-007","code":"TEST","discountType":"fixed","discountValue":100,"minimumOrder":500,"maximumDiscount":100,"usageLimit":10,"usedCount":0,"expiryDate":"2024-12-31","status":"inactive"},
+  {"id":"CPN-008","code":"EID2024","discountType":"percentage","discountValue":30,"minimumOrder":1500,"maximumDiscount":2000,"usageLimit":150,"usedCount":150,"expiryDate":"2024-04-10","status":"expired"}
+]
+
