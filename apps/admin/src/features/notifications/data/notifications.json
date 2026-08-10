@@ -1,0 +1,23 @@
+[
+  {"id":"NOTIF-001","title":"New Order Received","message":"Order #ORD-1020 has been placed by Moushumi Rahman","type":"order","time":"2024-01-16T10:30:00","read":false,"actionUrl":"/orders/ORD-1020"},
+  {"id":"NOTIF-002","title":"Payment Failed","message":"Payment for order #ORD-1014 failed due to insufficient balance","type":"payment","time":"2024-01-16T09:15:00","read":false,"actionUrl":"/payments/PAY-014"},
+  {"id":"NOTIF-003","title":"Return Request","message":"Return request #RET-003 approved for Amina Khatun","type":"return","time":"2024-01-15T16:45:00","read":true,"actionUrl":"/returns/RET-003"},
+  {"id":"NOTIF-004","title":"Low Stock Alert","message":"Wireless Headphones stock is below 10 units","type":"alert","time":"2024-01-15T14:20:00","read":true,"actionUrl":"/inventory"},
+  {"id":"NOTIF-005","title":"Order Shipped","message":"Order #ORD-1002 has been shipped via Steadfast","type":"shipping","time":"2024-01-15T11:30:00","read":true,"actionUrl":"/delivery/DLV-002"},
+  {"id":"NOTIF-006","title":"New Customer Registration","message":"Nusrat Jahan just created an account","type":"customer","time":"2024-01-15T10:00:00","read":true,"actionUrl":"/customers/CUST-011"},
+  {"id":"NOTIF-007","title":"Refund Processed","message":"Refund of 2500 BDT processed for order #ORD-1001","type":"payment","time":"2024-01-14T15:30:00","read":true,"actionUrl":"/payments/PAY-001"},
+  {"id":"NOTIF-008","title":"Delivery Delayed","message":"Order #ORD-1008 delivery delayed due to weather","type":"shipping","time":"2024-01-14T13:10:00","read":true,"actionUrl":"/delivery/DLV-008"},
+  {"id":"NOTIF-009","title":"Review Reported","message":"A review for Phone Case has been flagged","type":"alert","time":"2024-01-14T11:00:00","read":true,"actionUrl":"/reviews/REV-004"},
+  {"id":"NOTIF-010","title":"New Coupon Created","message":"Coupon SUMMER15 has been created by Admin","type":"system","time":"2024-01-13T16:00:00","read":true,"actionUrl":"/coupons"},
+  {"id":"NOTIF-011","title":"Order Cancelled","message":"Order #ORD-1006 has been cancelled by customer","type":"order","time":"2024-01-13T14:20:00","read":true,"actionUrl":"/orders/ORD-1006"},
+  {"id":"NOTIF-012","title":"Payment Received","message":"Payment of 4500 BDT received for order #ORD-1004","type":"payment","time":"2024-01-13T10:30:00","read":true,"actionUrl":"/payments/PAY-004"},
+  {"id":"NOTIF-013","title":"Stock Updated","message":"Smart Watch stock updated to 25 units","type":"alert","time":"2024-01-12T15:00:00","read":true,"actionUrl":"/inventory"},
+  {"id":"NOTIF-014","title":"Customer Query","message":"Fatima Begum submitted a query about order #ORD-1003","type":"customer","time":"2024-01-12T12:30:00","read":true,"actionUrl":"/customers/CUST-003"},
+  {"id":"NOTIF-015","title":"Return Rejected","message":"Return request #RET-004 has been rejected","type":"return","time":"2024-01-12T10:00:00","read":true,"actionUrl":"/returns/RET-004"},
+  {"id":"NOTIF-016","title":"System Update","message":"Admin panel updated to version 2.1.0","type":"system","time":"2024-01-11T08:00:00","read":true,"actionUrl":null},
+  {"id":"NOTIF-017","title":"New Review","message":"A new 5-star review for Wireless Headphones","type":"alert","time":"2024-01-11T06:30:00","read":true,"actionUrl":"/reviews/REV-001"},
+  {"id":"NOTIF-018","title":"Expense Added","message":"Marketing expense of 15000 BDT added","type":"alert","time":"2024-01-10T16:00:00","read":true,"actionUrl":"/expenses"},
+  {"id":"NOTIF-019","title":"Promotion Started","message":"Summer Sale promotion is now active","type":"system","time":"2024-01-10T00:00:00","read":true,"actionUrl":"/promotions/PROMO-001"},
+  {"id":"NOTIF-020","title":"Daily Report Generated","message":"Daily sales report for January 16 has been generated","type":"alert","time":"2024-01-09T23:59:00","read":true,"actionUrl":"/reports"}
+]
+
