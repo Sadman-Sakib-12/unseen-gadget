@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminUsers, type AdminUser } from '@/features/auth/data';
 
@@ -20,21 +20,19 @@ interface AuthProviderProps {
 }
 
 const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<AdminUser | null>(null);
-  const [isAuthLoaded, setIsAuthLoaded] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem('admin_user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error('Failed to parse user from localStorage', e);
-      }
+  const [user, setUser] = useState<AdminUser | null>(() => {
+    if (typeof window === 'undefined') {
+      return null;
     }
-    setIsAuthLoaded(true);
-  }, []);
+    try {
+      const storedUser = window.localStorage.getItem('admin_user');
+      return storedUser ? (JSON.parse(storedUser) as AdminUser) : null;
+    } catch (e) {
+      console.error('Failed to parse user from localStorage', e);
+      return null;
+    }
+  });
+  const router = useRouter();
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     const foundUser = adminUsers.find(
@@ -73,7 +71,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, isAuthenticated: !!user, isAuthLoaded }}>
+    <AuthContext.Provider value={{ user, login, logout, register, isAuthenticated: !!user, isAuthLoaded: true }}>
       {children}
     </AuthContext.Provider>
   );
@@ -93,7 +91,20 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isAuthLoaded } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthLoaded && !isAuthenticated) {
+      router.push('/login');
+    } else if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+      router.push('/dashboard');
+    }
+  }, [isAuthLoaded, isAuthenticated, allowedRoles, user, router]);
+
+  if (!isAuthLoaded) {
+    return null;
+  }
 
   if (!isAuthenticated) {
     return null;
