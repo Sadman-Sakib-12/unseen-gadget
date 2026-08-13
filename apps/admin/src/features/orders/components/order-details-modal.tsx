@@ -1,205 +1,289 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { X, User, MapPin, Printer, ChevronDown, Calendar, CheckCircle2, Truck } from "lucide-react";
-import { StatusBadge } from "./status-badge";
-import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
-import type { Order } from "../types";
+import { useEffect } from 'react';
+import { Calendar, MapPin, Printer, User, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { cn } from '@/components/ui/utils';
+import { formatBDT } from '@/lib/load-dashboard-data';
+import type { Order } from '../types';
 
 interface OrderDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
   order: Order | null;
-  onStatusChange?: (orderId: string, status: Order["status"]) => void;
+  onClose: () => void;
+  onStatusChange: (orderId: string, status: Order['status']) => void;
 }
 
-export function OrderDetailsModal({ isOpen, onClose, order, onStatusChange }: OrderDetailsModalProps) {
-  const [isRendered, setIsRendered] = useState(isOpen);
+const STATUS_ACTIONS: { label: string; value: Order['status'] }[] = [
+  { label: 'Mark as Confirmed', value: 'CONFIRMED' },
+  { label: 'Mark as Processing', value: 'PROCESSING' },
+  { label: 'Mark as Shipped', value: 'SHIPPED' },
+  { label: 'Mark as Delivered', value: 'DELIVERED' },
+];
 
-  // Handle animation mounting/unmounting
+const TIMELINE: { label: string; activeStatuses: string[] }[] = [
+  { label: 'Order Placed', activeStatuses: ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] },
+  { label: 'Payment Confirmed', activeStatuses: ['CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'] },
+  { label: 'Processing', activeStatuses: ['PROCESSING', 'SHIPPED', 'DELIVERED'] },
+  { label: 'Shipped', activeStatuses: ['SHIPPED', 'DELIVERED'] },
+  { label: 'Delivered', activeStatuses: ['DELIVERED'] },
+];
+
+function printInvoice(order: Order) {
+  const row = (item: Order['items'][number]) =>
+    `<tr>
+      <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:13px">${item.productName}</td>
+      <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:13px;text-align:center">${item.quantity}</td>
+      <td style="padding:8px 12px;border:1px solid #e5e7eb;font-size:13px;text-align:right">${formatBDT(item.total)}</td>
+    </tr>`;
+  const invoiceHtml = `<!doctype html><html><head><title>Invoice ${order.id}</title></head>
+<body style="margin:0;font-family:Inter,Arial,sans-serif;padding:0;background:#f8fafc">
+  <div style="max-width:640px;margin:32px auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
+    <div style="padding:24px 32px;border-bottom:1px solid #e5e7eb">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <p style="margin:0;font-size:18px;font-weight:700;color:#111827">Unseen Gadget</p>
+          <p style="margin:2px 0 0;font-size:12px;color:#6b7280">Admin Portal · Invoice</p>
+        </div>
+        <p style="margin:0;font-size:14px;font-weight:600;color:#1c2b6e">#${order.id}</p>
+      </div>
+    </div>
+    <div style="padding:24px 32px">
+      <p style="margin:0 0 4px;font-size:13px;color:#6b7280">Billed to</p>
+      <p style="margin:0;font-size:15px;font-weight:600;color:#111827">${order.customerName}</p>
+      <p style="margin:2px 0;font-size:13px;color:#374151">${order.email} · ${order.phone}</p>
+      <p style="margin:0;font-size:13px;color:#374151">${order.shippingAddress}, ${order.city}</p>
+      <table style="width:100%;border-collapse:collapse;margin-top:20px">
+        <thead><tr>
+          <th style="padding:8px 12px;border:1px solid #e5e7eb;text-align:left;font-size:12px;color:#6b7280">Item</th>
+          <th style="padding:8px 12px;border:1px solid #e5e7eb;text-align:center;font-size:12px;color:#6b7280">Qty</th>
+          <th style="padding:8px 12px;border:1px solid #e5e7eb;text-align:right;font-size:12px;color:#6b7280">Total</th>
+        </tr></thead>
+        <tbody>${order.items.map(row).join('')}</tbody>
+      </table>
+      <div style="margin-top:16px;display:flex;justify-content:flex-end">
+        <div style="font-size:13px;color:#374151">
+          <p style="margin:0 0 4px;display:flex;justify-content:space-between;gap:32px">Subtotal <span>${formatBDT(order.subtotal)}</span></p>
+          <p style="margin:0 0 4px;display:flex;justify-content:space-between;gap:32px">Discount <span>-${formatBDT(order.discount)}</span></p>
+          <p style="margin:0 0 4px;display:flex;justify-content:space-between;gap:32px">Shipping <span>${formatBDT(order.shippingCost)}</span></p>
+          <p style="margin:12px 0 0;padding-top:12px;border-top:1px dashed #e5e7eb;display:flex;justify-content:space-between;gap:32px;font-weight:700;color:#111827">Total <span>${formatBDT(order.total)}</span></p>
+        </div>
+      </div>
+    </div>
+    <div style="padding:16px 32px;border-top:1px solid #e5e7eb;text-align:center;font-size:12px;color:#9ca3af">Thank you for shopping with Unseen Gadget</div>
+  </div>
+</body></html>`;
+  const win = window.open('', '_blank', 'width=760,height=640');
+  if (!win) return;
+  win.document.write(invoiceHtml);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 250);
+}
+
+export function OrderDetailsModal({ order, onClose, onStatusChange }: OrderDetailsModalProps) {
   useEffect(() => {
-    if (isOpen) {
-      setIsRendered(true);
-    } else {
-      const timer = setTimeout(() => setIsRendered(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
-
-  if (!isRendered || !order) return null;
+    if (!order) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [order, onClose]);
 
   return (
     <>
-      {/* Drawer */}
-      <div 
-        className={`fixed top-16 bottom-0 right-0 z-40 w-full sm:w-[380px] bg-white border-l border-gray-200 flex flex-col transition-transform duration-300 ease-in-out transform ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+      <div
+        className={cn(
+          'fixed inset-0 z-30 bg-gray-950/40 backdrop-blur-sm transition-opacity duration-300',
+          order ? 'opacity-100' : 'pointer-events-none opacity-0'
+        )}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={order === null}
+        className={cn(
+          'fixed bottom-0 right-0 top-16 z-40 flex w-full flex-col border-l border-gray-200 bg-white shadow-xl transition-transform duration-300 ease-in-out sm:max-w-[400px] lg:top-0',
+          order ? 'translate-x-0' : 'translate-x-full'
+        )}
       >
-        {/* Header */}
-        <div className="flex-none flex items-center justify-between p-5 border-b border-gray-100 bg-white z-10">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">Order #{order.id}</h2>
-            <div className="flex items-center gap-2 mt-2">
-              <StatusBadge status={order.status} />
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
-              <Calendar className="h-3.5 w-3.5" />
-              Placed on {order.date} | 10:30 AM
-            </div>
-          </div>
-          <button 
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-8">
-            
-            {/* Customer */}
-            <div>
-              <div className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-3">
-                <User className="h-4 w-4" />
-                Customer
-              </div>
-              <div className="ml-6 space-y-1">
-                <p className="font-medium text-gray-900">{order.customerName}</p>
-                <p className="text-sm text-gray-500">{order.email}</p>
-                <p className="text-sm text-gray-500">+880 1712-345678</p>
-              </div>
-            </div>
-
-            {/* Shipping Address */}
-            <div>
-              <div className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-3">
-                <MapPin className="h-4 w-4" />
-                Shipping Address
-              </div>
-              <div className="ml-6 text-sm text-gray-600 leading-relaxed">
-                <p>{order.shippingAddress}</p>
-                <p>{order.city} - 1205, Bangladesh</p>
-              </div>
-            </div>
-
-            {/* Shipping Details */}
-            {["SHIPPED", "DELIVERED"].includes(order.status) && (
-              <div>
-                <div className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-3">
-                  <Truck className="h-4 w-4" />
-                  Shipping Details
+        {order ? (
+          <>
+            <div className="flex items-start justify-between gap-3 border-b border-gray-100 px-5 py-4">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-lg font-bold tracking-tight text-gray-900">
+                    Order {order.id}
+                  </h2>
+                  <StatusBadge status={order.status} />
                 </div>
-                <div className="ml-6 space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Courier</span>
-                    <span className="font-medium text-gray-900">Pathao Courier</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Tracking ID</span>
-                    <span className="font-medium text-blue-600 hover:underline cursor-pointer">STE-93847291</span>
-                  </div>
+                <p className="mt-1.5 flex items-center gap-1.5 text-xs text-gray-500">
+                  <Calendar className="h-3.5 w-3.5" />
+                  Placed on {order.date}
+                </p>
+                <div className="mt-3">
+                  <DropdownMenu
+                    align="end"
+                    trigger={
+                      <Button variant="outline" size="sm">
+                        Update status
+                      </Button>
+                    }
+                  >
+                    <DropdownMenuLabel>Update status</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {STATUS_ACTIONS.map((action) => (
+                      <DropdownMenuItem
+                        key={action.value}
+                        onSelect={() => onStatusChange(order.id, action.value)}
+                      >
+                        {action.label}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onSelect={() => onStatusChange(order.id, 'CANCELLED')}
+                      className="text-red-600"
+                    >
+                      Cancel order
+                    </DropdownMenuItem>
+                  </DropdownMenu>
                 </div>
               </div>
-            )}
+              <Button variant="ghost" size="icon" className="shrink-0" onClick={onClose} aria-label="Close details">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
 
-            {/* Order Summary */}
-            <div>
-              <div className="text-sm font-semibold text-gray-900 mb-4">
-                Order Summary
-              </div>
-              <div className="space-y-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">{order.product}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">Qty: 1</p>
-                  </div>
-                  <span className="font-medium text-sm text-gray-900">{order.amount.toLocaleString()} BDT</span>
+            <div className="flex-1 space-y-7 overflow-y-auto px-5 py-5">
+              <section>
+                <h3 className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-gray-900">
+                  <User className="h-4 w-4 text-gray-400" />
+                  Customer
+                </h3>
+                <div className="rounded-lg border border-gray-100 bg-gray-50/50 p-3.5">
+                  <p className="text-sm font-semibold text-gray-900">{order.customerName}</p>
+                  <p className="mt-0.5 text-sm text-gray-500">{order.email}</p>
+                  <p className="mt-0.5 text-sm text-gray-500">{order.phone}</p>
                 </div>
-                
-                <div className="border-t border-gray-100 pt-4 space-y-2.5 text-sm">
+              </section>
+
+              <section>
+                <h3 className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-gray-900">
+                  <MapPin className="h-4 w-4 text-gray-400" />
+                  Shipping Address
+                </h3>
+                <p className="rounded-lg border border-gray-100 bg-gray-50/50 p-3.5 text-sm leading-relaxed text-gray-600">
+                  {order.shippingAddress}
+                  <br />
+                  {order.city}
+                </p>
+              </section>
+
+              <section>
+                <h3 className="mb-2.5 text-sm font-semibold text-gray-900">Order Items</h3>
+                <div className="overflow-hidden rounded-lg border border-gray-200">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50/60">
+                      <tr className="border-b border-gray-100">
+                        <th className="px-3 py-2 text-left font-medium text-gray-500">Item</th>
+                        <th className="px-3 py-2 text-right font-medium text-gray-500">Qty</th>
+                        <th className="px-3 py-2 text-right font-medium text-gray-500">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {order.items.map((item) => (
+                        <tr key={item.id} className="border-b border-gray-100 last:border-0">
+                          <td className="px-3 py-2 font-medium text-gray-900">{item.productName}</td>
+                          <td className="px-3 py-2 text-right tabular-nums text-gray-700">{item.quantity}</td>
+                          <td className="px-3 py-2 text-right tabular-nums text-gray-900">{formatBDT(item.total)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <dl className="mt-3 space-y-2 text-sm">
                   <div className="flex justify-between text-gray-600">
-                    <span>Subtotal</span>
-                    <span className="font-medium text-gray-900">{(order.amount).toLocaleString()} BDT</span>
+                    <dt>Subtotal</dt>
+                    <dd className="font-medium text-gray-900">{formatBDT(order.subtotal)}</dd>
                   </div>
                   <div className="flex justify-between text-gray-600">
-                    <span>Shipping Charge</span>
-                    <span className="font-medium text-gray-900">0 BDT</span>
+                    <dt>Discount</dt>
+                    <dd className="font-medium text-emerald-600">−{formatBDT(order.discount)}</dd>
                   </div>
                   <div className="flex justify-between text-gray-600">
-                    <span>Discount</span>
-                    <span className="font-medium text-green-600">- 0 BDT</span>
+                    <dt>Shipping</dt>
+                    <dd className="font-medium text-gray-900">{formatBDT(order.shippingCost)}</dd>
                   </div>
+                  <div className="flex justify-between border-t border-dashed border-gray-200 pt-2">
+                    <dt className="font-semibold text-gray-900">Total</dt>
+                    <dd className="font-bold text-primary">{formatBDT(order.total)}</dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section>
+                <h3 className="mb-2.5 text-sm font-semibold text-gray-900">Payment Information</h3>
+                <div className="grid grid-cols-2 gap-y-3 rounded-lg border border-gray-100 bg-gray-50/50 p-3.5 text-sm">
+                  <span className="text-gray-500">Status</span>
+                  <span className="text-right">
+                    <StatusBadge status={order.paymentStatus} />
+                  </span>
+                  <span className="text-gray-500">Amount</span>
+                  <span className="text-right font-medium text-gray-900">{formatBDT(order.total)}</span>
                 </div>
+              </section>
 
-                <div className="border-t border-gray-200 border-dashed pt-4 flex justify-between items-center">
-                  <span className="font-bold text-gray-900 text-sm">Total Amount</span>
-                  <span className="font-bold text-blue-600 text-lg">{order.amount.toLocaleString()} BDT</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment Information */}
-            <div>
-              <div className="text-sm font-semibold text-gray-900 mb-4">
-                Payment Information
-              </div>
-              <div className="grid grid-cols-2 gap-y-3 text-sm">
-                <span className="text-gray-500">Method</span>
-                <span className="font-medium text-gray-900 text-right">bKash</span>
-                
-                <span className="text-gray-500">Transaction ID</span>
-                <span className="font-medium text-gray-900 text-right">8A3F5D7G2H</span>
-                
-                <span className="text-gray-500">Status</span>
-                <span className="text-right">
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Paid</span>
-                </span>
-                
-                <span className="text-gray-500">Amount</span>
-                <span className="font-medium text-gray-900 text-right">{order.amount.toLocaleString()} BDT</span>
-              </div>
-            </div>
-
-            {/* Order Timeline */}
-            <div>
-              <div className="text-sm font-semibold text-gray-900 mb-5">
-                Order Timeline
-              </div>
-              <div className="relative pl-3 space-y-6">
-                <div className="absolute left-[15px] top-2 bottom-2 w-px bg-gray-200" />
-                
-                {[
-                  { label: "Order Placed", statusList: ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"], time: `${order.date} | 10:30 AM` },
-                  { label: "Payment Confirmed", statusList: ["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"], time: `${order.date} | 10:32 AM` },
-                  { label: "Processing", statusList: ["PROCESSING", "SHIPPED", "DELIVERED"], time: `${order.date} | 11:00 AM` },
-                  { label: "Shipped", statusList: ["SHIPPED", "DELIVERED"], time: `2026-08-10 | 04:20 PM` },
-                  { label: "Delivered", statusList: ["DELIVERED"], time: `2026-08-11 | 11:15 AM` }
-                ].map((step, idx) => {
-                  const isCompleted = step.statusList.includes(order.status);
-                  return (
-                    <div key={idx} className="relative flex gap-4">
-                      <div className="z-10 bg-white rounded-full">
-                        <CheckCircle2 className={`h-5 w-5 ${isCompleted ? 'text-emerald-500 fill-emerald-50' : 'text-gray-300 fill-gray-50'}`} />
+              <section>
+                <h3 className="mb-4 text-sm font-semibold text-gray-900">Order Timeline</h3>
+                <div className="relative ml-1.5 space-y-5 border-l border-gray-200 pl-5">
+                  {TIMELINE.map((step, idx) => {
+                    const isCompleted = step.activeStatuses.includes(order.status.toUpperCase());
+                    return (
+                      <div key={idx} className="relative">
+                        <span
+                          className={cn(
+                            'absolute -left-[26px] top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white',
+                            isCompleted ? 'bg-emerald-500' : 'bg-gray-300'
+                          )}
+                        />
+                        <p
+                          className={cn(
+                            'text-sm font-semibold',
+                            isCompleted ? 'text-gray-900' : 'text-gray-400'
+                          )}
+                        >
+                          {step.label}
+                        </p>
                       </div>
-                      <div>
-                        <p className={`text-sm font-semibold ${isCompleted ? 'text-gray-900' : 'text-gray-400'}`}>{step.label}</p>
-                        <p className={`text-xs mt-0.5 ${isCompleted ? 'text-gray-500' : 'text-gray-300'}`}>{step.time}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              </section>
             </div>
 
-          </div>
-
-        {/* Fixed Footer Buttons */}
-        <div className="flex-none p-5 bg-white border-t border-gray-100 flex justify-end z-10">
-          <button className="flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
-            <Printer className="h-4 w-4" />
-            Print Invoice
-          </button>
-        </div>
+            <div className="flex shrink-0 justify-end border-t border-gray-100 bg-gray-50/60 px-5 py-4">
+              <Button variant="outline" onClick={() => printInvoice(order)}>
+                <Printer className="h-4 w-4" />
+                Print Invoice
+              </Button>
+            </div>
+          </>
+        ) : null}
       </div>
     </>
   );

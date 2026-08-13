@@ -1,9 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { InventoryItem } from "@/features/inventory/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InventoryItem } from "@/features/inventory/types";
 
 interface StockAdjustmentModalProps {
   item: InventoryItem | null;
@@ -16,9 +23,8 @@ export function StockAdjustmentModal({ item, open, onClose, onSave }: StockAdjus
   const [quantity, setQuantity] = useState(0);
   const [reason, setReason] = useState("");
 
-  if (!open || !item) return null;
-
   const handleSave = () => {
+    if (!item) return;
     onSave(item.id, quantity, reason);
     setQuantity(0);
     setReason("");
@@ -26,29 +32,28 @@ export function StockAdjustmentModal({ item, open, onClose, onSave }: StockAdjus
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="text-lg font-semibold">Adjust Stock - {item.name}</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <div className="p-4 space-y-4">
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-500">Current Stock</span>
-              <p className="font-medium">{item.stock}</p>
+    <Dialog open={open && item !== null} onOpenChange={onClose}>
+      <DialogHeader>
+        <DialogTitle>Adjust Stock - {item ? item.name : ""}</DialogTitle>
+      </DialogHeader>
+      <DialogContent>
+        <div className="space-y-4">
+          {item ? (
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="rounded-lg border border-gray-100 bg-gray-50/50 p-3.5">
+                <p className="text-gray-500">Current Stock</p>
+                <p className="mt-0.5 text-lg font-semibold text-gray-900">{item.stock}</p>
+              </div>
+              <div className="rounded-lg border border-gray-100 bg-gray-50/50 p-3.5">
+                <p className="text-gray-500">Min Stock</p>
+                <p className="mt-0.5 text-lg font-semibold text-gray-900">{item.minStock}</p>
+              </div>
             </div>
-            <div>
-              <span className="text-gray-500">Min Stock</span>
-              <p className="font-medium">{item.minStock}</p>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Quantity Change</label>
+          ) : null}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-gray-700">
+              Quantity Change
+            </label>
             <Input
               type="number"
               value={quantity}
@@ -56,22 +61,24 @@ export function StockAdjustmentModal({ item, open, onClose, onSave }: StockAdjus
               placeholder="Use negative for reduction"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-gray-700">Reason</label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+              className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
               placeholder="Enter adjustment reason..."
             />
           </div>
         </div>
-        <div className="flex justify-end gap-2 p-4 border-t">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave}>Save Adjustment</Button>
-        </div>
-      </div>
-    </div>
+      </DialogContent>
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={handleSave}>Save Adjustment</Button>
+      </DialogFooter>
+    </Dialog>
   );
 }

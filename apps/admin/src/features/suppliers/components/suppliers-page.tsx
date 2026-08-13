@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BadgeDollarSign, Building2, Plus, Truck, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/page-header";
+import { StatCard } from "@/components/ui/stat-card";
 import { suppliers } from "@/features/suppliers/data";
 import { Supplier } from "@/features/suppliers/types";
 import { SuppliersTable } from "@/features/suppliers/components/suppliers-table";
 import { SupplierForm } from "@/features/suppliers/components/supplier-form";
+import { formatBDT } from "@/lib/load-dashboard-data";
 
 export function SuppliersPage() {
   const [showForm, setShowForm] = useState(false);
@@ -36,26 +39,54 @@ export function SuppliersPage() {
     setShowForm(true);
   };
 
+  const totalDue = suppliers.reduce((sum, s) => sum + s.dueAmount, 0);
+  const totalPurchases = suppliers.reduce((sum, s) => sum + s.totalPurchases, 0);
+  const active = suppliers.filter((s) => s.status === "ACTIVE").length;
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Suppliers</h1>
-          <p className="text-gray-500">Manage supplier information and payments</p>
-        </div>
-        <Button onClick={handleAdd}>Add Supplier</Button>
+      <PageHeader
+        title="Suppliers"
+        description="Manage supplier information and payments."
+        actions={
+          <Button onClick={handleAdd}>
+            <Plus className="h-4 w-4" />
+            Add Supplier
+          </Button>
+        }
+      />
+
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <StatCard
+          title="Total suppliers"
+          value={suppliers.length}
+          icon={Truck}
+          iconClassName="bg-blue-50 text-blue-700"
+        />
+        <StatCard
+          title="Active"
+          value={active}
+          icon={UserCheck}
+          iconClassName="bg-emerald-50 text-emerald-700"
+        />
+        <StatCard
+          title="Total purchases"
+          value={formatBDT(totalPurchases)}
+          icon={Building2}
+          iconClassName="bg-violet-50 text-violet-700"
+        />
+        <StatCard
+          title="Total due"
+          value={formatBDT(totalDue)}
+          icon={BadgeDollarSign}
+          iconClassName="bg-red-50 text-red-700"
+        />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Suppliers</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SuppliersTable suppliers={suppliers} onEdit={handleEdit} />
-        </CardContent>
-      </Card>
+      <SuppliersTable suppliers={suppliers} onEdit={handleEdit} />
 
       <SupplierForm
+        key={editingSupplier?.id ?? "new"}
         supplier={editingSupplier}
         open={showForm}
         onClose={() => {

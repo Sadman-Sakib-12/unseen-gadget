@@ -1,8 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  CheckCircle2,
+  Layers,
+  PackagePlus,
+  PackageX,
+  TriangleAlert,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/page-header";
+import { StatCard } from "@/components/ui/stat-card";
 import { inventoryItems, stockMovements } from "@/features/inventory/data";
 import { InventoryItem } from "@/features/inventory/types";
 import { StockTable } from "@/features/inventory/components/stock-table";
@@ -36,56 +44,50 @@ export function InventoryPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Inventory</h1>
-          <p className="text-gray-500">Manage stock levels and warehouse inventory</p>
-        </div>
-        <Button onClick={() => alert("Add product feature coming soon")}>Add Product</Button>
+      <PageHeader
+        title="Inventory"
+        description="Manage stock levels and warehouse inventory."
+        actions={
+          <Button onClick={() => alert("Add product feature coming soon")}>
+            <PackagePlus className="h-4 w-4" />
+            Add Product
+          </Button>
+        }
+      />
+
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <StatCard
+          title="Total SKUs"
+          value={inventoryItems.length}
+          icon={Layers}
+          iconClassName="bg-blue-50 text-blue-700"
+        />
+        <StatCard
+          title="In stock"
+          value={inStock}
+          icon={CheckCircle2}
+          iconClassName="bg-emerald-50 text-emerald-700"
+        />
+        <StatCard
+          title="Low stock"
+          value={lowStock}
+          icon={TriangleAlert}
+          iconClassName="bg-amber-50 text-amber-700"
+        />
+        <StatCard
+          title="Out of stock"
+          value={outOfStock}
+          icon={PackageX}
+          iconClassName="bg-red-50 text-red-700"
+        />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">In Stock</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{inStock}</div>
-            <p className="text-xs text-gray-500">{Math.round((inStock / inventoryItems.length) * 100)}% of total products</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Low Stock</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{lowStock}</div>
-            <p className="text-xs text-gray-500">Below minimum threshold</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">Out of Stock</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{outOfStock}</div>
-            <p className="text-xs text-gray-500">Immediate restock required</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Current Stock</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <StockTable items={inventoryItems} onAdjust={handleAdjust} />
-        </CardContent>
-      </Card>
+      <StockTable items={inventoryItems} onAdjust={handleAdjust} />
 
       <StockHistory movements={stockMovements} />
 
       <StockAdjustmentModal
+        key={selectedItem?.id ?? "adjust"}
         item={selectedItem}
         open={showAdjustModal}
         onClose={() => {

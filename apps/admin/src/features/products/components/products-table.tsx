@@ -1,11 +1,31 @@
-"use client";
+'use client';
 
-import { useState, useMemo } from "react";
-import { Search, Filter, ChevronUp, ChevronDown } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { formatBDT } from "@/lib/load-dashboard-data";
-import type { Product } from "../types";
+import { useMemo, useState } from 'react';
+import { ChevronDown, ChevronUp, Eye, Pencil, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Badge } from '@/components/ui/badge';
+import { SearchInput } from '@/components/ui/search-input';
+import { Select } from '@/components/ui/select';
+import { StatusBadge } from '@/components/ui/status-badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { formatBDT } from '@/lib/load-dashboard-data';
+import { PRODUCT_IMAGE_FALLBACK } from '@/lib/images';
+import { cn } from '@/components/ui/utils';
+import type { Product } from '../types';
 
 interface ProductsTableProps {
   products: Product[];
@@ -14,263 +34,332 @@ interface ProductsTableProps {
   onView: (product: Product) => void;
 }
 
-type SortField = "id" | "name" | "price" | "stock" | "category" | "status";
-type SortDirection = "asc" | "desc";
+type SortField = keyof Pick<Product, 'id' | 'name' | 'price' | 'stock' | 'category' | 'status'>;
+type SortDirection = 'asc' | 'desc';
 
-function SortIcon({ field, sortField, sortDirection }: { field: SortField; sortField: SortField; sortDirection: SortDirection }) {
-  if (sortField !== field) return null;
-  return sortDirection === "asc" ? (
-    <ChevronUp className="h-4 w-4" />
+const STATUS_OPTIONS = [
+  { value: 'ALL', label: 'All status' },
+  { value: 'ACTIVE', label: 'Active' },
+  { value: 'INACTIVE', label: 'Inactive' },
+  { value: 'OUT_OF_STOCK', label: 'Out of stock' },
+];
+
+function SortIndicator({
+  active,
+  direction,
+}: {
+  active: boolean;
+  direction: SortDirection;
+}) {
+  if (!active) return <ChevronUp className="h-3.5 w-3.5 text-gray-300" />;
+  return direction === 'asc' ? (
+    <ChevronUp className="h-3.5 w-3.5" />
   ) : (
-    <ChevronDown className="h-4 w-4" />
+    <ChevronDown className="h-3.5 w-3.5" />
   );
 }
 
-export function ProductsTable({ products, onEdit, onDelete, onView }: ProductsTableProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const [sortField, setSortField] = useState<SortField>("id");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+function SortableHeader({
+  label,
+  field,
+  sortField,
+  sortDirection,
+  onSort,
+  align = 'left',
+}: {
+  label: string;
+  field: SortField;
+  sortField: SortField;
+  sortDirection: SortDirection;
+  onSort: (field: SortField) => void;
+  align?: 'left' | 'right' | 'center';
+}) {
+  return (
+    <TableHead
+      onClick={() => onSort(field)}
+      className={cn(
+        'cursor-pointer select-none transition-colors hover:text-gray-900',
+        align === 'right' && 'text-right',
+        align === 'center' && 'text-center'
+      )}
+    >
+      <span
+        className={cn(
+          'inline-flex items-center gap-1',
+          align === 'right' && 'justify-end',
+          align === 'center' && 'justify-center'
+        )}
+      >
+        {label}
+        <SortIndicator
+          active={sortField === field}
+          direction={sortDirection}
+        />
+      </span>
+    </TableHead>
+  );
+}
+
+export function ProductsTable({
+  products,
+  onEdit,
+  onDelete,
+  onView,
+}: ProductsTableProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [sortField, setSortField] = useState<SortField>('id');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const categories = useMemo(() => {
+  const categoryOptions = useMemo(() => {
     const cats = Array.from(new Set(products.map((p) => p.category)));
-    return ["ALL", ...cats];
+    return [{ value: 'ALL', label: 'All categories' }, ...cats.map((c) => ({ value: c, label: c }))];
   }, [products]);
 
-  const statuses = ["ALL", "ACTIVE", "INACTIVE", "OUT_OF_STOCK"];
-
   const filteredProducts = useMemo(() => {
-    let result = [...products];
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(query) ||
-          p.sku.toLowerCase().includes(query) ||
-          p.barcode.includes(query) ||
-          p.brand.toLowerCase().includes(query)
-      );
-    }
-
-    if (categoryFilter !== "ALL") {
-      result = result.filter((p) => p.category === categoryFilter);
-    }
-
-    if (statusFilter !== "ALL") {
-      result = result.filter((p) => p.status === statusFilter);
-    }
-
-    result.sort((a, b) => {
-      let aVal: string | number = a[sortField];
-      let bVal: string | number = b[sortField];
-
-      if (typeof aVal === "string") aVal = aVal.toLowerCase();
-      if (typeof bVal === "string") bVal = bVal.toLowerCase();
-
-      if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
-      return 0;
+    const query = searchQuery.trim().toLowerCase();
+    let result = products.filter((p) => {
+      if (
+        query &&
+        !p.name.toLowerCase().includes(query) &&
+        !p.sku.toLowerCase().includes(query) &&
+        !p.barcode.includes(query) &&
+        !p.brand.toLowerCase().includes(query)
+      ) {
+        return false;
+      }
+      if (categoryFilter !== 'ALL' && p.category !== categoryFilter) return false;
+      if (statusFilter !== 'ALL' && p.status !== statusFilter) return false;
+      return true;
     });
 
+    result = [...result].sort((a, b) => {
+      const aVal: string | number = typeof a[sortField] === 'string' ? (a[sortField] as string).toLowerCase() : a[sortField];
+      const bVal: string | number = typeof b[sortField] === 'string' ? (b[sortField] as string).toLowerCase() : b[sortField];
+      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
     return result;
   }, [products, searchQuery, categoryFilter, statusFilter, sortField, sortDirection]);
 
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
+  const safePage = Math.min(currentPage, totalPages);
   const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    (safePage - 1) * itemsPerPage,
+    safePage * itemsPerPage
   );
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortField(field);
-      setSortDirection("asc");
+      setSortDirection('asc');
     }
   };
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <CardHeader className="gap-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <CardTitle>Products ({filteredProducts.length})</CardTitle>
-          <div className="flex gap-2 flex-wrap">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                className="rounded-lg border border-gray-200 py-2 pl-10 pr-4 text-sm focus:border-black focus:outline-none"
-              />
-            </div>
-            <div className="relative">
-              <Filter className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <select
-                value={categoryFilter}
-                onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
-                className="rounded-lg border border-gray-200 py-2 pl-10 pr-8 text-sm focus:border-black focus:outline-none appearance-none bg-white"
-              >
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat === "ALL" ? "All Categories" : cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <select
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <SearchInput
+              value={searchQuery}
+              onValueChange={(value) => {
+                setSearchQuery(value);
+                setCurrentPage(1);
+              }}
+              placeholder="Search name, SKU, brand..."
+            />
+            <Select
+              value={categoryFilter}
+              onChange={(e) => {
+                setCategoryFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="sm:w-44"
+              options={categoryOptions}
+            />
+            <Select
               value={statusFilter}
-              onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-              className="rounded-lg border border-gray-200 py-2 px-3 text-sm focus:border-black focus:outline-none appearance-none bg-white"
-            >
-              {statuses.map((status) => (
-                <option key={status} value={status}>
-                  {status === "ALL" ? "All Status" : status.replace("_", " ")}
-                </option>
-              ))}
-            </select>
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="sm:w-40"
+              options={STATUS_OPTIONS}
+            />
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="pb-3 text-left font-medium">
-                  <div className="flex items-center gap-1">Image</div>
-                </th>
-                <th
-                  className="pb-3 text-left font-medium cursor-pointer"
-                  onClick={() => toggleSort("name")}
-                >
-                  <div className="flex items-center gap-1">Name <SortIcon field="name" sortField={sortField} sortDirection={sortDirection} /></div>
-                </th>
-                <th
-                  className="pb-3 text-left font-medium cursor-pointer"
-                  onClick={() => toggleSort("category")}
-                >
-                  <div className="flex items-center gap-1">Category <SortIcon field="category" sortField={sortField} sortDirection={sortDirection} /></div>
-                </th>
-                <th
-                  className="pb-3 text-right font-medium cursor-pointer"
-                  onClick={() => toggleSort("price")}
-                >
-                  <div className="flex items-center justify-end gap-1">Price <SortIcon field="price" sortField={sortField} sortDirection={sortDirection} /></div>
-                </th>
-                <th
-                  className="pb-3 text-right font-medium cursor-pointer"
-                  onClick={() => toggleSort("stock")}
-                >
-                  <div className="flex items-center justify-end gap-1">Stock <SortIcon field="stock" sortField={sortField} sortDirection={sortDirection} /></div>
-                </th>
-                <th
-                  className="pb-3 text-center font-medium cursor-pointer"
-                  onClick={() => toggleSort("status")}
-                >
-                  <div className="flex items-center justify-center gap-1">Status <SortIcon field="status" sortField={sortField} sortDirection={sortDirection} /></div>
-                </th>
-                <th className="pb-3 text-right font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+      <CardContent className="p-0">
+        {paginatedProducts.length === 0 ? (
+          <EmptyState
+            title="No products found"
+            description="Try adjusting your search or filters to find what you are looking for."
+          />
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product</TableHead>
+                <SortableHeader
+                  label="Category"
+                  field="category"
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={toggleSort}
+                />
+                <SortableHeader
+                  label="Price"
+                  field="price"
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={toggleSort}
+                  align="right"
+                />
+                <SortableHeader
+                  label="Stock"
+                  field="stock"
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={toggleSort}
+                  align="right"
+                />
+                <SortableHeader
+                  label="Status"
+                  field="status"
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={toggleSort}
+                  align="center"
+                />
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {paginatedProducts.map((product) => (
-                <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3">
-                    <div className="h-10 w-10 rounded-lg bg-gray-100 overflow-hidden">
-                      <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        className="h-full w-full object-cover"
-                      />
+                <TableRow key={product.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = PRODUCT_IMAGE_FALLBACK;
+                          }}
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-gray-900">
+                          {product.name}
+                        </p>
+                        <p className="truncate text-xs text-gray-500">
+                          {product.brand} · {product.sku}
+                        </p>
+                      </div>
                     </div>
-                  </td>
-                  <td className="py-3">
-                    <div>
-                      <p className="font-medium">{product.name}</p>
-                      <p className="text-xs text-gray-500">{product.brand}</p>
-                    </div>
-                  </td>
-                  <td className="py-3">{product.category}</td>
-                  <td className="py-3 text-right">{formatBDT(product.price)}</td>
-                  <td className="py-3 text-right">
-                    <span className={product.stock < 10 ? "text-red-600 font-medium" : ""}>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{product.category}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right font-medium tabular-nums">
+                    {formatBDT(product.price)}
+                    {product.discount > 0 ? (
+                      <span className="ml-1.5 text-xs font-semibold text-red-600">
+                        −{product.discount}%
+                      </span>
+                    ) : null}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    <span
+                      className={cn(
+                        product.stock === 0 && 'font-semibold text-red-600',
+                        product.stock > 0 && product.stock < 10 && 'font-semibold text-amber-600',
+                        product.stock >= 10 && 'text-gray-700'
+                      )}
+                    >
                       {product.stock}
                     </span>
-                  </td>
-                  <td className="py-3 text-center">
-                    <Badge
-                      variant={
-                        product.status === "ACTIVE"
-                          ? "success"
-                          : product.status === "INACTIVE"
-                          ? "secondary"
-                          : "destructive"
-                      }
-                    >
-                      {product.status.replace("_", " ")}
-                    </Badge>
-                  </td>
-                  <td className="py-3 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <StatusBadge status={product.status} />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => onView(product)}
-                        className="text-sm text-blue-600 hover:underline"
+                        className="text-gray-600"
                       >
+                        <Eye className="h-4 w-4" />
+                        <span className="sr-only">View {product.name}</span>
                         View
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => onEdit(product)}
-                        className="text-sm text-gray-600 hover:underline"
+                        aria-label={`Edit ${product.name}`}
                       >
-                        Edit
-                      </button>
-                      <button
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => onDelete(product.id)}
-                        className="text-sm text-red-600 hover:underline"
+                        aria-label={`Delete ${product.name}`}
+                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
                       >
-                        Delete
-                      </button>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        )}
 
-        <div className="flex items-center justify-between mt-4 pt-4 border-t">
+        {filteredProducts.length > 0 && (
+          <div className="flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-gray-500">
-            Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-            {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of{" "}
+            Showing {paginatedProducts.length === 0 ? 0 : (safePage - 1) * itemsPerPage + 1}–
+            {Math.min(safePage * itemsPerPage, filteredProducts.length)} of{' '}
             {filteredProducts.length} products
           </p>
-          <div className="flex gap-2">
-            <button
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={safePage === 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="rounded-lg border border-gray-200 px-3 py-1 text-sm disabled:opacity-50 hover:bg-gray-50"
             >
               Previous
-            </button>
-            <span className="px-3 py-1 text-sm">
-              Page {currentPage} of {totalPages}
+            </Button>
+            <span className="text-sm text-gray-500 tabular-nums">
+              Page {safePage} of {totalPages}
             </span>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={safePage === totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="rounded-lg border border-gray-200 px-3 py-1 text-sm disabled:opacity-50 hover:bg-gray-50"
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
+        )}
       </CardContent>
     </Card>
   );
