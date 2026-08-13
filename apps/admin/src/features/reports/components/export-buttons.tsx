@@ -1,17 +1,24 @@
 "use client";
-import { Download } from "lucide-react";
+import { FileDown, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-export function ExportButtons({ onExportCSV, onExportPDF }: { onExportCSV: () => void; onExportPDF: () => void }) {
+export function ExportButtons({
+  onExportCSV,
+  onExportPDF,
+}: {
+  onExportCSV: () => void;
+  onExportPDF: () => void;
+}) {
   return (
-    <div className="flex gap-2">
-      <button onClick={onExportCSV} className="flex items-center gap-2 rounded-md border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50">
-        <Download size={16} />
+    <div className="flex flex-wrap gap-2">
+      <Button variant="outline" onClick={onExportCSV}>
+        <FileDown className="h-4 w-4" />
         Export CSV
-      </button>
-      <button onClick={onExportPDF} className="flex items-center gap-2 rounded-md border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50">
-        <Download size={16} />
+      </Button>
+      <Button variant="outline" onClick={onExportPDF}>
+        <FileText className="h-4 w-4" />
         Export PDF
-      </button>
+      </Button>
     </div>
   );
 }

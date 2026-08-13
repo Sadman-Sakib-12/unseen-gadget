@@ -1,16 +1,19 @@
 ﻿"use client";
 import { useState } from "react";
-import { Plus } from "lucide-react";
-import { PostsTable } from "@/features/blog/components/posts-table";
-import { PostForm } from "@/features/blog/components/post-form";
-import { PostCard } from "@/features/blog/components/post-card";
+import { LayoutGrid, List, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/page-header";
+import { cn } from "@/components/ui/utils";
+import { PostsTable } from "./posts-table";
+import { PostForm } from "./post-form";
+import { PostCard } from "./post-card";
 import initialPosts from "@/features/blog/data/posts.json";
-import { Post } from "@/features/blog/types";
+import type { Post } from "@/features/blog/types";
 
 export function BlogPage() {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [showForm, setShowForm] = useState(false);
-  const [editingPost, setEditingPost] = useState<Post | undefined>(undefined);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [view, setView] = useState<"table" | "grid">("table");
 
   const handleSave = (post: Post) => {
@@ -20,39 +23,53 @@ export function BlogPage() {
       setPosts([...posts, post]);
     }
     setShowForm(false);
-    setEditingPost(undefined);
+    setEditingPost(null);
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Blog</h1>
-          <p className="text-gray-500">Manage posts and pages</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setView(view === "table" ? "grid" : "table")}
-            className="rounded-md border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50"
-          >
-            {view === "table" ? "Grid View" : "Table View"}
-          </button>
-          <button
-            onClick={() => { setEditingPost(undefined); setShowForm(true); }}
-            className="flex items-center gap-2 rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-          >
-            <Plus size={16} />
-            New Post
-          </button>
-        </div>
-      </div>
-      {showForm && (
-        <PostForm
-          post={editingPost}
-          onSave={handleSave}
-          onCancel={() => { setShowForm(false); setEditingPost(undefined); }}
-        />
-      )}
+      <PageHeader
+        title="Blog"
+        description="Manage posts and pages"
+        actions={
+          <>
+            <div className="inline-flex items-center rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
+              <button
+                type="button"
+                onClick={() => setView("table")}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                  view === "table" ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"
+                )}
+              >
+                <List className="h-4 w-4" />
+                <span className="hidden sm:inline">Table</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setView("grid")}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                  view === "grid" ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"
+                )}
+              >
+                <LayoutGrid className="h-4 w-4" />
+                <span className="hidden sm:inline">Grid</span>
+              </button>
+            </div>
+            <Button
+              onClick={() => {
+                setEditingPost(null);
+                setShowForm(true);
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              New Post
+            </Button>
+          </>
+        }
+      />
+
       {view === "table" ? (
         <PostsTable data={posts} />
       ) : (
@@ -62,6 +79,17 @@ export function BlogPage() {
           ))}
         </div>
       )}
+
+      <PostForm
+        key={editingPost ? editingPost.id : "new-post"}
+        isOpen={showForm}
+        onClose={() => {
+          setShowForm(false);
+          setEditingPost(null);
+        }}
+        post={editingPost}
+        onSave={handleSave}
+      />
     </div>
   );
 }

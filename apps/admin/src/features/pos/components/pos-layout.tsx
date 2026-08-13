@@ -2,13 +2,19 @@
 
 import { useState, useMemo } from "react";
 import { LayoutDashboard } from "lucide-react";
+import { PageHeader } from "@/components/layout/page-header";
 import { ProductSearch } from "./product-search";
 import { Cart } from "./cart";
 import { PaymentModal } from "./payment-modal";
 import { ReceiptModal } from "./receipt-modal";
 import allProducts from "@/features/pos/data/products.json";
 import posSession from "@/features/pos/data/pos-session.json";
+import { formatBDT } from "@/lib/load-dashboard-data";
 import type { PosProduct, PosCartItem } from "../types";
+
+function getNextCartItemId(items: PosCartItem[]): number {
+  return items.reduce((max, item) => Math.max(max, item.id), 0) + 1;
+}
 
 export function PosLayout() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,7 +48,7 @@ export function PosLayout() {
         );
       }
       const newItem: PosCartItem = {
-        id: Date.now(),
+        id: getNextCartItemId(prev),
         productId: product.id,
         name: product.name,
         price: product.price,
@@ -97,43 +103,47 @@ export function PosLayout() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Point of Sale</h1>
-          <p className="text-gray-500">Session: {posSession.id} | Cash in Hand: {posSession.cashInHand.toLocaleString()} BDT</p>
-        </div>
-        <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-4 py-2">
-          <LayoutDashboard className="h-5 w-5 text-gray-500" />
-          <span className="text-sm font-medium">POS Active</span>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Point of Sale"
+        description={`Session: ${posSession.id} | Cash in Hand: ${formatBDT(posSession.cashInHand)}`}
+        actions={
+          <span className="inline-flex items-center gap-2 rounded-lg bg-gray-50 px-4 py-2">
+            <LayoutDashboard className="h-5 w-5 text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">POS Active</span>
+          </span>
+        }
+      />
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-4">
+        <div className="space-y-4 lg:col-span-2">
           <ProductSearch
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onBarcodeScan={() => setSearchQuery("")}
           />
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {filteredProducts.map((product: PosProduct) => (
               <button
                 key={product.id}
+                type="button"
                 onClick={() => addToCart(product)}
-                className="rounded-lg border border-gray-200 bg-white p-3 text-left hover:border-black transition-colors"
+                className="group rounded-xl border border-gray-200 bg-white p-3 text-left shadow-sm transition-all hover:border-gray-900 hover:shadow-md"
               >
-                <div className="aspect-square rounded-lg bg-gray-100 mb-3 overflow-hidden">
+                <div className="mb-3 aspect-square overflow-hidden rounded-lg bg-gray-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
                   />
                 </div>
-                <p className="text-sm font-medium line-clamp-2">{product.name}</p>
-                <p className="text-xs text-gray-500 mt-1">{product.category}</p>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-sm font-bold">{product.price.toLocaleString()} BDT</span>
+                <p className="line-clamp-2 text-sm font-medium text-gray-900">{product.name}</p>
+                <p className="mt-1 text-xs text-gray-500">{product.category}</p>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-sm font-bold text-gray-900">
+                    {formatBDT(product.price)}
+                  </span>
                   <span className="text-xs text-gray-400">Stock: {product.stock}</span>
                 </div>
               </button>

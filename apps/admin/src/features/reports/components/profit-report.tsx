@@ -1,53 +1,90 @@
 "use client";
-import { ProfitReportData } from "@/features/reports/types";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { CircleDollarSign } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatCard } from "@/components/ui/stat-card";
+import { formatBDT } from "@/lib/load-dashboard-data";
+import type { ProfitReportData } from "@/features/reports/types";
 
 export function ProfitReport({ data }: { data: ProfitReportData[] }) {
-  if (!data.length) return <p className="text-gray-500">No profit data available.</p>;
+  if (!data.length) {
+    return (
+      <Card>
+        <EmptyState
+          icon={CircleDollarSign}
+          title="No profit data available"
+          description="Profit reports will appear here once you have recorded revenue and costs."
+        />
+      </Card>
+    );
+  }
   const report = data[0];
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-lg border border-gray-200 p-4">
-          <p className="text-sm text-gray-500">Total Revenue</p>
-          <p className="text-2xl font-bold">{report.totalRevenue.toLocaleString()} BDT</p>
-        </div>
-        <div className="rounded-lg border border-gray-200 p-4">
-          <p className="text-sm text-gray-500">Total Cost</p>
-          <p className="text-2xl font-bold">{report.totalCost.toLocaleString()} BDT</p>
-        </div>
-        <div className="rounded-lg border border-gray-200 p-4">
-          <p className="text-sm text-gray-500">Net Profit</p>
-          <p className="text-2xl font-bold text-green-600">{report.netProfit.toLocaleString()} BDT</p>
-        </div>
-        <div className="rounded-lg border border-gray-200 p-4">
-          <p className="text-sm text-gray-500">Profit Margin</p>
-          <p className="text-2xl font-bold">{report.profitMargin}%</p>
-        </div>
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <StatCard
+          title="Total Revenue"
+          value={formatBDT(report.totalRevenue)}
+          icon={CircleDollarSign}
+          iconClassName="bg-blue-50 text-blue-700"
+        />
+        <StatCard
+          title="Total Cost"
+          value={formatBDT(report.totalCost)}
+          icon={CircleDollarSign}
+          iconClassName="bg-orange-50 text-orange-700"
+        />
+        <StatCard
+          title="Net Profit"
+          value={<span className="text-emerald-600">{formatBDT(report.netProfit)}</span>}
+          icon={CircleDollarSign}
+          iconClassName="bg-emerald-50 text-emerald-700"
+        />
+        <StatCard
+          title="Profit Margin"
+          value={`${report.profitMargin}%`}
+          icon={CircleDollarSign}
+          iconClassName="bg-violet-50 text-violet-700"
+        />
       </div>
-      <div className="rounded-lg border border-gray-200 p-4">
-        <h3 className="text-lg font-semibold mb-4">Monthly Profit Trend</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={report.monthlyBreakdown}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="profit" fill="#000" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-      <div className="rounded-lg border border-gray-200 p-4">
-        <h3 className="text-lg font-semibold mb-4">Top Categories by Profit</h3>
-        <div className="space-y-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>Monthly Profit Trend</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={report.monthlyBreakdown}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="profit" fill="#111827" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Top Categories by Profit</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
           {report.topCategories.map((c, i) => (
-            <div key={i} className="flex items-center justify-between">
-              <span className="text-sm">{c.category}</span>
-              <span className="text-sm font-medium">{c.profit.toLocaleString()} BDT</span>
+            <div key={i} className="flex items-center justify-between border-b border-gray-50 pb-2 last:border-0 last:pb-0">
+              <span className="text-sm text-gray-700">{c.category}</span>
+              <span className="text-sm font-semibold text-gray-900">{formatBDT(c.profit)}</span>
             </div>
           ))}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

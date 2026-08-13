@@ -1,52 +1,108 @@
 "use client";
-import { PurchaseReportData } from "@/features/reports/types";
+import { PackageSearch } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatCard } from "@/components/ui/stat-card";
+import { formatBDT } from "@/lib/load-dashboard-data";
+import type { PurchaseReportData } from "@/features/reports/types";
 
 export function PurchaseReport({ data }: { data: PurchaseReportData[] }) {
-  if (!data.length) return <p className="text-gray-500">No purchase data available.</p>;
+  if (!data.length) {
+    return (
+      <Card>
+        <EmptyState
+          icon={PackageSearch}
+          title="No purchase data available"
+          description="Purchase reports will appear here once you have recorded purchases."
+        />
+      </Card>
+    );
+  }
   const report = data[0];
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-lg border border-gray-200 p-4">
-          <p className="text-sm text-gray-500">Total Purchases</p>
-          <p className="text-2xl font-bold">{report.totalPurchases.toLocaleString()} BDT</p>
-        </div>
-        <div className="rounded-lg border border-gray-200 p-4">
-          <p className="text-sm text-gray-500">Suppliers</p>
-          <p className="text-2xl font-bold">{report.totalSuppliers}</p>
-        </div>
-        <div className="rounded-lg border border-gray-200 p-4">
-          <p className="text-sm text-gray-500">Products Purchased</p>
-          <p className="text-2xl font-bold">{report.totalProductsPurchased}</p>
-        </div>
-        <div className="rounded-lg border border-gray-200 p-4">
-          <p className="text-sm text-gray-500">Avg Purchase</p>
-          <p className="text-2xl font-bold">{report.averagePurchaseValue.toLocaleString()} BDT</p>
-        </div>
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <StatCard
+          title="Total Purchases"
+          value={formatBDT(report.totalPurchases)}
+          icon={PackageSearch}
+          iconClassName="bg-blue-50 text-blue-700"
+        />
+        <StatCard
+          title="Suppliers"
+          value={report.totalSuppliers}
+          icon={PackageSearch}
+          iconClassName="bg-emerald-50 text-emerald-700"
+        />
+        <StatCard
+          title="Products Purchased"
+          value={report.totalProductsPurchased}
+          icon={PackageSearch}
+          iconClassName="bg-violet-50 text-violet-700"
+        />
+        <StatCard
+          title="Avg Purchase"
+          value={formatBDT(report.averagePurchaseValue)}
+          icon={PackageSearch}
+          iconClassName="bg-amber-50 text-amber-700"
+        />
       </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Monthly Purchases</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={report.monthlyData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="amount" fill="#111827" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-lg border border-gray-200 p-4">
-          <h3 className="text-lg font-semibold mb-4">Top Suppliers</h3>
-          <div className="space-y-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Suppliers</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
             {report.topSuppliers.map((s, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <span className="text-sm">{s.name}</span>
-                <span className="text-sm font-medium">{s.amount.toLocaleString()} BDT</span>
+              <div key={i} className="flex items-center justify-between border-b border-gray-50 pb-2 last:border-0 last:pb-0">
+                <span className="text-sm text-gray-700">{s.name}</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {formatBDT(s.amount)}
+                </span>
               </div>
             ))}
-          </div>
-        </div>
-        <div className="rounded-lg border border-gray-200 p-4">
-          <h3 className="text-lg font-semibold mb-4">Category Breakdown</h3>
-          <div className="space-y-2">
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Category Breakdown</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
             {report.categoryBreakdown.map((c, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <span className="text-sm">{c.category}</span>
-                <span className="text-sm font-medium">{c.amount.toLocaleString()} BDT</span>
+              <div key={i} className="flex items-center justify-between border-b border-gray-50 pb-2 last:border-0 last:pb-0">
+                <span className="text-sm text-gray-700">{c.category}</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {formatBDT(c.amount)}
+                </span>
               </div>
             ))}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

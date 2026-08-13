@@ -1,7 +1,16 @@
 "use client";
 
-import { Minus, Plus, Trash2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import { formatBDT } from "@/lib/load-dashboard-data";
 import type { PosCartItem, PosProduct } from "../types";
 
 interface CartProps {
@@ -37,20 +46,31 @@ export function Cart({
 
   return (
     <Card className="h-full">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Cart ({items.length})</CardTitle>
+      <CardHeader className="border-b border-gray-100 pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <ShoppingCart className="h-5 w-5 text-gray-500" />
+          Cart ({items.length})
+        </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex-1 overflow-auto space-y-2 max-h-[400px]">
+      <CardContent className="flex flex-col gap-4 p-4">
+        <div className="max-h-[400px] flex-1 space-y-2 overflow-auto">
           {items.length === 0 ? (
-            <p className="text-center text-sm text-gray-500 py-8">Cart is empty</p>
+            <EmptyState
+              icon={ShoppingCart}
+              title="Cart is empty"
+              description="Click a product to add it to the current sale."
+            />
           ) : (
             items.map((item) => {
               const product = getProduct(item.productId);
               return (
-                <div key={item.id} className="flex items-start gap-3 rounded-lg border border-gray-100 p-3">
+                <div
+                  key={item.id}
+                  className="flex items-start gap-3 rounded-lg border border-gray-100 p-3"
+                >
                   {product && (
-                    <div className="h-12 w-12 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden">
+                    <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={product.image}
                         alt={product.name}
@@ -58,34 +78,48 @@ export function Cart({
                       />
                     </div>
                   )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{item.name}</p>
-                    <p className="text-xs text-gray-500">{item.price.toLocaleString()} BDT</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <button
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-gray-900">{item.name}</p>
+                    <p className="text-xs text-gray-500">{formatBDT(item.price)}</p>
+                    <div className="mt-2 flex items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
                         onClick={() => onUpdateQuantity(item.productId, Math.max(1, item.quantity - 1))}
-                        className="rounded p-1 hover:bg-gray-100"
+                        aria-label={`Decrease quantity of ${item.name}`}
                       >
-                        <Minus className="h-3 w-3" />
-                      </button>
-                      <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
-                      <button
+                        <Minus className="h-3.5 w-3.5" />
+                      </Button>
+                      <span className="w-8 text-center text-sm font-medium text-gray-900">
+                        {item.quantity}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
                         onClick={() => onUpdateQuantity(item.productId, item.quantity + 1)}
-                        className="rounded p-1 hover:bg-gray-100"
+                        aria-label={`Increase quantity of ${item.name}`}
                       >
-                        <Plus className="h-3 w-3" />
-                      </button>
-                      <button
+                        <Plus className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="ml-auto h-7 w-7 text-red-600 hover:bg-red-50 hover:text-red-700"
                         onClick={() => onRemoveItem(item.productId)}
-                        className="ml-auto rounded p-1 text-red-500 hover:bg-red-50"
+                        aria-label={`Remove ${item.name} from cart`}
                       >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">{(item.price * item.quantity).toLocaleString()} BDT</p>
-                  </div>
+                  <p className="text-sm font-semibold tabular-nums text-gray-900">
+                    {formatBDT(item.price * item.quantity)}
+                  </p>
                 </div>
               );
             })
@@ -93,51 +127,48 @@ export function Cart({
         </div>
 
         {items.length > 0 && (
-          <div className="space-y-3 border-t pt-3">
+          <div className="space-y-3 border-t border-gray-100 pt-4">
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm text-gray-500">Discount (%)</span>
-              <input
+              <Input
                 type="number"
                 min="0"
                 max="100"
                 value={discount}
                 onChange={(e) => onDiscountChange(Number(e.target.value))}
-                className="w-20 rounded border border-gray-200 px-2 py-1 text-sm text-right"
+                className="h-8 w-20 text-right"
               />
             </div>
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm text-gray-500">Tax (%)</span>
-              <input
+              <Input
                 type="number"
                 min="0"
                 max="100"
                 value={taxRate}
                 onChange={(e) => onTaxRateChange(Number(e.target.value))}
-                className="w-20 rounded border border-gray-200 px-2 py-1 text-sm text-right"
+                className="h-8 w-20 text-right"
               />
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Subtotal</span>
-              <span>{subtotal.toLocaleString()} BDT</span>
+              <span className="tabular-nums text-gray-900">{formatBDT(subtotal)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Discount</span>
-              <span className="text-red-600">-{discountAmount.toLocaleString()} BDT</span>
+              <span className="tabular-nums text-red-600">-{formatBDT(discountAmount)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Tax</span>
-              <span>{taxAmount.toLocaleString()} BDT</span>
+              <span className="tabular-nums text-gray-900">{formatBDT(taxAmount)}</span>
             </div>
             <div className="flex justify-between text-lg font-bold">
-              <span>Total</span>
-              <span>{total.toLocaleString()} BDT</span>
+              <span className="text-gray-900">Total</span>
+              <span className="tabular-nums text-gray-900">{formatBDT(total)}</span>
             </div>
-            <button
-              onClick={onCheckout}
-              className="w-full rounded-lg bg-black py-3 text-white font-medium hover:bg-gray-800"
-            >
+            <Button type="button" className="w-full" size="lg" onClick={onCheckout}>
               Checkout
-            </button>
+            </Button>
           </div>
         )}
       </CardContent>

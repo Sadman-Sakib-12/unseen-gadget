@@ -1,10 +1,14 @@
 ﻿"use client";
 import { useState } from "react";
+import { Bell, BellRing, MessageSquareText, TriangleAlert } from "lucide-react";
 import { Plus } from "lucide-react";
-import { NotificationsList } from "@/features/notifications/components/notifications-list";
-import { NotificationForm } from "@/features/notifications/components/notification-form";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/page-header";
+import { StatCard } from "@/components/ui/stat-card";
+import { NotificationsList } from "./notifications-list";
+import { NotificationForm } from "./notification-form";
 import initialNotifications from "@/features/notifications/data/notifications.json";
-import { Notification } from "@/features/notifications/types";
+import type { Notification } from "@/features/notifications/types";
 
 export function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
@@ -15,28 +19,53 @@ export function NotificationsPage() {
     setShowForm(false);
   };
 
+  const unread = notifications.filter((n) => !n.read).length;
+  const orders = notifications.filter((n) => n.type === "order").length;
+  const alerts = notifications.filter((n) => n.type === "alert").length;
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
-          <p className="text-gray-500">System notifications and alerts</p>
-        </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-        >
-          <Plus size={16} />
-          Send Notification
-        </button>
-      </div>
-      {showForm && (
-        <NotificationForm
-          onSave={handleSave}
-          onCancel={() => setShowForm(false)}
+      <PageHeader
+        title="Notifications"
+        description="System notifications and alerts"
+        actions={
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="h-4 w-4" />
+            Send Notification
+          </Button>
+        }
+      />
+
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <StatCard
+          title="Total"
+          value={notifications.length}
+          icon={Bell}
+          iconClassName="bg-blue-50 text-blue-700"
         />
-      )}
+        <StatCard
+          title="Unread"
+          value={unread}
+          icon={BellRing}
+          iconClassName="bg-orange-50 text-orange-700"
+        />
+        <StatCard
+          title="Orders"
+          value={orders}
+          icon={MessageSquareText}
+          iconClassName="bg-violet-50 text-violet-700"
+        />
+        <StatCard
+          title="Alerts"
+          value={alerts}
+          icon={TriangleAlert}
+          iconClassName="bg-red-50 text-red-700"
+        />
+      </div>
+
       <NotificationsList data={notifications} />
+
+      <NotificationForm isOpen={showForm} onClose={() => setShowForm(false)} onSave={handleSave} />
     </div>
   );
 }
