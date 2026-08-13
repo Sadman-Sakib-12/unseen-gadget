@@ -1,62 +1,118 @@
-"use client";
-import { X } from "lucide-react";
-import { Delivery } from "@/features/delivery/types";
+'use client';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { cn } from '@/components/ui/utils';
+import type { Delivery } from '@/features/delivery/types';
 
 interface TrackingModalProps {
   delivery: Delivery | null;
   onClose: () => void;
 }
 
-export function TrackingModal({ delivery, onClose }: TrackingModalProps) {
-  if (!delivery) return null;
-  const steps = ["pending", "picked_up", "in_transit", "delivered"];
-  const currentStep = steps.indexOf(delivery.status);
-  const stepClass = (idx: number) => {
-    if (delivery.status === "cancelled") return "border-red-500 bg-red-50";
-    if (idx <= currentStep) return "border-black bg-black text-white";
-    return "border-gray-300 bg-white";
-  };
+const STEPS = ['pending', 'picked_up', 'in_transit', 'delivered'];
+
+function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Tracking Information</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-        </div>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-gray-500">Tracking Number</p>
-              <p className="font-mono text-sm">{delivery.trackingNumber}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Courier</p>
-              <p className="text-sm">{delivery.courier}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Estimated Delivery</p>
-              <p className="text-sm">{delivery.estimatedDelivery}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Shipping Cost</p>
-              <p className="text-sm">{delivery.shippingCost} BDT</p>
-            </div>
-          </div>
-          <div className="pt-4">
-            <p className="text-sm font-medium mb-3">Delivery Status</p>
-            <div className="flex items-center justify-between">
-              {steps.map((step, idx) => (
-                <div key={step} className="flex flex-col items-center">
-                  <div className={"flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs " + stepClass(idx)}>
-                    {idx + 1}
-                  </div>
-                  <span className="mt-1 text-xs capitalize">{step.replace("_", " ")}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="flex items-center justify-between gap-4 py-2">
+      <dt className="text-sm text-gray-500">{label}</dt>
+      <dd className="text-right text-sm font-medium text-gray-900">{value}</dd>
     </div>
+  );
+}
+
+export function TrackingModal({ delivery, onClose }: TrackingModalProps) {
+  const currentStep = delivery ? STEPS.indexOf(delivery.status) : -1;
+  const cancelled = delivery?.status === 'cancelled';
+
+  return (
+    <Dialog open={delivery !== null} onOpenChange={onClose}>
+      {delivery ? (
+        <>
+          <DialogHeader>
+            <DialogTitle>Tracking Information</DialogTitle>
+            <DialogDescription>
+              {delivery.orderId} · {delivery.customerName}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogContent>
+            <div className="space-y-6">
+              <dl className="divide-y divide-gray-100 border-t border-gray-100">
+                <Row label="Tracking number" value={delivery.trackingNumber} />
+                <Row label="Courier" value={delivery.courier} />
+                <Row
+                  label="Estimated delivery"
+                  value={delivery.estimatedDelivery}
+                />
+                <Row label="Shipping cost" value={`${delivery.shippingCost} BDT`} />
+              </dl>
+
+              <section>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-gray-900">
+                    Delivery status
+                  </h4>
+                  <StatusBadge status={delivery.status} />
+                </div>
+
+                {cancelled ? (
+                  <div className="mt-4 rounded-lg border border-red-100 bg-red-50/60 p-4 text-sm font-medium text-red-700">
+                    This delivery was cancelled.
+                  </div>
+                ) : (
+                  <ol className="mt-4 flex items-center">
+                    {STEPS.map((step, idx) => {
+                      const done = idx <= currentStep;
+                      const isLast = idx === STEPS.length - 1;
+                      return (
+                        <li
+                          key={step}
+                          className={cn('flex flex-col items-center', !isLast && 'flex-1')}
+                        >
+                          <div className="flex w-full items-center">
+                            {!isLast ? (
+                              <div
+                                className={cn(
+                                  'h-0.5 flex-1',
+                                  idx < currentStep ? 'bg-primary' : 'bg-gray-200'
+                                )}
+                              />
+                            ) : null}
+                            <div
+                              className={cn(
+                                'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold',
+                                done
+                                  ? 'border-primary bg-primary text-white'
+                                  : 'border-gray-200 bg-white text-gray-400'
+                              )}
+                            >
+                              {idx + 1}
+                            </div>
+                          </div>
+                          <span
+                            className={cn(
+                              'mt-1.5 text-xs capitalize',
+                              done ? 'font-medium text-gray-900' : 'text-gray-400'
+                            )}
+                          >
+                            {step.replace('_', ' ')}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                )}
+              </section>
+            </div>
+          </DialogContent>
+        </>
+      ) : null}
+    </Dialog>
   );
 }

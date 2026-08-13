@@ -1,63 +1,124 @@
-"use client";
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Delivery } from "@/features/delivery/types";
+'use client';
 
-const statusVariants: Record<string, string> = {
-  pending: "secondary",
-  picked_up: "warning",
-  in_transit: "default",
-  delivered: "success",
-  cancelled: "destructive",
-};
+import { useState } from 'react';
+import { PackageSearch } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { SearchInput } from '@/components/ui/search-input';
+import { StatusBadge } from '@/components/ui/status-badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import type { Delivery } from '@/features/delivery/types';
 
-export function DeliveriesTable({ data }: { data: Delivery[] }) {
-  const [search, setSearch] = useState("");
-  const filtered = data.filter((d) =>
-    d.customerName.toLowerCase().includes(search.toLowerCase()) ||
-    d.orderId.toLowerCase().includes(search.toLowerCase()) ||
-    d.trackingNumber.toLowerCase().includes(search.toLowerCase())
-  );
+interface DeliveriesTableProps {
+  data: Delivery[];
+  onAssign?: (delivery: Delivery) => void;
+  onTrack?: (delivery: Delivery) => void;
+}
+
+export function DeliveriesTable({ data, onAssign, onTrack }: DeliveriesTableProps) {
+  const [search, setSearch] = useState('');
+
+  const filtered = data.filter((d) => {
+    const query = search.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      d.customerName.toLowerCase().includes(query) ||
+      d.orderId.toLowerCase().includes(query) ||
+      d.trackingNumber.toLowerCase().includes(query) ||
+      d.courier.toLowerCase().includes(query)
+    );
+  });
+
   return (
-    <div className="space-y-4">
-      <input
-        type="text"
-        placeholder="Search deliveries..."
-        className="w-full max-w-sm rounded-md border border-gray-200 px-3 py-2 text-sm"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      <div className="rounded-lg border border-gray-200">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium">ID</th>
-              <th className="px-4 py-3 text-left font-medium">Order</th>
-              <th className="px-4 py-3 text-left font-medium">Customer</th>
-              <th className="px-4 py-3 text-left font-medium">Courier</th>
-              <th className="px-4 py-3 text-left font-medium">Tracking</th>
-              <th className="px-4 py-3 text-left font-medium">Status</th>
-              <th className="px-4 py-3 text-left font-medium">Cost</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filtered.map((delivery) => (
-              <tr key={delivery.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-mono text-xs">{delivery.id}</td>
-                <td className="px-4 py-3">{delivery.orderId}</td>
-                <td className="px-4 py-3">{delivery.customerName}</td>
-                <td className="px-4 py-3">{delivery.courier}</td>
-                <td className="px-4 py-3 font-mono text-xs">{delivery.trackingNumber}</td>
-                <td className="px-4 py-3">
-                  <Badge variant={statusVariants[delivery.status] as any}>{delivery.status.replace("_", " ")}</Badge>
-                </td>
-                <td className="px-4 py-3">{delivery.shippingCost} BDT</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm font-medium text-gray-900">
+          Deliveries <span className="text-gray-400">({filtered.length})</span>
+        </p>
+        <SearchInput
+          value={search}
+          onValueChange={setSearch}
+          placeholder="Search customer, order, tracking..."
+        />
       </div>
-      <p className="text-sm text-gray-500">Showing {filtered.length} of {data.length} deliveries</p>
+
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={PackageSearch}
+          title="No deliveries found"
+          description="Try adjusting your search to find what you are looking for."
+        />
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Order</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Courier</TableHead>
+              <TableHead>Tracking</TableHead>
+              <TableHead className="text-right">Cost</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((delivery) => (
+              <TableRow key={delivery.id}>
+                <TableCell>
+                  <p className="font-medium text-gray-900">{delivery.orderId}</p>
+                  <p className="font-mono text-xs text-gray-400">{delivery.id}</p>
+                </TableCell>
+                <TableCell>
+                  <p className="font-medium text-gray-900">{delivery.customerName}</p>
+                  <p className="text-xs text-gray-500">
+                    {delivery.city}
+                  </p>
+                </TableCell>
+                <TableCell className="text-gray-600">{delivery.courier}</TableCell>
+                <TableCell>
+                  <span className="font-mono text-xs text-gray-600">
+                    {delivery.trackingNumber || '—'}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right tabular-nums text-gray-900">
+                  {delivery.shippingCost} BDT
+                </TableCell>
+                <TableCell>
+                  <StatusBadge status={delivery.status} />
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => onTrack?.(delivery)}>
+                      Track
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onAssign?.(delivery)}
+                      className="text-primary"
+                    >
+                      Assign
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      <div className="border-t border-gray-100 px-4 py-3">
+        <p className="text-sm text-gray-500">
+          Showing {filtered.length} of {data.length} deliveries
+        </p>
+      </div>
     </div>
   );
 }

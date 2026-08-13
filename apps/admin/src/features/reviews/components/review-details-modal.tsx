@@ -1,58 +1,69 @@
 "use client";
-import { X } from "lucide-react";
 import { Star } from "lucide-react";
-import { Review } from "@/features/reviews/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { StatusBadge } from "@/components/ui/status-badge";
+import type { Review } from "@/features/reviews/types";
 
 interface ReviewDetailsModalProps {
   review: Review | null;
   onClose: () => void;
 }
 
-export function ReviewDetailsModal({ review, onClose }: ReviewDetailsModalProps) {
-  if (!review) return null;
+function Row({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Review Details</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-        </div>
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-gray-500">Review ID</p>
-              <p className="font-mono text-sm">{review.id}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Product</p>
-              <p className="text-sm">{review.productName}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Customer</p>
-              <p className="text-sm">{review.customerName}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Rating</p>
-              <div className="flex items-center gap-1">
-                <Star size={14} className="fill-yellow-400 text-yellow-400" />
-                <span>{review.rating} / 5</span>
+    <div className="flex items-center justify-between gap-4 py-2">
+      <dt className="text-sm text-gray-500">{label}</dt>
+      <dd className="text-right text-sm font-medium text-gray-900">{value}</dd>
+    </div>
+  );
+}
+
+export function ReviewDetailsModal({ review, onClose }: ReviewDetailsModalProps) {
+  return (
+    <Dialog open={review !== null} onOpenChange={onClose}>
+      {review ? (
+        <>
+          <DialogHeader>
+            <DialogTitle>Review Details</DialogTitle>
+            <DialogDescription>
+              {review.productName} by {review.customerName}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogContent>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1 text-lg font-semibold text-gray-900">
+                  <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
+                  {review.rating} / 5
+                </div>
+                <StatusBadge status={review.status} />
+              </div>
+
+              <dl className="divide-y divide-gray-100 border-t border-gray-100">
+                <Row label="Review ID" value={review.id} />
+                <Row label="Product" value={review.productName} />
+                <Row label="Customer" value={review.customerName} />
+                <Row label="Rating" value={`${review.rating} / 5`} />
+                <Row label="Helpful votes" value={review.helpful} />
+                <Row label="Date" value={review.date} />
+              </dl>
+
+              <div className="rounded-lg border border-gray-100 bg-gray-50/50 p-4">
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  Comment
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-gray-700">{review.comment}</p>
               </div>
             </div>
-            <div className="col-span-2">
-              <p className="text-sm text-gray-500">Comment</p>
-              <p className="text-sm">{review.comment}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Helpful Votes</p>
-              <p className="text-sm">{review.helpful}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Date</p>
-              <p className="text-sm">{review.date}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          </DialogContent>
+        </>
+      ) : null}
+    </Dialog>
   );
 }
