@@ -1,61 +1,108 @@
 "use client";
+
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { Ticket } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SearchInput } from "@/components/ui/search-input";
+import { StatusBadge } from "@/components/ui/status-badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { formatBDT } from "@/lib/load-dashboard-data";
 import { Coupon } from "@/features/coupons/types";
 
-const statusVariants: Record<string, string> = {
-  active: "success",
-  inactive: "secondary",
-  expired: "destructive",
-};
+interface CouponsTableProps {
+  data: Coupon[];
+}
 
-export function CouponsTable({ data }: { data: Coupon[] }) {
+export function CouponsTable({ data }: CouponsTableProps) {
   const [search, setSearch] = useState("");
-  const filtered = data.filter((c) =>
-    c.code.toLowerCase().includes(search.toLowerCase()) || c.id.toLowerCase().includes(search.toLowerCase())
-  );
+
+  const filtered = data.filter((coupon) => {
+    const query = search.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      coupon.code.toLowerCase().includes(query) ||
+      coupon.id.toLowerCase().includes(query)
+    );
+  });
+
   return (
-    <div className="space-y-4">
-      <input
-        type="text"
-        placeholder="Search coupons..."
-        className="w-full max-w-sm rounded-md border border-gray-200 px-3 py-2 text-sm"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      <div className="rounded-lg border border-gray-200">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium">ID</th>
-              <th className="px-4 py-3 text-left font-medium">Code</th>
-              <th className="px-4 py-3 text-left font-medium">Discount</th>
-              <th className="px-4 py-3 text-left font-medium">Min Order</th>
-              <th className="px-4 py-3 text-left font-medium">Used</th>
-              <th className="px-4 py-3 text-left font-medium">Expiry</th>
-              <th className="px-4 py-3 text-left font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filtered.map((coupon) => (
-              <tr key={coupon.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-mono text-xs">{coupon.id}</td>
-                <td className="px-4 py-3 font-mono font-medium">{coupon.code}</td>
-                <td className="px-4 py-3">
-                  {coupon.discountType === "percentage" ? coupon.discountValue + "%" : coupon.discountValue + " BDT"}
-                </td>
-                <td className="px-4 py-3">{coupon.minimumOrder.toLocaleString()}</td>
-                <td className="px-4 py-3">{coupon.usedCount} / {coupon.usageLimit}</td>
-                <td className="px-4 py-3">{coupon.expiryDate}</td>
-                <td className="px-4 py-3">
-                  <Badge variant={statusVariants[coupon.status] as any}>{coupon.status}</Badge>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm font-medium text-gray-900">
+          Coupons <span className="text-gray-400">({filtered.length})</span>
+        </p>
+        <SearchInput
+          value={search}
+          onValueChange={setSearch}
+          placeholder="Search code, ID..."
+        />
       </div>
-      <p className="text-sm text-gray-500">Showing {filtered.length} of {data.length} coupons</p>
+
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={Ticket}
+          title="No coupons found"
+          description="Try adjusting your search to find what you are looking for."
+        />
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>Code</TableHead>
+              <TableHead>Discount</TableHead>
+              <TableHead>Min Order</TableHead>
+              <TableHead>Used</TableHead>
+              <TableHead>Expiry</TableHead>
+              <TableHead>Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((coupon) => (
+              <TableRow key={coupon.id}>
+                <TableCell>
+                  <span className="font-mono text-xs text-gray-500">{coupon.id}</span>
+                </TableCell>
+                <TableCell>
+                  <span className="font-mono text-sm font-medium text-gray-900">
+                    {coupon.code}
+                  </span>
+                </TableCell>
+                <TableCell className="text-gray-600">
+                  {coupon.discountType === "percentage"
+                    ? `${coupon.discountValue}%`
+                    : formatBDT(coupon.discountValue)}
+                </TableCell>
+                <TableCell className="text-gray-600">
+                  {formatBDT(coupon.minimumOrder)}
+                </TableCell>
+                <TableCell className="text-gray-600">
+                  {coupon.usedCount} / {coupon.usageLimit}
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-sm text-gray-500">
+                  {coupon.expiryDate}
+                </TableCell>
+                <TableCell>
+                  <StatusBadge status={coupon.status} />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      <div className="border-t border-gray-100 px-4 py-3">
+        <p className="text-sm text-gray-500">
+          Showing {filtered.length} of {data.length} coupons
+        </p>
+      </div>
     </div>
   );
 }

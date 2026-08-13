@@ -1,5 +1,10 @@
 "use client";
+
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Promotion } from "@/features/promotions/types";
 
 interface PromotionFormProps {
@@ -10,7 +15,7 @@ interface PromotionFormProps {
 
 export function PromotionForm({ promotion, onSave, onCancel }: PromotionFormProps) {
   const [formData, setFormData] = useState({
-    id: promotion?.id || "PROMO-" + String(Date.now()).slice(-3),
+    id: promotion?.id || "",
     name: promotion?.name || "",
     type: promotion?.type || "sale",
     discountType: promotion?.discountType || "percentage",
@@ -24,71 +29,129 @@ export function PromotionForm({ promotion, onSave, onCancel }: PromotionFormProp
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData as Promotion);
+    const id = promotion?.id || `PROMO-${String(Date.now()).slice(-3)}`;
+    onSave({ ...formData, id });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold">{promotion ? "Edit Promotion" : "Create Promotion"}</h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label className="block text-sm font-medium mb-1">Name</label>
-          <input type="text" className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Type</label>
-          <select className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm" value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}>
-            <option value="sale">Sale</option>
-            <option value="bundle">Bundle</option>
-            <option value="free_shipping">Free Shipping</option>
-            <option value="bogo">Buy One Get One</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Discount Type</label>
-          <select className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm" value={formData.discountType} onChange={(e) => setFormData({ ...formData, discountType: e.target.value as any })}>
-            <option value="percentage">Percentage</option>
-            <option value="fixed">Fixed Amount</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Discount Value</label>
-          <input type="number" className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm" value={formData.discountValue} onChange={(e) => setFormData({ ...formData, discountValue: Number(e.target.value) })} required />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Applicable To</label>
-          <select className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm" value={formData.applicableTo} onChange={(e) => setFormData({ ...formData, applicableTo: e.target.value as any })}>
-            <option value="all">All Products</option>
-            <option value="category">Category</option>
-            <option value="product">Specific Product</option>
-            <option value="brand">Brand</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Status</label>
-          <select className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}>
-            <option value="active">Active</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="ended">Ended</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Start Date</label>
-          <input type="date" className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} required />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">End Date</label>
-          <input type="date" className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm" value={formData.endDate} onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} required />
-        </div>
-        <div className="col-span-2">
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <textarea className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm" rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
-        </div>
-      </div>
-      <div className="flex justify-end gap-2">
-        <button type="button" onClick={onCancel} className="rounded-md border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50">Cancel</button>
-        <button type="submit" className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">Save Promotion</button>
-      </div>
-    </form>
+    <Card>
+      <CardHeader>
+        <CardTitle>{promotion ? "Edit Promotion" : "Create Promotion"}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-gray-700">Name</label>
+              <Input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-gray-700">Type</label>
+              <Select
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                options={[
+                  { value: "sale", label: "Sale" },
+                  { value: "bundle", label: "Bundle" },
+                  { value: "free_shipping", label: "Free Shipping" },
+                  { value: "bogo", label: "Buy One Get One" },
+                ]}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-gray-700">
+                Discount Type
+              </label>
+              <Select
+                value={formData.discountType}
+                onChange={(e) => setFormData({ ...formData, discountType: e.target.value })}
+                options={[
+                  { value: "percentage", label: "Percentage" },
+                  { value: "fixed", label: "Fixed Amount" },
+                ]}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-gray-700">
+                Discount Value
+              </label>
+              <Input
+                type="number"
+                value={formData.discountValue}
+                onChange={(e) => setFormData({ ...formData, discountValue: Number(e.target.value) })}
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-gray-700">
+                Applicable To
+              </label>
+              <Select
+                value={formData.applicableTo}
+                onChange={(e) => setFormData({ ...formData, applicableTo: e.target.value })}
+                options={[
+                  { value: "all", label: "All Products" },
+                  { value: "category", label: "Category" },
+                  { value: "product", label: "Specific Product" },
+                  { value: "brand", label: "Brand" },
+                ]}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-gray-700">Status</label>
+              <Select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                options={[
+                  { value: "active", label: "Active" },
+                  { value: "scheduled", label: "Scheduled" },
+                  { value: "ended", label: "Ended" },
+                ]}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-gray-700">Start Date</label>
+              <Input
+                type="date"
+                value={formData.startDate}
+                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-gray-700">End Date</label>
+              <Input
+                type="date"
+                value={formData.endDate}
+                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Description
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={3}
+                className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit">Save Promotion</Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,62 +1,111 @@
-"use client";
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Customer } from "@/features/customers/types";
+'use client';
 
-const statusVariants: Record<string, string> = {
-  active: "success",
-  inactive: "secondary",
-  blocked: "destructive",
-};
+import { useState } from 'react';
+import { BatteryCharging } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
+import { SearchInput } from '@/components/ui/search-input';
+import { StatusBadge } from '@/components/ui/status-badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import type { Customer } from '@/features/customers/types';
+import { formatBDT } from '@/lib/load-dashboard-data';
 
-export function CustomersTable({ data, onView }: { data: Customer[]; onView?: (c: Customer) => void }) {
-  const [search, setSearch] = useState("");
-  const filtered = data.filter(
-    (c) =>
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.email.toLowerCase().includes(search.toLowerCase()) ||
-      c.id.toLowerCase().includes(search.toLowerCase())
-  );
+interface CustomersTableProps {
+  data: Customer[];
+  onView?: (customer: Customer) => void;
+}
+
+export function CustomersTable({ data, onView }: CustomersTableProps) {
+  const [search, setSearch] = useState('');
+
+  const filtered = data.filter((customer) => {
+    const query = search.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      customer.name.toLowerCase().includes(query) ||
+      customer.email.toLowerCase().includes(query) ||
+      customer.id.toLowerCase().includes(query) ||
+      customer.city.toLowerCase().includes(query)
+    );
+  });
+
   return (
-    <div className="space-y-4">
-      <input
-        type="text"
-        placeholder="Search customers..."
-        className="w-full max-w-sm rounded-md border border-gray-200 px-3 py-2 text-sm"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      <div className="rounded-lg border border-gray-200">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium">ID</th>
-              <th className="px-4 py-3 text-left font-medium">Name</th>
-              <th className="px-4 py-3 text-left font-medium">Email</th>
-              <th className="px-4 py-3 text-left font-medium">City</th>
-              <th className="px-4 py-3 text-left font-medium">Orders</th>
-              <th className="px-4 py-3 text-left font-medium">Spent</th>
-              <th className="px-4 py-3 text-left font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filtered.map((customer) => (
-              <tr key={customer.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onView?.(customer)}>
-                <td className="px-4 py-3 font-mono text-xs">{customer.id}</td>
-                <td className="px-4 py-3 font-medium">{customer.name}</td>
-                <td className="px-4 py-3">{customer.email}</td>
-                <td className="px-4 py-3">{customer.city}</td>
-                <td className="px-4 py-3">{customer.totalOrders}</td>
-                <td className="px-4 py-3">{customer.totalSpent.toLocaleString()}</td>
-                <td className="px-4 py-3">
-                  <Badge variant={statusVariants[customer.status] as any}>{customer.status}</Badge>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm font-medium text-gray-900">
+          Customers <span className="text-gray-400">({filtered.length})</span>
+        </p>
+        <SearchInput
+          value={search}
+          onValueChange={setSearch}
+          placeholder="Search name, email, ID..."
+        />
       </div>
-      <p className="text-sm text-gray-500">Showing {filtered.length} of {data.length} customers</p>
+
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={BatteryCharging}
+          title="No customers found"
+          description="Try adjusting your search to find who you are looking for."
+        />
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>City</TableHead>
+              <TableHead className="text-right">Orders</TableHead>
+              <TableHead className="text-right">Total spent</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Joined</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((customer) => (
+              <TableRow
+                key={customer.id}
+                onClick={() => onView?.(customer)}
+                className={onView ? 'cursor-pointer' : undefined}
+              >
+                <TableCell>
+                  <span className="font-mono text-xs text-gray-500">{customer.id}</span>
+                </TableCell>
+                <TableCell>
+                  <p className="font-medium text-gray-900">{customer.name}</p>
+                </TableCell>
+                <TableCell className="text-gray-600">{customer.email}</TableCell>
+                <TableCell className="text-gray-600">{customer.city}</TableCell>
+                <TableCell className="text-right tabular-nums text-gray-900">
+                  {customer.totalOrders}
+                </TableCell>
+                <TableCell className="text-right font-semibold tabular-nums text-gray-900">
+                  {formatBDT(customer.totalSpent)}
+                </TableCell>
+                <TableCell>
+                  <StatusBadge status={customer.status} />
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-sm text-gray-500">
+                  {customer.joinDate}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      <div className="border-t border-gray-100 px-4 py-3">
+        <p className="text-sm text-gray-500">
+          Showing {filtered.length} of {data.length} customers
+        </p>
+      </div>
     </div>
   );
 }

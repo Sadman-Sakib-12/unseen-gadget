@@ -1,6 +1,10 @@
 ﻿"use client";
+
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { CheckCircle2, Pause, Plus, Ticket, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/page-header";
+import { StatCard } from "@/components/ui/stat-card";
 import { CouponsTable } from "@/features/coupons/components/coupons-table";
 import { CouponForm } from "@/features/coupons/components/coupon-form";
 import initialCoupons from "@/features/coupons/data/coupons.json";
@@ -12,37 +16,76 @@ export function CouponsPage() {
   const [editingCoupon, setEditingCoupon] = useState<Coupon | undefined>(undefined);
 
   const handleSave = (coupon: Coupon) => {
-    if (editingCoupon) {
-      setCoupons(coupons.map((c) => (c.id === coupon.id ? coupon : c)));
-    } else {
-      setCoupons([...coupons, coupon]);
-    }
+    setCoupons((prev) =>
+      editingCoupon ? prev.map((c) => (c.id === coupon.id ? coupon : c)) : [...prev, coupon]
+    );
     setShowForm(false);
     setEditingCoupon(undefined);
   };
 
+  const stats = {
+    total: coupons.length,
+    active: coupons.filter((c) => c.status === "active").length,
+    inactive: coupons.filter((c) => c.status === "inactive").length,
+    expired: coupons.filter((c) => c.status === "expired").length,
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Coupons</h1>
-          <p className="text-gray-500">Manage discount coupons and offers</p>
-        </div>
-        <button
-          onClick={() => { setEditingCoupon(undefined); setShowForm(true); }}
-          className="flex items-center gap-2 rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-        >
-          <Plus size={16} />
-          Create Coupon
-        </button>
+      <PageHeader
+        title="Coupons"
+        description="Manage discount coupons and offers."
+        actions={
+          <Button
+            onClick={() => {
+              setEditingCoupon(undefined);
+              setShowForm(true);
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            Create Coupon
+          </Button>
+        }
+      />
+
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <StatCard
+          title="Total coupons"
+          value={stats.total}
+          icon={Ticket}
+          iconClassName="bg-blue-50 text-blue-700"
+        />
+        <StatCard
+          title="Active"
+          value={stats.active}
+          icon={CheckCircle2}
+          iconClassName="bg-emerald-50 text-emerald-700"
+        />
+        <StatCard
+          title="Inactive"
+          value={stats.inactive}
+          icon={Pause}
+          iconClassName="bg-amber-50 text-amber-700"
+        />
+        <StatCard
+          title="Expired"
+          value={stats.expired}
+          icon={XCircle}
+          iconClassName="bg-red-50 text-red-700"
+        />
       </div>
+
       {showForm && (
         <CouponForm
           coupon={editingCoupon}
           onSave={handleSave}
-          onCancel={() => { setShowForm(false); setEditingCoupon(undefined); }}
+          onCancel={() => {
+            setShowForm(false);
+            setEditingCoupon(undefined);
+          }}
         />
       )}
+
       <CouponsTable data={coupons} />
     </div>
   );

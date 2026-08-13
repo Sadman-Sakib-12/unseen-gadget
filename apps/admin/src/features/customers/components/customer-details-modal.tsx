@@ -1,64 +1,63 @@
-"use client";
-import { X } from "lucide-react";
-import { Customer } from "@/features/customers/types";
+'use client';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { StatusBadge } from '@/components/ui/status-badge';
+import type { Customer } from '@/features/customers/types';
+import { formatBDT } from '@/lib/load-dashboard-data';
 
 interface CustomerDetailsModalProps {
   customer: Customer | null;
   onClose: () => void;
 }
 
-export function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) {
-  if (!customer) return null;
+function Row({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Customer Details</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <X size={20} />
-          </button>
-        </div>
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-gray-500">Customer ID</p>
-              <p className="font-mono text-sm">{customer.id}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Name</p>
-              <p className="font-medium">{customer.name}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Email</p>
-              <p className="text-sm">{customer.email}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Phone</p>
-              <p className="text-sm">{customer.phone}</p>
-            </div>
-            <div className="col-span-2">
-              <p className="text-sm text-gray-500">Address</p>
-              <p className="text-sm">{customer.address}, {customer.city}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Total Orders</p>
-              <p className="text-sm">{customer.totalOrders}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Total Spent</p>
-              <p className="text-sm">{customer.totalSpent.toLocaleString()} BDT</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Last Order</p>
-              <p className="text-sm">{customer.lastOrder || "N/A"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Join Date</p>
-              <p className="text-sm">{customer.joinDate}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="flex items-center justify-between gap-4 py-2">
+      <dt className="text-sm text-gray-500">{label}</dt>
+      <dd className="text-right text-sm font-medium text-gray-900">{value}</dd>
     </div>
+  );
+}
+
+export function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) {
+  return (
+    <Dialog open={customer !== null} onOpenChange={onClose}>
+      {customer ? (
+        <>
+          <DialogHeader>
+            <DialogTitle>Customer Details</DialogTitle>
+            <DialogDescription>{customer.email}</DialogDescription>
+          </DialogHeader>
+          <DialogContent>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-lg font-semibold text-gray-900">{customer.name}</p>
+                  <p className="text-sm text-gray-500">
+                    {customer.address}, {customer.city}
+                  </p>
+                </div>
+                <StatusBadge status={customer.status} />
+              </div>
+
+              <dl className="divide-y divide-gray-100 border-t border-gray-100">
+                <Row label="Customer ID" value={customer.id} />
+                <Row label="Phone" value={customer.phone} />
+                <Row label="Total orders" value={customer.totalOrders} />
+                <Row label="Total spent" value={formatBDT(customer.totalSpent)} />
+                <Row label="Last order" value={customer.lastOrder || 'N/A'} />
+                <Row label="Joined" value={customer.joinDate} />
+              </dl>
+            </div>
+          </DialogContent>
+        </>
+      ) : null}
+    </Dialog>
   );
 }

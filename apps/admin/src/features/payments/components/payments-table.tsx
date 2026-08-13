@@ -1,62 +1,116 @@
-"use client";
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Payment } from "@/features/payments/types";
+'use client';
 
-const statusVariants: Record<string, string> = {
-  completed: "success",
-  pending: "warning",
-  failed: "destructive",
-  refunded: "secondary",
-};
+import { useState } from 'react';
+import { ReceiptText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { SearchInput } from '@/components/ui/search-input';
+import { StatusBadge } from '@/components/ui/status-badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { formatBDT } from '@/lib/load-dashboard-data';
+import type { Payment } from '@/features/payments/types';
 
-export function PaymentsTable({ data }: { data: Payment[] }) {
-  const [search, setSearch] = useState("");
-  const filtered = data.filter((p) =>
-    p.customerName.toLowerCase().includes(search.toLowerCase()) ||
-    p.transactionId.toLowerCase().includes(search.toLowerCase()) ||
-    p.orderId.toLowerCase().includes(search.toLowerCase())
-  );
+interface PaymentsTableProps {
+  data: Payment[];
+  onView?: (payment: Payment) => void;
+}
+
+export function PaymentsTable({ data, onView }: PaymentsTableProps) {
+  const [search, setSearch] = useState('');
+
+  const filtered = data.filter((p) => {
+    const query = search.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      p.customerName.toLowerCase().includes(query) ||
+      p.transactionId.toLowerCase().includes(query) ||
+      p.orderId.toLowerCase().includes(query) ||
+      p.paymentGateway.toLowerCase().includes(query)
+    );
+  });
+
   return (
-    <div className="space-y-4">
-      <input
-        type="text"
-        placeholder="Search payments..."
-        className="w-full max-w-sm rounded-md border border-gray-200 px-3 py-2 text-sm"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      <div className="rounded-lg border border-gray-200">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium">ID</th>
-              <th className="px-4 py-3 text-left font-medium">Transaction</th>
-              <th className="px-4 py-3 text-left font-medium">Customer</th>
-              <th className="px-4 py-3 text-left font-medium">Amount</th>
-              <th className="px-4 py-3 text-left font-medium">Method</th>
-              <th className="px-4 py-3 text-left font-medium">Gateway</th>
-              <th className="px-4 py-3 text-left font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filtered.map((payment) => (
-              <tr key={payment.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-mono text-xs">{payment.id}</td>
-                <td className="px-4 py-3 font-mono text-xs">{payment.transactionId}</td>
-                <td className="px-4 py-3">{payment.customerName}</td>
-                <td className="px-4 py-3">{payment.amount.toLocaleString()}</td>
-                <td className="px-4 py-3 capitalize">{payment.method.replace("_", " ")}</td>
-                <td className="px-4 py-3">{payment.paymentGateway}</td>
-                <td className="px-4 py-3">
-                  <Badge variant={statusVariants[payment.status] as any}>{payment.status}</Badge>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm font-medium text-gray-900">
+          Payments <span className="text-gray-400">({filtered.length})</span>
+        </p>
+        <SearchInput
+          value={search}
+          onValueChange={setSearch}
+          placeholder="Search customer, transaction..."
+        />
       </div>
-      <p className="text-sm text-gray-500">Showing {filtered.length} of {data.length} payments</p>
+
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={ReceiptText}
+          title="No payments found"
+          description="Try adjusting your search to find what you are looking for."
+        />
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Transaction</TableHead>
+              <TableHead>Order</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead>Method</TableHead>
+              <TableHead>Gateway</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((payment) => (
+              <TableRow key={payment.id}>
+                <TableCell className="max-w-[10rem]">
+                  <span className="block truncate font-mono text-xs font-medium text-primary">
+                    {payment.transactionId}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span className="text-gray-600">{payment.orderId}</span>
+                </TableCell>
+                <TableCell className="font-medium text-gray-900">
+                  {payment.customerName}
+                </TableCell>
+                <TableCell className="text-right font-semibold tabular-nums text-gray-900">
+                  {formatBDT(payment.amount)}
+                </TableCell>
+                <TableCell className="capitalize text-gray-600">
+                  {payment.method.replace('_', ' ')}
+                </TableCell>
+                <TableCell className="text-gray-600">{payment.paymentGateway}</TableCell>
+                <TableCell className="whitespace-nowrap text-gray-600">{payment.date}</TableCell>
+                <TableCell>
+                  <StatusBadge status={payment.status} />
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => onView?.(payment)}>
+                    View
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      <div className="border-t border-gray-100 px-4 py-3">
+        <p className="text-sm text-gray-500">
+          Showing {filtered.length} of {data.length} payments
+        </p>
+      </div>
     </div>
   );
 }

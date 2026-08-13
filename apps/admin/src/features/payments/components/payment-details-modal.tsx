@@ -1,58 +1,52 @@
-"use client";
-import { X } from "lucide-react";
-import { Payment } from "@/features/payments/types";
+'use client';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { formatBDT } from '@/lib/load-dashboard-data';
+import type { Payment } from '@/features/payments/types';
 
 interface PaymentDetailsModalProps {
   payment: Payment | null;
   onClose: () => void;
 }
 
-export function PaymentDetailsModal({ payment, onClose }: PaymentDetailsModalProps) {
-  if (!payment) return null;
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Payment Details</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
-        </div>
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-gray-500">Payment ID</p>
-              <p className="font-mono text-sm">{payment.id}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Transaction ID</p>
-              <p className="font-mono text-sm">{payment.transactionId}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Order ID</p>
-              <p className="text-sm">{payment.orderId}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Customer</p>
-              <p className="text-sm">{payment.customerName}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Amount</p>
-              <p className="text-sm">{payment.amount.toLocaleString()} BDT</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Method</p>
-              <p className="text-sm capitalize">{payment.method.replace("_", " ")}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Gateway</p>
-              <p className="text-sm">{payment.paymentGateway}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Date</p>
-              <p className="text-sm">{payment.date}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="flex items-center justify-between gap-4 py-2">
+      <dt className="text-sm text-gray-500">{label}</dt>
+      <dd className="text-right text-sm font-medium text-gray-900">{value}</dd>
     </div>
+  );
+}
+
+export function PaymentDetailsModal({ payment, onClose }: PaymentDetailsModalProps) {
+  return (
+    <Dialog open={payment !== null} onOpenChange={onClose}>
+      {payment ? (
+        <>
+          <DialogHeader>
+            <DialogTitle>Payment Details</DialogTitle>
+          </DialogHeader>
+          <DialogContent>
+            <dl className="divide-y divide-gray-100 border-t border-gray-100">
+              <Row label="Payment ID" value={payment.id} />
+              <Row label="Transaction ID" value={payment.transactionId} />
+              <Row label="Order ID" value={payment.orderId} />
+              <Row label="Customer" value={payment.customerName} />
+              <Row label="Amount" value={formatBDT(payment.amount)} />
+              <Row label="Method" value={payment.method.replace('_', ' ')} />
+              <Row label="Gateway" value={payment.paymentGateway} />
+              <Row label="Date" value={payment.date} />
+              <Row label="Status" value={<StatusBadge status={payment.status} />} />
+            </dl>
+          </DialogContent>
+        </>
+      ) : null}
+    </Dialog>
   );
 }
