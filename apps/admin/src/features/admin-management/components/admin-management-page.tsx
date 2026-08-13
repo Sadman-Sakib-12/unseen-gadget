@@ -1,22 +1,24 @@
 "use client";
 import { useState } from "react";
+import { Plus, ShieldPlus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus } from "lucide-react";
-import { AdminsTable } from "@/features/admin-management/components/admins-table";
-import { RolesTable } from "@/features/admin-management/components/roles-table";
-import { AdminForm } from "@/features/admin-management/components/admin-form";
-import { RoleForm } from "@/features/admin-management/components/role-form";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/page-header";
+import { AdminsTable } from "./admins-table";
+import { RolesTable } from "./roles-table";
+import { AdminForm } from "./admin-form";
+import { RoleForm } from "./role-form";
 import initialAdmins from "@/features/admin-management/data/admins.json";
 import initialRoles from "@/features/admin-management/data/roles.json";
-import { Admin, Role } from "@/features/admin-management/types";
+import type { Admin, Role } from "@/features/admin-management/types";
 
 export function AdminManagementPage() {
   const [admins, setAdmins] = useState<Admin[]>(initialAdmins);
   const [roles] = useState<Role[]>(initialRoles);
   const [showAdminForm, setShowAdminForm] = useState(false);
   const [showRoleForm, setShowRoleForm] = useState(false);
-  const [editingAdmin, setEditingAdmin] = useState<Admin | undefined>(undefined);
-  const [editingRole, setEditingRole] = useState<Role | undefined>(undefined);
+  const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
+  const [editingRole, setEditingRole] = useState<Role | null>(null);
 
   const handleSaveAdmin = (admin: Admin) => {
     if (editingAdmin) {
@@ -25,70 +27,78 @@ export function AdminManagementPage() {
       setAdmins([...admins, admin]);
     }
     setShowAdminForm(false);
-    setEditingAdmin(undefined);
+    setEditingAdmin(null);
   };
 
-  const handleSaveRole = (_role: Role) => {
-    if (editingRole) {
-      setShowRoleForm(false);
-      setEditingRole(undefined);
-    } else {
-      setShowRoleForm(false);
-      setEditingRole(undefined);
-    }
+  const handleSaveRole = () => {
+    setShowRoleForm(false);
+    setEditingRole(null);
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Admin Management</h1>
-        <p className="text-gray-500">Manage admin users and roles</p>
-      </div>
+      <PageHeader
+        title="Admin Management"
+        description="Manage admin users and roles"
+        actions={
+          <>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setEditingRole(null);
+                setShowRoleForm(true);
+              }}
+            >
+              <ShieldPlus className="h-4 w-4" />
+              Add Role
+            </Button>
+            <Button
+              onClick={() => {
+                setEditingAdmin(null);
+                setShowAdminForm(true);
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              Add Admin
+            </Button>
+          </>
+        }
+      />
       <Tabs defaultValue="admins">
         <TabsList>
           <TabsTrigger value="admins">Admins</TabsTrigger>
           <TabsTrigger value="roles">Roles</TabsTrigger>
         </TabsList>
         <TabsContent value="admins" className="mt-4">
-          <div className="flex justify-end mb-4">
-            <button
-              onClick={() => { setEditingAdmin(undefined); setShowAdminForm(true); }}
-              className="flex items-center gap-2 rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-            >
-              <Plus size={16} />
-              Add Admin
-            </button>
-          </div>
-          {showAdminForm && (
-            <AdminForm
-              admin={editingAdmin}
-              roles={roles}
-              onSave={handleSaveAdmin}
-              onCancel={() => { setShowAdminForm(false); setEditingAdmin(undefined); }}
-            />
-          )}
           <AdminsTable data={admins} />
         </TabsContent>
         <TabsContent value="roles" className="mt-4">
-          <div className="flex justify-end mb-4">
-            <button
-              onClick={() => { setEditingRole(undefined); setShowRoleForm(true); }}
-              className="flex items-center gap-2 rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-            >
-              <Plus size={16} />
-              Add Role
-            </button>
-          </div>
-          {showRoleForm && (
-            <RoleForm
-              role={editingRole}
-              onSave={handleSaveRole}
-              onCancel={() => { setShowRoleForm(false); setEditingRole(undefined); }}
-            />
-          )}
           <RolesTable data={roles} />
         </TabsContent>
       </Tabs>
+
+      <AdminForm
+        key={editingAdmin ? editingAdmin.id : "new-admin"}
+        isOpen={showAdminForm}
+        onClose={() => {
+          setShowAdminForm(false);
+          setEditingAdmin(null);
+        }}
+        admin={editingAdmin}
+        roles={roles}
+        onSave={handleSaveAdmin}
+      />
+
+      <RoleForm
+        key={editingRole ? editingRole.id : "new-role"}
+        isOpen={showRoleForm}
+        onClose={() => {
+          setShowRoleForm(false);
+          setEditingRole(null);
+        }}
+        role={editingRole}
+        onSave={handleSaveRole}
+      />
     </div>
   );
 }

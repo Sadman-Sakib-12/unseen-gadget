@@ -1,33 +1,60 @@
 "use client";
-import { Role } from "@/features/admin-management/types";
+import { ShieldCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import type { Role } from "@/features/admin-management/types";
 
 export function RolesTable({ data }: { data: Role[] }) {
   return (
-    <div className="rounded-lg border border-gray-200">
-      <table className="w-full text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-3 text-left font-medium">ID</th>
-            <th className="px-4 py-3 text-left font-medium">Name</th>
-            <th className="px-4 py-3 text-left font-medium">Permissions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
+    <Card className="overflow-hidden">
+      <div className="border-b border-gray-100 p-4">
+        <p className="text-sm font-medium text-gray-900">
+          Roles <span className="text-gray-400">({data.length})</span>
+        </p>
+      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>ID</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Permissions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {data.map((role) => (
-            <tr key={role.id} className="hover:bg-gray-50">
-              <td className="px-4 py-3 font-mono text-xs">{role.id}</td>
-              <td className="px-4 py-3 font-medium">{role.name}</td>
-              <td className="px-4 py-3">
+            <TableRow key={role.id}>
+              <TableCell>
+                <span className="font-mono text-xs text-gray-500">{role.id}</span>
+              </TableCell>
+              <TableCell>
+                <p className="font-medium text-gray-900">{role.name}</p>
+              </TableCell>
+              <TableCell>
                 <div className="flex flex-wrap gap-1">
                   {role.permissions.map((p) => (
-                    <span key={p} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs">{p}</span>
+                    <Badge
+                      key={p}
+                      variant="secondary"
+                      className="inline-flex items-center gap-1"
+                    >
+                      <ShieldCheck className="h-3 w-3" />
+                      {p}
+                    </Badge>
                   ))}
                 </div>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </TableBody>
+      </Table>
+    </Card>
   );
 }
