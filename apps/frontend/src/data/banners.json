@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "title": "Apple Shopping Event",
+    "subtitle": "Hurry and get discounts on all Apple devices up to 20%",
+    "cta": "Go Shopping",
+    "href": "/brand/apple",
+    "image": "/images/banners/apple-sale.jpg",
+    "bgColor": "bg-gray-900"
+  },
+  {
+    "id": 2,
+    "title": "MacBook Air M5",
+    "subtitle": "Experience the future of laptops with M5 chip",
+    "cta": "Shop Now",
+    "href": "/category/computers/macbooks",
+    "image": "/images/banners/macbook-air.jpg",
+    "bgColor": "bg-gray-800"
+  },
+  {
+    "id": 3,
+    "title": "iPad Accessories",
+    "subtitle": "Personalize your iPad with top branded accessories",
+    "cta": "Explore",
+    "href": "/category/cases-protectors/ipad",
+    "image": "/images/banners/ipad-accessories.jpg",
+    "bgColor": "bg-gray-900"
+  }
+]

@@ -1,0 +1,16 @@
+[
+  { "id": "iphones", "name": "iPhones", "href": "/category/smartphones/iphones", "image": "/images/categories/iphones.jpg" },
+  { "id": "ipads", "name": "iPads", "href": "/category/ipads-tablets", "image": "/images/categories/ipads.jpg" },
+  { "id": "macbook", "name": "Macbook", "href": "/category/computers/macbooks", "image": "/images/categories/macbook.jpg" },
+  { "id": "apple-watch", "name": "Apple Watch", "href": "/category/smart-watches/apple", "image": "/images/categories/apple-watch.jpg" },
+  { "id": "smart-watches", "name": "Smart Watches", "href": "/category/smart-watches", "image": "/images/categories/smart-watches.jpg" },
+  { "id": "airpods", "name": "AirPods", "href": "/category/audio/airpods", "image": "/images/categories/airpods.jpg" },
+  { "id": "power-bank", "name": "Power Bank", "href": "/category/accessories/power-banks", "image": "/images/categories/power-bank.jpg" },
+  { "id": "iphone-cases", "name": "iPhone Case & Covers", "href": "/category/cases-protectors/iphone", "image": "/images/categories/iphone-cases.jpg" },
+  { "id": "ipad-cases", "name": "iPad Covers & Protectors", "href": "/category/cases-protectors/ipad", "image": "/images/categories/ipad-cases.jpg" },
+  { "id": "cables", "name": "Cables and Adapters", "href": "/category/accessories/chargers", "image": "/images/categories/cables.jpg" },
+  { "id": "macbook-protection", "name": "Macbook Protection", "href": "/category/cases-protectors/macbook", "image": "/images/categories/macbook-protection.jpg" },
+  { "id": "tws", "name": "TWS", "href": "/category/audio/tws", "image": "/images/categories/tws.jpg" },
+  { "id": "android-zone", "name": "Android Zone", "href": "/category/smartphones/android", "image": "/images/categories/android.jpg" },
+  { "id": "itunes-gift", "name": "iTunes Gift Cards", "href": "/category/accessories/digital-goods", "image": "/images/categories/itunes-gift.jpg" }
+]
