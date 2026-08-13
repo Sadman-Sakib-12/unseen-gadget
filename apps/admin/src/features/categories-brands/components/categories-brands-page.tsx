@@ -1,19 +1,21 @@
 "use client";
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus } from "lucide-react";
-import { CategoriesTable } from "@/features/categories-brands/components/categories-table";
-import { BrandsTable } from "@/features/categories-brands/components/brands-table";
-import { CategoryForm } from "@/features/categories-brands/components/category-form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/page-header";
+import { CategoriesTable } from "./categories-table";
+import { BrandsTable } from "./brands-table";
+import { CategoryForm } from "./category-form";
 import initialCategories from "@/features/categories-brands/data/categories.json";
 import initialBrands from "@/features/categories-brands/data/brands.json";
-import { Category, Brand } from "@/features/categories-brands/types";
+import type { Category, Brand } from "@/features/categories-brands/types";
 
 export function CategoriesBrandsPage() {
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [brands] = useState<Brand[]>(initialBrands);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | undefined>(undefined);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
   const handleSaveCategory = (category: Category) => {
     if (editingCategory) {
@@ -22,43 +24,49 @@ export function CategoriesBrandsPage() {
       setCategories([...categories, category]);
     }
     setShowCategoryForm(false);
-    setEditingCategory(undefined);
+    setEditingCategory(null);
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Categories & Brands</h1>
-        <p className="text-gray-500">Organize products with categories and brands</p>
-      </div>
+      <PageHeader
+        title="Categories & Brands"
+        description="Organize products with categories and brands"
+        actions={
+          <Button
+            onClick={() => {
+              setEditingCategory(null);
+              setShowCategoryForm(true);
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            Add Category
+          </Button>
+        }
+      />
       <Tabs defaultValue="categories">
         <TabsList>
           <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="brands">Brands</TabsTrigger>
         </TabsList>
         <TabsContent value="categories" className="mt-4">
-          <div className="flex justify-end mb-4">
-            <button
-              onClick={() => { setEditingCategory(undefined); setShowCategoryForm(true); }}
-              className="flex items-center gap-2 rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-            >
-              <Plus size={16} />
-              Add Category
-            </button>
-          </div>
-          {showCategoryForm && (
-            <CategoryForm
-              category={editingCategory}
-              onSave={handleSaveCategory}
-              onCancel={() => { setShowCategoryForm(false); setEditingCategory(undefined); }}
-            />
-          )}
           <CategoriesTable data={categories} />
         </TabsContent>
         <TabsContent value="brands" className="mt-4">
           <BrandsTable data={brands} />
         </TabsContent>
       </Tabs>
+
+      <CategoryForm
+        key={editingCategory ? editingCategory.id : "new-category"}
+        isOpen={showCategoryForm}
+        onClose={() => {
+          setShowCategoryForm(false);
+          setEditingCategory(null);
+        }}
+        category={editingCategory}
+        onSave={handleSaveCategory}
+      />
     </div>
   );
 }

@@ -1,5 +1,17 @@
 "use client";
 
+import { Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { formatBDT } from "@/lib/load-dashboard-data";
 import { PurchaseItem } from "@/features/purchases/types";
 
 interface PurchaseItemsProps {
@@ -31,74 +43,68 @@ export function PurchaseItems({ items, onChange }: PurchaseItemsProps) {
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-            <tr>
-              <th className="px-3 py-2">Product</th>
-              <th className="px-3 py-2 text-right">Qty</th>
-              <th className="px-3 py-2 text-right">Unit Price</th>
-              <th className="px-3 py-2 text-right">Total</th>
-              <th className="px-3 py-2 text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
+      <div className="overflow-hidden rounded-lg border border-gray-200">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Product</TableHead>
+              <TableHead className="text-right">Qty</TableHead>
+              <TableHead className="text-right">Unit Price</TableHead>
+              <TableHead className="text-right">Total</TableHead>
+              <TableHead className="text-center">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {items.map((item) => (
-              <tr key={item.id} className="bg-white">
-                <td className="px-3 py-2">
-                  <input
+              <TableRow key={item.id}>
+                <TableCell>
+                  <Input
                     type="text"
                     value={item.productName}
                     onChange={(e) => updateItem(item.id, "productName", e.target.value)}
                     placeholder="Product name"
-                    className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
                   />
-                </td>
-                <td className="px-3 py-2">
-                  <input
+                </TableCell>
+                <TableCell>
+                  <Input
                     type="number"
                     value={item.quantity}
                     onChange={(e) => updateItem(item.id, "quantity", Number(e.target.value))}
-                    className="w-20 rounded-md border border-gray-300 px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+                    className="w-20 text-right"
                   />
-                </td>
-                <td className="px-3 py-2">
-                  <input
+                </TableCell>
+                <TableCell>
+                  <Input
                     type="number"
                     value={item.unitPrice}
                     onChange={(e) => updateItem(item.id, "unitPrice", Number(e.target.value))}
-                    className="w-28 rounded-md border border-gray-300 px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+                    className="w-28 text-right"
                   />
-                </td>
-                <td className="px-3 py-2 text-right font-mono text-sm">
-                  BDT {item.total.toLocaleString()}
-                </td>
-                <td className="px-3 py-2 text-center">
-                  <button
+                </TableCell>
+                <TableCell className="text-right font-mono text-sm tabular-nums">
+                  {formatBDT(item.total)}
+                </TableCell>
+                <TableCell className="text-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => removeItem(item.id)}
-                    className="text-red-600 hover:text-red-800"
                     disabled={items.length === 1}
+                    aria-label="Remove item"
+                    className="text-red-600 hover:bg-red-50 hover:text-red-700"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
-      <button
-        type="button"
-        onClick={addItem}
-        className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-      >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
+      <Button type="button" variant="ghost" size="sm" onClick={addItem}>
+        <Plus className="h-4 w-4" />
         Add Item
-      </button>
+      </Button>
     </div>
   );
 }
