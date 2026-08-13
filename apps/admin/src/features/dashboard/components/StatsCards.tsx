@@ -1,45 +1,138 @@
-﻿"use client";
+﻿'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { dashboardStats } from "@/features/dashboard/data";
-import { formatBDT } from "@/lib/load-dashboard-data";
+import {
+  AlertTriangle,
+  BarChart2,
+  Clock,
+  CreditCard,
+  DollarSign,
+  Package,
+  Receipt,
+  ShoppingCart,
+  TrendingUp,
+  Truck,
+  Users,
+  Warehouse,
+  XCircle,
+} from 'lucide-react';
+import { StatCard } from '@/components/ui/stat-card';
+import { dashboardStats } from '@/features/dashboard/data';
+import { formatBDT } from '@/lib/load-dashboard-data';
 
-const stats = [
-  { title: "Total Sales", value: formatBDT(dashboardStats.totalSales), change: dashboardStats.revenueChange, showChange: true },
-  { title: "Todays Sales", value: formatBDT(dashboardStats.todaySales), change: dashboardStats.revenueChange, showChange: true },
-  { title: "Gross Profit", value: formatBDT(dashboardStats.grossProfit), change: dashboardStats.profitChange, showChange: true },
-  { title: "Total Orders", value: dashboardStats.totalOrders.toString(), change: dashboardStats.ordersChange, showChange: true },
-  { title: "Pending Orders", value: dashboardStats.pendingOrders.toString(), change: null, showChange: false },
-  { title: "Inventory Value", value: formatBDT(dashboardStats.inventoryValue), change: null, showChange: false },
-  { title: "Total Products", value: dashboardStats.totalProducts.toString(), change: null, showChange: false },
-  { title: "Low Stock", value: dashboardStats.lowStock.toString(), change: null, showChange: false },
-  { title: "Out of Stock", value: dashboardStats.outOfStock.toString(), change: null, showChange: false },
-  { title: "Total Suppliers", value: dashboardStats.totalSuppliers.toString(), change: null, showChange: false },
-  { title: "Total Customers", value: dashboardStats.totalCustomers.toString(), change: null, showChange: false },
-  { title: "Total Expenses", value: formatBDT(dashboardStats.totalExpenses), change: dashboardStats.expensesChange, showChange: true },
-  { title: "Total Revenue", value: formatBDT(dashboardStats.totalRevenue), change: dashboardStats.revenueChange, showChange: true },
+interface StatConfig {
+  title: string;
+  value: string;
+  change?: number;
+  changeLabel?: string;
+  icon: React.ElementType;
+  iconClassName: string;
+}
+
+const stats: StatConfig[] = [
+  {
+    title: 'Total Sales',
+    value: formatBDT(dashboardStats.totalSales),
+    change: dashboardStats.revenueChange,
+    changeLabel: 'vs last month',
+    icon: DollarSign,
+    iconClassName: 'bg-primary/10 text-primary',
+  },
+  {
+    title: "Today's Sales",
+    value: formatBDT(dashboardStats.todaySales),
+    icon: ShoppingCart,
+    iconClassName: 'bg-emerald-50 text-emerald-700',
+  },
+  {
+    title: 'Gross Profit',
+    value: formatBDT(dashboardStats.grossProfit),
+    change: dashboardStats.profitChange,
+    changeLabel: 'vs last month',
+    icon: TrendingUp,
+    iconClassName: 'bg-emerald-50 text-emerald-700',
+  },
+  {
+    title: 'Total Orders',
+    value: dashboardStats.totalOrders.toString(),
+    change: dashboardStats.ordersChange,
+    changeLabel: 'vs last month',
+    icon: BarChart2,
+    iconClassName: 'bg-blue-50 text-blue-700',
+  },
+  {
+    title: 'Pending Orders',
+    value: dashboardStats.pendingOrders.toString(),
+    icon: Clock,
+    iconClassName: 'bg-amber-50 text-amber-700',
+  },
+  {
+    title: 'Inventory Value',
+    value: formatBDT(dashboardStats.inventoryValue),
+    icon: Warehouse,
+    iconClassName: 'bg-primary/10 text-primary',
+  },
+  {
+    title: 'Total Products',
+    value: dashboardStats.totalProducts.toString(),
+    icon: Package,
+    iconClassName: 'bg-blue-50 text-blue-700',
+  },
+  {
+    title: 'Low Stock',
+    value: dashboardStats.lowStock.toString(),
+    icon: AlertTriangle,
+    iconClassName: 'bg-amber-50 text-amber-700',
+  },
+  {
+    title: 'Out of Stock',
+    value: dashboardStats.outOfStock.toString(),
+    icon: XCircle,
+    iconClassName: 'bg-red-50 text-red-700',
+  },
+  {
+    title: 'Total Suppliers',
+    value: dashboardStats.totalSuppliers.toString(),
+    icon: Truck,
+    iconClassName: 'bg-gray-100 text-gray-700',
+  },
+  {
+    title: 'Total Customers',
+    value: dashboardStats.totalCustomers.toString(),
+    icon: Users,
+    iconClassName: 'bg-gray-100 text-gray-700',
+  },
+  {
+    title: 'Total Expenses',
+    value: formatBDT(dashboardStats.totalExpenses),
+    change: dashboardStats.expensesChange,
+    changeLabel: 'vs last month',
+    icon: Receipt,
+    iconClassName: 'bg-red-50 text-red-700',
+  },
+  {
+    title: 'Total Revenue',
+    value: formatBDT(dashboardStats.totalRevenue),
+    change: dashboardStats.revenueChange,
+    changeLabel: 'vs last month',
+    icon: CreditCard,
+    iconClassName: 'bg-emerald-50 text-emerald-700',
+  },
 ];
 
 export function StatsCards() {
   return (
-    <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
       {stats.map((stat) => (
-        <Card key={stat.title}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">{stat.title}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
-            {stat.showChange && stat.change !== null && (
-              <p className="text-xs text-gray-500">
-                <span className={stat.change >= 0 ? "text-green-600" : "text-red-600"}>
-                  {stat.change >= 0 ? "+" : ""}{stat.change}%
-                </span>
-                {" from last month"}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        <StatCard
+          key={stat.title}
+          title={stat.title}
+          value={stat.value}
+          icon={stat.icon}
+          iconClassName={stat.iconClassName}
+          change={stat.change}
+          changeLabel={stat.changeLabel}
+          className="min-w-0"
+        />
       ))}
     </div>
   );

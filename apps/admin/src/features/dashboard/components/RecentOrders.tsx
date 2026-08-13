@@ -1,9 +1,11 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { recentOrders } from "@/features/dashboard/data";
-import { getStatusBadgeVariant } from "@/lib/load-dashboard-data";
+import { ClipboardList } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { recentOrders } from '@/features/dashboard/data';
+import { formatBDT } from '@/lib/load-dashboard-data';
 
 interface RecentOrdersProps {
   className?: string;
@@ -12,25 +14,45 @@ interface RecentOrdersProps {
 export function RecentOrders({ className }: RecentOrdersProps) {
   return (
     <Card className={className}>
-      <CardHeader>
+      <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle>Recent Orders</CardTitle>
+        <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+          {recentOrders.length} total
+        </span>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+      <CardContent className="p-0">
+        {recentOrders.length === 0 ? (
+          <EmptyState
+            icon={ClipboardList}
+            title="No recent orders"
+            description="Orders will show up here as they are placed."
+          />
+        ) : (
+          <div className="divide-y divide-gray-100">
           {recentOrders.slice(0, 5).map((order) => (
-            <div key={order.id} className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium leading-none">{order.customerName}</p>
-                <p className="text-xs text-gray-500">{order.product}</p>
-                <p className="text-xs text-gray-400">{order.id} - {order.date}</p>
+            <div
+              key={order.id}
+              className="flex items-center justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-gray-50/60"
+            >
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-gray-900">
+                  {order.customerName}
+                </p>
+                <p className="truncate text-xs text-gray-500">{order.product}</p>
+                <p className="mt-0.5 text-xs text-gray-400">
+                  {order.id} · {order.date}
+                </p>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-medium">{new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(order.amount)}</p>
-                <Badge variant={getStatusBadgeVariant(order.status) as "default" | "destructive" | "outline" | "secondary" | "success" | "warning"}>{order.status}</Badge>
+              <div className="shrink-0 text-right">
+                <p className="text-sm font-semibold text-gray-900">
+                  {formatBDT(order.amount)}
+                </p>
+                <StatusBadge status={order.status} className="mt-1" />
               </div>
             </div>
           ))}
         </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -1,13 +1,14 @@
 ﻿"use client";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GeneralSettingsComponent } from "@/features/settings/components/general-settings";
-import { OrderSettingsComponent } from "@/features/settings/components/order-settings";
-import { PaymentSettingsComponent } from "@/features/settings/components/payment-settings";
-import { EmailSettingsComponent } from "@/features/settings/components/email-settings";
-import { ShippingSettingsComponent } from "@/features/settings/components/shipping-settings";
+import { PageHeader } from "@/components/layout/page-header";
+import { GeneralSettingsComponent } from "./general-settings";
+import { OrderSettingsComponent } from "./order-settings";
+import { PaymentSettingsComponent } from "./payment-settings";
+import { EmailSettingsComponent } from "./email-settings";
+import { ShippingSettingsComponent } from "./shipping-settings";
 import settingsJson from "@/features/settings/data/settings.json";
-import { Settings } from "@/features/settings/types";
+import type { Settings } from "@/features/settings/types";
 
 export function SettingsPage() {
   const [settings, setSettings] = useState<Settings>(settingsJson as Settings);
@@ -20,10 +21,10 @@ export function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-gray-500">Configure your store preferences</p>
-      </div>
+      <PageHeader
+        title="Settings"
+        description="Configure your store preferences"
+      />
       <Tabs defaultValue="general">
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
@@ -51,4 +52,3 @@ export function SettingsPage() {
     </div>
   );
 }
-

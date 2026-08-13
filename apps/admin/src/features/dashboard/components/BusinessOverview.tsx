@@ -1,8 +1,18 @@
-﻿"use client";
+﻿'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { salesData } from "@/features/dashboard/data";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { salesData } from '@/features/dashboard/data';
+import { chartAxis, chartColors, chartTooltip } from '@/lib/chart-theme';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 interface BusinessOverviewProps {
   className?: string;
@@ -11,33 +21,87 @@ interface BusinessOverviewProps {
 export function BusinessOverview({ className }: BusinessOverviewProps) {
   return (
     <Card className={className}>
-      <CardHeader>
-        <CardTitle>Business Overview</CardTitle>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-base font-semibold text-gray-900">
+              Business Overview
+            </CardTitle>
+            <p className="text-xs text-gray-500 mt-0.5">Revenue, Cost & Profit trend</p>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={350}>
-          <AreaChart data={salesData}>
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={salesData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#000000" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#000000" stopOpacity={0} />
+                <stop offset="5%" stopColor={chartColors.primary} stopOpacity={0.28} />
+                <stop offset="95%" stopColor={chartColors.primary} stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#737373" stopOpacity={0.6} />
-                <stop offset="95%" stopColor="#737373" stopOpacity={0} />
+                <stop offset="5%" stopColor={chartColors.amber} stopOpacity={0.22} />
+                <stop offset="95%" stopColor={chartColors.amber} stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#a3a3a3" stopOpacity={0.6} />
-                <stop offset="95%" stopColor="#a3a3a3" stopOpacity={0} />
+                <stop offset="5%" stopColor={chartColors.emerald} stopOpacity={0.22} />
+                <stop offset="95%" stopColor={chartColors.emerald} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip formatter={(value: number) => new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(value)} />
-            <Area type="monotone" dataKey="revenue" stroke="#000000" fillOpacity={1} fill="url(#colorRevenue)" />
-            <Area type="monotone" dataKey="cost" stroke="#737373" fillOpacity={1} fill="url(#colorCost)" />
-            <Area type="monotone" dataKey="profit" stroke="#a3a3a3" fillOpacity={1} fill="url(#colorProfit)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis
+              dataKey="month"
+              tick={{ fontSize: chartAxis.fontSize, fill: chartAxis.tickFill }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              tick={{ fontSize: chartAxis.fontSize, fill: chartAxis.tickFill }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={(v) => `৳${(v / 1000).toFixed(0)}k`}
+            />
+            <Tooltip
+              {...chartTooltip}
+              formatter={(value: number) =>
+                new Intl.NumberFormat('en-BD', {
+                  style: 'currency',
+                  currency: 'BDT',
+                }).format(value)
+              }
+            />
+            <Legend
+              wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }}
+              iconType="circle"
+              iconSize={8}
+            />
+            <Area
+              type="monotone"
+              dataKey="revenue"
+              stroke={chartColors.primary}
+              strokeWidth={2}
+              fillOpacity={1}
+              fill="url(#colorRevenue)"
+              name="Revenue"
+            />
+            <Area
+              type="monotone"
+              dataKey="cost"
+              stroke={chartColors.amber}
+              strokeWidth={2}
+              fillOpacity={1}
+              fill="url(#colorCost)"
+              name="Cost"
+            />
+            <Area
+              type="monotone"
+              dataKey="profit"
+              stroke={chartColors.emerald}
+              strokeWidth={2}
+              fillOpacity={1}
+              fill="url(#colorProfit)"
+              name="Profit"
+            />
           </AreaChart>
         </ResponsiveContainer>
       </CardContent>
