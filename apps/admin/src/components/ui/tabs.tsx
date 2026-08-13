@@ -26,24 +26,17 @@ interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Tabs = ({ defaultValue, value, onValueChange, children, className }: TabsProps) => {
-  const [activeTab, setActiveTab] = React.useState(value || defaultValue);
-
-  React.useEffect(() => {
-    if (value !== undefined) {
-      setActiveTab(value);
-    }
-  }, [value]);
+  const [internalTab, setInternalTab] = React.useState(value ?? defaultValue);
+  const activeTab = value !== undefined ? value : internalTab;
 
   const handleTabChange = (newValue: string) => {
-    setActiveTab(newValue);
+    setInternalTab(newValue);
     onValueChange?.(newValue);
   };
 
   return (
     <TabsContext.Provider value={{ activeTab, onTabChange: handleTabChange }}>
-      <div className={cn('w-full', className)}>
-        {children}
-      </div>
+      <div className={cn('w-full', className)}>{children}</div>
     </TabsContext.Provider>
   );
 };
@@ -52,7 +45,8 @@ const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('inline-flex h-10 items-center rounded-md bg-gray-100 p-1', className)}
+      role="tablist"
+      className={cn('inline-flex h-10 items-center rounded-lg bg-gray-100 p-1', className)}
       {...props}
     />
   )
@@ -71,8 +65,10 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
     return (
       <button
         ref={ref}
+        role="tab"
+        aria-selected={isActive}
         className={cn(
-          'inline-flex items-center justify-center rounded-md px-3 py-1.5 text-sm font-medium transition-all',
+          'inline-flex items-center justify-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
           isActive ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900',
           className
         )}
@@ -97,11 +93,7 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
     if (value !== activeTab) return null;
 
     return (
-      <div
-        ref={ref}
-        className={cn('mt-2', className)}
-        {...props}
-      >
+      <div ref={ref} role="tabpanel" className={cn('mt-2', className)} {...props}>
         {children}
       </div>
     );

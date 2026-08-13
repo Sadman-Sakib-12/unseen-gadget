@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/hooks/use-auth';
+import type { LucideIcon } from 'lucide-react';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -24,18 +24,19 @@ import {
   FileText,
   Settings,
   Shield,
-  Bell,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  X,
 } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/components/ui/utils';
 import { Button } from '@/components/ui/button';
 
 interface NavItem {
   title: string;
   href: string;
-  icon: any;
+  icon: LucideIcon;
   badge?: { text: string; variant: 'default' | 'success' | 'destructive' };
   subItems?: { title: string; href: string }[];
   allowedRoles?: string[];
@@ -58,9 +59,9 @@ const navItems: NavItem[] = [
   { title: 'Reviews', href: '/reviews', icon: Star, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
   { title: 'Expenses', href: '/expenses', icon: Receipt, allowedRoles: ['SUPER_ADMIN'] },
   { title: 'Reports', href: '/reports', icon: BarChart3, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { 
-    title: 'CMS', 
-    href: '/blog', 
+  {
+    title: 'CMS',
+    href: '/blog',
     icon: FileText,
     allowedRoles: ['SUPER_ADMIN', 'MANAGER'],
     subItems: [
@@ -68,163 +69,222 @@ const navItems: NavItem[] = [
       { title: 'Navbar', href: '/blog/navbar' },
       { title: 'Landing Pages', href: '/blog/landing' },
       { title: 'About Us', href: '/blog/about' },
-    ]
+    ],
   },
   { title: 'Settings', href: '/settings', icon: Settings, allowedRoles: ['SUPER_ADMIN'] },
   { title: 'Admin & Roles', href: '/admin-management', icon: Shield, allowedRoles: ['SUPER_ADMIN'] },
 ];
 
-const Sidebar = () => {
+interface SidebarProps {
+  mobileOpen: boolean;
+  onMobileClose: () => void;
+}
+
+const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
-    '/blog': true // default expand CMS
+    '/blog': true,
   });
   const pathname = usePathname();
 
   const toggleSubmenu = (href: string) => {
-    setExpandedMenus(prev => ({
+    setExpandedMenus((prev) => ({
       ...prev,
-      [href]: !prev[href]
+      [href]: !prev[href],
     }));
   };
 
-  return (
-    <aside
-      className={cn(
-        'flex h-screen flex-col bg-white text-gray-600 transition-all duration-300 border-r border-gray-200 shadow-sm z-10 relative',
-        collapsed ? 'w-20' : 'w-72'
-      )}
-    >
-      {/* Header */}
-      <div className="flex h-20 items-center justify-between px-6 border-b border-gray-100">
-        {!collapsed && (
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1c2b6e] text-white font-bold shadow-md">
-              UG
-            </div>
-            <span className="text-lg font-bold tracking-tight text-gray-900">Unseen Gadget</span>
-          </div>
-        )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
-          onClick={() => setCollapsed(!collapsed)}
-        >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </Button>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 custom-scrollbar">
-        <ul className="space-y-1.5">
-          {navItems
-            .filter((item) => !item.allowedRoles || (user && item.allowedRoles.includes(user.role)))
-            .map((item) => {
-            const isActive = pathname === item.href || (pathname.startsWith(item.href + '/') && !item.subItems);
-            const isSubmenuActive = item.subItems?.some(sub => pathname === sub.href);
+  const renderNav = (collapse: boolean, onNavigate?: () => void) => (
+    <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4">
+      <ul className="space-y-1">
+        {navItems
+          .filter((item) => !item.allowedRoles || (user && item.allowedRoles.includes(user.role)))
+          .map((item) => {
+            const isActive =
+              pathname === item.href || (pathname.startsWith(item.href + '/') && !item.subItems);
+            const isSubmenuActive = item.subItems?.some((sub) => pathname === sub.href);
             const isExpanded = expandedMenus[item.href];
+            const Icon = item.icon;
 
             return (
               <li key={item.href}>
-                <div
-                  onClick={() => item.subItems ? toggleSubmenu(item.href) : null}
-                  className={cn(
-                    'group flex items-center justify-between rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 cursor-pointer',
-                    isActive && !item.subItems
-                      ? 'bg-[#1c2b6e] text-white shadow-md shadow-[#1c2b6e]/20'
-                      : isSubmenuActive
-                      ? 'bg-[#1c2b6e]/10 text-[#1c2b6e]'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  )}
-                >
-                  {item.subItems ? (
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-3">
-                        <item.icon
+                {item.subItems ? (
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSubmenu(item.href)}
+                      className={cn(
+                        'flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                        isSubmenuActive
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      )}
+                    >
+                      <span className="flex items-center gap-3">
+                        <Icon
                           className={cn(
-                            'h-5 w-5 shrink-0 transition-colors',
-                            (isActive && !item.subItems) ? 'text-white' : isSubmenuActive ? 'text-[#1c2b6e]' : 'text-gray-500 group-hover:text-[#1c2b6e]'
+                            'h-5 w-5 shrink-0',
+                            isSubmenuActive ? 'text-primary' : 'text-gray-500'
                           )}
                         />
-                        {!collapsed && <span>{item.title}</span>}
-                      </div>
-                      {!collapsed && (
-                        <ChevronDown className={cn(
-                          'h-4 w-4 transition-transform',
-                          isExpanded && 'rotate-180',
-                          (isActive && !item.subItems) ? 'text-white/80' : isSubmenuActive ? 'text-[#1c2b6e]' : 'text-gray-400 group-hover:text-gray-600'
-                        )} />
-                      )}
-                    </div>
-                  ) : (
-                    <Link href={item.href} className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-3">
-                        <item.icon
+                        {!collapse && <span>{item.title}</span>}
+                      </span>
+                      {!collapse && (
+                        <ChevronDown
                           className={cn(
-                            'h-5 w-5 shrink-0 transition-colors',
-                            isActive ? 'text-white' : 'text-gray-500 group-hover:text-[#1c2b6e]'
+                            'h-4 w-4 transition-transform',
+                            isExpanded && 'rotate-180',
+                            isSubmenuActive ? 'text-primary' : 'text-gray-400'
                           )}
                         />
-                        {!collapsed && <span>{item.title}</span>}
-                      </div>
-
-                      {!collapsed && item.badge && (
-                        <div
-                          className={cn(
-                            'flex h-5 items-center justify-center rounded-full px-2 text-[10px] font-bold tracking-wide',
-                            item.badge.variant === 'success' && 'bg-emerald-100 text-emerald-700',
-                            item.badge.variant === 'default' && 'bg-[#1c2b6e]/10 text-[#1c2b6e]',
-                            isActive && item.badge.variant === 'default' && 'bg-white/20 text-white',
-                            isActive && item.badge.variant === 'success' && 'bg-white/20 text-white'
-                          )}
-                        >
-                          {item.badge.text}
-                        </div>
                       )}
-                    </Link>
-                  )}
-                </div>
-
-                {/* Submenu rendering */}
-                {!collapsed && item.subItems && isExpanded && (
-                  <ul className="mt-1 space-y-1 pl-11">
-                    {item.subItems.map(subItem => {
-                      const isSubActive = pathname === subItem.href;
-                      return (
-                        <li key={subItem.href}>
-                          <Link
-                            href={subItem.href}
-                            className={cn(
-                              'block rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                              isSubActive
-                                ? 'bg-[#1c2b6e] text-white shadow-sm shadow-[#1c2b6e]/30'
-                                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                            )}
-                          >
-                            {subItem.title}
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                    </button>
+                    {!collapse && isExpanded && (
+                      <ul className="mt-1 space-y-0.5 pl-10">
+                        {item.subItems.map((subItem) => {
+                          const isSubActive = pathname === subItem.href;
+                          return (
+                            <li key={subItem.href}>
+                              <Link
+                                href={subItem.href}
+                                onClick={onNavigate}
+                                className={cn(
+                                  'block rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                                  isSubActive
+                                    ? 'bg-primary text-white shadow-sm shadow-primary/30'
+                                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                                )}
+                              >
+                                {subItem.title}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    href={item.href}
+                    onClick={onNavigate}
+                    className={cn(
+                      'flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                      isActive
+                        ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    )}
+                  >
+                    <span className="flex items-center gap-3">
+                      <Icon
+                        className={cn('h-5 w-5 shrink-0', isActive ? 'text-white' : 'text-gray-500')}
+                      />
+                      {!collapse && <span>{item.title}</span>}
+                    </span>
+                    {!collapse && item.badge ? (
+                      <span
+                        className={cn(
+                          'flex h-5 items-center justify-center rounded-full px-2 text-[10px] font-bold tracking-wide',
+                          item.badge.variant === 'success'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-primary/10 text-primary',
+                          isActive &&
+                            (item.badge.variant === 'default' || item.badge.variant === 'success') &&
+                            'bg-white/20 text-white'
+                        )}
+                      >
+                        {item.badge.text}
+                      </span>
+                    ) : null}
+                  </Link>
                 )}
               </li>
             );
           })}
-        </ul>
-      </nav>
+      </ul>
+    </nav>
+  );
 
-      {/* Footer */}
-      {!collapsed && (
-        <div className="p-6 pt-0 mt-auto">
-          <div className="text-center text-xs text-gray-400 font-medium">
-            © 2025 Unseen Gadget
-          </div>
+  const brandMark = (withClose?: () => void) => (
+    <div className="flex h-16 items-center justify-between border-b border-gray-100 px-4">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground shadow-sm">
+          UG
         </div>
+        {!collapsed || withClose ? (
+          <span className="truncate text-base font-bold tracking-tight text-gray-900">
+            Unseen Gadget
+          </span>
+        ) : null}
+      </div>
+      {withClose ? (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 lg:hidden"
+          onClick={withClose}
+          aria-label="Close menu"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      ) : (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+          onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+        </Button>
       )}
-    </aside>
+    </div>
+  );
+
+  const sidebarFooter = (
+    <div className={cn('px-4 pb-4 pt-2', collapsed && 'px-2 text-center')}>
+      <p className="text-xs font-medium text-gray-400">© 2025 Unseen Gadget</p>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside
+        className={cn(
+          'relative z-10 hidden h-screen shrink-0 flex-col border-r border-gray-200 bg-white transition-all duration-300 lg:flex',
+          collapsed ? 'lg:w-20' : 'lg:w-72'
+        )}
+      >
+        {brandMark()}
+        {renderNav(collapsed)}
+        {sidebarFooter}
+      </aside>
+
+      {/* Mobile drawer */}
+      <div
+        className={cn('fixed inset-0 z-40 lg:hidden', !mobileOpen && 'pointer-events-none')}
+        aria-hidden={!mobileOpen}
+      >
+        <div
+          className={cn(
+            'absolute inset-0 bg-gray-950/50 backdrop-blur-sm transition-opacity',
+            mobileOpen ? 'opacity-100' : 'opacity-0'
+          )}
+          onClick={onMobileClose}
+        />
+        <div
+          className={cn(
+            'absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-white shadow-xl transition-transform duration-300',
+            mobileOpen ? 'translate-x-0' : '-translate-x-full'
+          )}
+        >
+          {brandMark(onMobileClose)}
+          {renderNav(false, onMobileClose)}
+          {sidebarFooter}
+        </div>
+      </div>
+    </>
   );
 };
 
