@@ -20,19 +20,28 @@ interface AuthProviderProps {
 }
 
 const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<AdminUser | null>(() => {
-    if (typeof window === 'undefined') {
-      return null;
-    }
-    try {
-      const storedUser = window.localStorage.getItem('admin_user');
-      return storedUser ? (JSON.parse(storedUser) as AdminUser) : null;
-    } catch (e) {
-      console.error('Failed to parse user from localStorage', e);
-      return null;
-    }
-  });
+  const [user, setUser] = useState<AdminUser | null>(null);
+  const [isAuthLoaded, setIsAuthLoaded] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    let active = true;
+    const id = window.setTimeout(() => {
+      if (!active) return;
+      try {
+        const storedUser = window.localStorage.getItem('admin_user');
+        setUser(storedUser ? (JSON.parse(storedUser) as AdminUser) : null);
+      } catch (e) {
+        console.error('Failed to parse user from localStorage', e);
+        setUser(null);
+      }
+      setIsAuthLoaded(true);
+    }, 0);
+    return () => {
+      active = false;
+      window.clearTimeout(id);
+    };
+  }, []);
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     const foundUser = adminUsers.find(
@@ -71,7 +80,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, isAuthenticated: !!user, isAuthLoaded: true }}>
+    <AuthContext.Provider value={{ user, login, logout, register, isAuthenticated: !!user, isAuthLoaded }}>
       {children}
     </AuthContext.Provider>
   );

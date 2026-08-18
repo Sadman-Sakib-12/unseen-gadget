@@ -20,6 +20,19 @@ export const chartAxis = {
   fontSize: 12,
 };
 
+/** Grid line stroke shared by every chart so hairlines stay consistent. */
+export const chartGridStroke = '#f0f0f0';
+
+/** Sequential ramp for multi-series charts (channels, categories, trends). */
+export const chartPalette = [
+  chartColors.primary,
+  '#4152b8',
+  '#6b7ee6',
+  chartColors.emerald,
+  chartColors.amber,
+  '#8b5cf6',
+];
+
 export const chartTooltip = {
   contentStyle: {
     backgroundColor: '#ffffff',

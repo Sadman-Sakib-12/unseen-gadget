@@ -24,14 +24,8 @@ export {
   quickActions,
 };
 
-export const formatBDT = (amount: number): string => {
-  return new Intl.NumberFormat("en-BD", {
-    style: "currency",
-    currency: "BDT",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
+// Kept for backward compatibility — canonical helpers now live in @/lib/format.
+export { formatBDT } from "./format";
 
 export const getStatusBadgeVariant = (status: string) => {
   switch (status) {
