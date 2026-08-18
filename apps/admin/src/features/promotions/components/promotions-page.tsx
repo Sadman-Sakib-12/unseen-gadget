@@ -88,7 +88,13 @@ export function PromotionsPage() {
         />
       )}
 
-      <PromotionsTable data={promotions} />
+      <PromotionsTable
+        data={promotions}
+        onEdit={(promotion) => {
+          setEditingPromotion(promotion);
+          setShowForm(true);
+        }}
+      />
     </div>
   );
 }

@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { Megaphone } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Megaphone, Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SearchInput } from "@/components/ui/search-input";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TablePanel } from "@/components/ui/table-panel";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -13,39 +16,61 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatBDT } from "@/lib/load-dashboard-data";
+import { formatBDT, formatShortDate } from "@/lib/format";
 import { Promotion } from "@/features/promotions/types";
 
 interface PromotionsTableProps {
   data: Promotion[];
+  onEdit?: (promotion: Promotion) => void;
 }
 
-export function PromotionsTable({ data }: PromotionsTableProps) {
-  const [search, setSearch] = useState("");
+const PAGE_SIZE = 10;
 
-  const filtered = data.filter((promo) => {
+export function PromotionsTable({ data, onEdit }: PromotionsTableProps) {
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return true;
-    return (
-      promo.name.toLowerCase().includes(query) ||
-      promo.id.toLowerCase().includes(query)
+    if (!query) return data;
+    return data.filter(
+      (promo) =>
+        promo.name.toLowerCase().includes(query) ||
+        promo.id.toLowerCase().includes(query)
     );
-  });
+  }, [data, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const rows = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm font-medium text-gray-900">
-          Promotions <span className="text-gray-400">({filtered.length})</span>
-        </p>
+    <TablePanel
+      title="Promotions"
+      count={filtered.length}
+      toolbar={
         <SearchInput
           value={search}
-          onValueChange={setSearch}
+          onValueChange={(value) => {
+            setSearch(value);
+            setCurrentPage(1);
+          }}
           placeholder="Search name, ID..."
         />
-      </div>
-
-      {filtered.length === 0 ? (
+      }
+      footer={
+        filtered.length > 0 ? (
+          <Pagination
+            page={safePage}
+            pageCount={totalPages}
+            total={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
+        ) : null
+      }
+    >
+      {rows.length === 0 ? (
         <EmptyState
           icon={Megaphone}
           title="No promotions found"
@@ -62,10 +87,11 @@ export function PromotionsTable({ data }: PromotionsTableProps) {
               <TableHead>Applicable To</TableHead>
               <TableHead>Duration</TableHead>
               <TableHead>Status</TableHead>
+              {onEdit ? <TableHead className="text-right">Actions</TableHead> : null}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((promo) => (
+            {rows.map((promo) => (
               <TableRow key={promo.id}>
                 <TableCell>
                   <span className="font-mono text-xs text-gray-500">{promo.id}</span>
@@ -83,22 +109,28 @@ export function PromotionsTable({ data }: PromotionsTableProps) {
                   {promo.applicableTo}
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-sm text-gray-500">
-                  {promo.startDate} - {promo.endDate}
+                  {formatShortDate(promo.startDate)} – {formatShortDate(promo.endDate)}
                 </TableCell>
                 <TableCell>
                   <StatusBadge status={promo.status} />
                 </TableCell>
+                {onEdit ? (
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEdit(promo)}
+                      aria-label={`Edit promotion ${promo.name}`}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                ) : null}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       )}
-
-      <div className="border-t border-gray-100 px-4 py-3">
-        <p className="text-sm text-gray-500">
-          Showing {filtered.length} of {data.length} promotions
-        </p>
-      </div>
-    </div>
+    </TablePanel>
   );
 }

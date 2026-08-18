@@ -3,12 +3,6 @@
 import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, Eye, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Badge } from '@/components/ui/badge';
 import { SearchInput } from '@/components/ui/search-input';
@@ -22,6 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { TablePanel } from '@/components/ui/table-panel';
+import { Pagination } from '@/components/ui/pagination';
 import { formatBDT } from '@/lib/load-dashboard-data';
 import { PRODUCT_IMAGE_FALLBACK } from '@/lib/images';
 import { cn } from '@/components/ui/utils';
@@ -163,204 +159,182 @@ export function ProductsTable({
   };
 
   return (
-    <Card>
-      <CardHeader className="gap-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <CardTitle>Products ({filteredProducts.length})</CardTitle>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <SearchInput
-              value={searchQuery}
-              onValueChange={(value) => {
-                setSearchQuery(value);
-                setCurrentPage(1);
-              }}
-              placeholder="Search name, SKU, brand..."
-            />
-            <Select
-              value={categoryFilter}
-              onChange={(e) => {
-                setCategoryFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="sm:w-44"
-              options={categoryOptions}
-            />
-            <Select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="sm:w-40"
-              options={STATUS_OPTIONS}
-            />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        {paginatedProducts.length === 0 ? (
-          <EmptyState
-            title="No products found"
-            description="Try adjusting your search or filters to find what you are looking for."
+    <TablePanel
+      title="Products"
+      count={filteredProducts.length}
+      toolbar={
+        <>
+          <SearchInput
+            value={searchQuery}
+            onValueChange={(value) => {
+              setSearchQuery(value);
+              setCurrentPage(1);
+            }}
+            placeholder="Search name, SKU, brand..."
           />
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <SortableHeader
-                  label="Category"
-                  field="category"
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSort={toggleSort}
-                />
-                <SortableHeader
-                  label="Price"
-                  field="price"
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSort={toggleSort}
-                  align="right"
-                />
-                <SortableHeader
-                  label="Stock"
-                  field="stock"
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSort={toggleSort}
-                  align="right"
-                />
-                <SortableHeader
-                  label="Status"
-                  field="status"
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSort={toggleSort}
-                  align="center"
-                />
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedProducts.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="h-full w-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = PRODUCT_IMAGE_FALLBACK;
-                          }}
-                        />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate font-medium text-gray-900">
-                          {product.name}
-                        </p>
-                        <p className="truncate text-xs text-gray-500">
-                          {product.brand} · {product.sku}
-                        </p>
-                      </div>
+          <Select
+            value={categoryFilter}
+            onChange={(e) => {
+              setCategoryFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full sm:w-44"
+            options={categoryOptions}
+          />
+          <Select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full sm:w-40"
+            options={STATUS_OPTIONS}
+          />
+        </>
+      }
+      footer={
+        filteredProducts.length > 0 ? (
+          <Pagination
+            page={safePage}
+            pageCount={totalPages}
+            total={filteredProducts.length}
+            pageSize={itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
+        ) : null
+      }
+    >
+      {paginatedProducts.length === 0 ? (
+        <EmptyState
+          title="No products found"
+          description="Try adjusting your search or filters to find what you are looking for."
+        />
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Product</TableHead>
+              <SortableHeader
+                label="Category"
+                field="category"
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={toggleSort}
+              />
+              <SortableHeader
+                label="Price"
+                field="price"
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={toggleSort}
+                align="right"
+              />
+              <SortableHeader
+                label="Stock"
+                field="stock"
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={toggleSort}
+                align="right"
+              />
+              <SortableHeader
+                label="Status"
+                field="status"
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={toggleSort}
+                align="center"
+              />
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedProducts.map((product) => (
+              <TableRow key={product.id}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = PRODUCT_IMAGE_FALLBACK;
+                        }}
+                      />
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{product.category}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-medium tabular-nums">
-                    {formatBDT(product.price)}
-                    {product.discount > 0 ? (
-                      <span className="ml-1.5 text-xs font-semibold text-red-600">
-                        −{product.discount}%
-                      </span>
-                    ) : null}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    <span
-                      className={cn(
-                        product.stock === 0 && 'font-semibold text-red-600',
-                        product.stock > 0 && product.stock < 10 && 'font-semibold text-amber-600',
-                        product.stock >= 10 && 'text-gray-700'
-                      )}
-                    >
-                      {product.stock}
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-gray-900">
+                        {product.name}
+                      </p>
+                      <p className="truncate text-xs text-gray-500">
+                        {product.brand} · {product.sku}
+                      </p>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="secondary">{product.category}</Badge>
+                </TableCell>
+                <TableCell className="text-right font-medium tabular-nums">
+                  {formatBDT(product.price)}
+                  {product.discount > 0 ? (
+                    <span className="ml-1.5 text-xs font-semibold text-red-600">
+                      −{product.discount}%
                     </span>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <StatusBadge status={product.status} />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onView(product)}
-                        className="text-gray-600"
-                      >
-                        <Eye className="h-4 w-4" />
-                        <span className="sr-only">View {product.name}</span>
-                        View
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onEdit(product)}
-                        aria-label={`Edit ${product.name}`}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onDelete(product.id)}
-                        aria-label={`Delete ${product.name}`}
-                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-
-        {filteredProducts.length > 0 && (
-          <div className="flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-gray-500">
-            Showing {paginatedProducts.length === 0 ? 0 : (safePage - 1) * itemsPerPage + 1}–
-            {Math.min(safePage * itemsPerPage, filteredProducts.length)} of{' '}
-            {filteredProducts.length} products
-          </p>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={safePage === 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-gray-500 tabular-nums">
-              Page {safePage} of {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={safePage === totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-        )}
-      </CardContent>
-    </Card>
+                  ) : null}
+                </TableCell>
+                <TableCell className="text-right tabular-nums">
+                  <span
+                    className={cn(
+                      product.stock === 0 && 'font-semibold text-red-600',
+                      product.stock > 0 && product.stock < 10 && 'font-semibold text-amber-600',
+                      product.stock >= 10 && 'text-gray-700'
+                    )}
+                  >
+                    {product.stock}
+                  </span>
+                </TableCell>
+                <TableCell className="text-center">
+                  <StatusBadge status={product.status} />
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onView(product)}
+                      className="text-gray-600"
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span className="sr-only">View {product.name}</span>
+                      View
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEdit(product)}
+                      aria-label={`Edit ${product.name}`}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDelete(product.id)}
+                      aria-label={`Delete ${product.name}`}
+                      className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </TablePanel>
   );
 }

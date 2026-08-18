@@ -65,7 +65,7 @@ export function PurchaseForm({ purchase, open, onClose, onSave }: PurchaseFormPr
 
   return (
     <Dialog open={open} onOpenChange={onClose} className="max-w-3xl">
-      <DialogHeader>
+      <DialogHeader close>
         <DialogTitle>{purchase ? "Edit Purchase" : "Create Purchase"}</DialogTitle>
       </DialogHeader>
       <DialogContent>

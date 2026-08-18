@@ -40,7 +40,7 @@ export function SupplierForm({ supplier, open, onClose, onSave }: SupplierFormPr
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogHeader>
+      <DialogHeader close>
         <DialogTitle>{supplier ? "Edit Supplier" : "Add Supplier"}</DialogTitle>
       </DialogHeader>
       <DialogContent>

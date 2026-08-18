@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SearchInput } from "@/components/ui/search-input";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TablePanel } from "@/components/ui/table-panel";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -14,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatBDT } from "@/lib/load-dashboard-data";
+import { formatBDT, formatShortDate } from "@/lib/format";
 import { Purchase } from "@/features/purchases/types";
 
 interface PurchasesTableProps {
@@ -22,32 +24,53 @@ interface PurchasesTableProps {
   onView: (purchase: Purchase) => void;
 }
 
+const PAGE_SIZE = 10;
+
 export function PurchasesTable({ purchases, onView }: PurchasesTableProps) {
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const filtered = purchases.filter((purchase) => {
+  const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return true;
-    return (
-      purchase.invoiceNumber.toLowerCase().includes(query) ||
-      purchase.supplierName.toLowerCase().includes(query)
+    if (!query) return purchases;
+    return purchases.filter(
+      (purchase) =>
+        purchase.invoiceNumber.toLowerCase().includes(query) ||
+        purchase.supplierName.toLowerCase().includes(query)
     );
-  });
+  }, [purchases, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const rows = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm font-medium text-gray-900">
-          Purchases <span className="text-gray-400">({filtered.length})</span>
-        </p>
+    <TablePanel
+      title="Purchases"
+      count={filtered.length}
+      toolbar={
         <SearchInput
           value={search}
-          onValueChange={setSearch}
+          onValueChange={(value) => {
+            setSearch(value);
+            setCurrentPage(1);
+          }}
           placeholder="Search invoice, supplier..."
         />
-      </div>
-
-      {filtered.length === 0 ? (
+      }
+      footer={
+        filtered.length > 0 ? (
+          <Pagination
+            page={safePage}
+            pageCount={totalPages}
+            total={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
+        ) : null
+      }
+    >
+      {rows.length === 0 ? (
         <EmptyState
           icon={ShoppingCart}
           title="No purchases found"
@@ -68,7 +91,7 @@ export function PurchasesTable({ purchases, onView }: PurchasesTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((purchase) => (
+            {rows.map((purchase) => (
               <TableRow key={purchase.id}>
                 <TableCell>
                   <span className="font-mono text-sm font-medium text-gray-900">
@@ -77,7 +100,7 @@ export function PurchasesTable({ purchases, onView }: PurchasesTableProps) {
                 </TableCell>
                 <TableCell className="text-gray-700">{purchase.supplierName}</TableCell>
                 <TableCell className="whitespace-nowrap text-sm text-gray-500">
-                  {purchase.date}
+                  {formatShortDate(purchase.date)}
                 </TableCell>
                 <TableCell className="text-right font-semibold tabular-nums text-gray-900">
                   {formatBDT(purchase.total)}
@@ -107,12 +130,6 @@ export function PurchasesTable({ purchases, onView }: PurchasesTableProps) {
           </TableBody>
         </Table>
       )}
-
-      <div className="border-t border-gray-100 px-4 py-3">
-        <p className="text-sm text-gray-500">
-          Showing {filtered.length} of {purchases.length} purchases
-        </p>
-      </div>
-    </div>
+    </TablePanel>
   );
 }

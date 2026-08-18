@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/layout/page-header';
 import { StatCard } from '@/components/ui/stat-card';
-import { cn } from '@/components/ui/utils';
+import { SegmentedControl } from '@/components/ui/segmented-control';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ProductCard } from './product-card';
 import { ProductsTable } from './products-table';
 import { ProductForm } from './product-form';
@@ -23,6 +24,7 @@ export function ProductsPage() {
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
 
   const stats = useMemo(() => {
     const active = products.filter((p) => p.status === 'ACTIVE').length;
@@ -43,8 +45,13 @@ export function ProductsPage() {
   };
 
   const handleDeleteProduct = (productId: number) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      setProducts((prev) => prev.filter((p) => p.id !== productId));
+    setDeleteTarget(products.find((p) => p.id === productId) ?? null);
+  };
+
+  const confirmDeleteProduct = () => {
+    if (deleteTarget) {
+      setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+      setDeleteTarget(null);
     }
   };
 
@@ -115,34 +122,20 @@ export function ProductsPage() {
       </div>
 
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">
-            Inventory value: <span className="font-semibold text-gray-900">{formatInventoryValue(stats.totalValue)}</span>
+            Inventory value:{' '}
+            <span className="font-semibold text-gray-900">{formatInventoryValue(stats.totalValue)}</span>
           </p>
-          <div className="inline-flex items-center rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
-            <button
-              type="button"
-              onClick={() => setViewMode('table')}
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                viewMode === 'table' ? 'bg-primary text-primary-foreground' : 'text-gray-600 hover:bg-gray-100'
-              )}
-            >
-              <List className="h-4 w-4" />
-              <span className="hidden sm:inline">Table</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('grid')}
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'text-gray-600 hover:bg-gray-100'
-              )}
-            >
-              <LayoutGrid className="h-4 w-4" />
-              <span className="hidden sm:inline">Grid</span>
-            </button>
-          </div>
+          <SegmentedControl
+            aria-label="Product view"
+            value={viewMode}
+            onValueChange={(value) => setViewMode(value as ViewMode)}
+            options={[
+              { value: 'table', label: 'Table', icon: List, iconOnly: false },
+              { value: 'grid', label: 'Grid', icon: LayoutGrid, iconOnly: false },
+            ]}
+          />
         </div>
 
         {viewMode === 'grid' ? (
@@ -202,6 +195,24 @@ export function ProductsPage() {
           handleEditProduct(product);
         }}
       />
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        title="Delete product"
+        description="This will permanently remove the product from your catalog."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={confirmDeleteProduct}
+      >
+        <p>
+          Are you sure you want to delete{' '}
+          <span className="font-semibold text-gray-900">{deleteTarget?.name}</span>?
+          This action cannot be undone.
+        </p>
+      </ConfirmDialog>
     </div>
   );
 }

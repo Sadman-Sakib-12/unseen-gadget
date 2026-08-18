@@ -174,10 +174,10 @@ export function ProductDetailsModal({
           </DialogContent>
 
           <DialogFooter>
-            <Button onClick={() => onEdit(product)}>Edit product</Button>
             <Button variant="outline" onClick={onClose}>
               Close
             </Button>
+            <Button onClick={() => onEdit(product)}>Edit product</Button>
           </DialogFooter>
         </>
       ) : null}
