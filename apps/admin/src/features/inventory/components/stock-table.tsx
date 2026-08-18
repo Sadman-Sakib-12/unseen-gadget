@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ArchiveRestore } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SearchInput } from "@/components/ui/search-input";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TablePanel } from "@/components/ui/table-panel";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -14,6 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatShortDate } from "@/lib/format";
+import { cn } from "@/components/ui/utils";
 import { InventoryItem } from "@/features/inventory/types";
 
 interface StockTableProps {
@@ -21,33 +25,54 @@ interface StockTableProps {
   onAdjust: (item: InventoryItem) => void;
 }
 
+const PAGE_SIZE = 10;
+
 export function StockTable({ items, onAdjust }: StockTableProps) {
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const filtered = items.filter((item) => {
+  const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return true;
-    return (
-      item.name.toLowerCase().includes(query) ||
-      item.sku.toLowerCase().includes(query) ||
-      item.warehouse.toLowerCase().includes(query)
+    if (!query) return items;
+    return items.filter(
+      (item) =>
+        item.name.toLowerCase().includes(query) ||
+        item.sku.toLowerCase().includes(query) ||
+        item.warehouse.toLowerCase().includes(query)
     );
-  });
+  }, [items, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const rows = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm font-medium text-gray-900">
-          Current Stock <span className="text-gray-400">({filtered.length})</span>
-        </p>
+    <TablePanel
+      title="Current Stock"
+      count={filtered.length}
+      toolbar={
         <SearchInput
           value={search}
-          onValueChange={setSearch}
+          onValueChange={(value) => {
+            setSearch(value);
+            setCurrentPage(1);
+          }}
           placeholder="Search product, SKU, warehouse..."
         />
-      </div>
-
-      {filtered.length === 0 ? (
+      }
+      footer={
+        filtered.length > 0 ? (
+          <Pagination
+            page={safePage}
+            pageCount={totalPages}
+            total={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
+        ) : null
+      }
+    >
+      {rows.length === 0 ? (
         <EmptyState
           icon={ArchiveRestore}
           title="No stock items found"
@@ -69,7 +94,7 @@ export function StockTable({ items, onAdjust }: StockTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((item) => (
+            {rows.map((item) => (
               <TableRow key={item.id}>
                 <TableCell className="font-medium text-gray-900">{item.name}</TableCell>
                 <TableCell>
@@ -77,7 +102,14 @@ export function StockTable({ items, onAdjust }: StockTableProps) {
                 </TableCell>
                 <TableCell className="text-gray-600">{item.warehouse}</TableCell>
                 <TableCell className="text-right font-semibold tabular-nums text-gray-900">
-                  {item.stock}
+                  <span
+                    className={cn(
+                      item.status === "OUT_OF_STOCK" && "text-red-600",
+                      item.status === "LOW_STOCK" && "text-amber-600"
+                    )}
+                  >
+                    {item.stock}
+                  </span>
                 </TableCell>
                 <TableCell className="text-right tabular-nums text-gray-500">
                   {item.minStock}
@@ -89,7 +121,7 @@ export function StockTable({ items, onAdjust }: StockTableProps) {
                   <StatusBadge status={item.status} />
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-right text-sm text-gray-500">
-                  {item.lastRestocked}
+                  {formatShortDate(item.lastRestocked)}
                 </TableCell>
                 <TableCell className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => onAdjust(item)}>
@@ -101,12 +133,6 @@ export function StockTable({ items, onAdjust }: StockTableProps) {
           </TableBody>
         </Table>
       )}
-
-      <div className="border-t border-gray-100 px-4 py-3">
-        <p className="text-sm text-gray-500">
-          Showing {filtered.length} of {items.length} stock items
-        </p>
-      </div>
-    </div>
+    </TablePanel>
   );
 }

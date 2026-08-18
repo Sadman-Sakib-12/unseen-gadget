@@ -4,12 +4,14 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { InventoryItem } from "@/features/inventory/types";
 
 interface StockAdjustmentModalProps {
@@ -33,8 +35,9 @@ export function StockAdjustmentModal({ item, open, onClose, onSave }: StockAdjus
 
   return (
     <Dialog open={open && item !== null} onOpenChange={onClose}>
-      <DialogHeader>
-        <DialogTitle>Adjust Stock - {item ? item.name : ""}</DialogTitle>
+      <DialogHeader close>
+        <DialogTitle>Adjust Stock</DialogTitle>
+        {item ? <DialogDescription>{item.name}</DialogDescription> : null}
       </DialogHeader>
       <DialogContent>
         <div className="space-y-4">
@@ -63,11 +66,10 @@ export function StockAdjustmentModal({ item, open, onClose, onSave }: StockAdjus
           </div>
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">Reason</label>
-            <textarea
+            <Textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}
-              className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
               placeholder="Enter adjustment reason..."
             />
           </div>

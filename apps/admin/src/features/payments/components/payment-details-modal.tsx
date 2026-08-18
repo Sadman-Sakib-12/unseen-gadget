@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { formatBDT } from '@/lib/load-dashboard-data';
+import { formatBDT, formatShortDate } from '@/lib/format';
 import type { Payment } from '@/features/payments/types';
 
 interface PaymentDetailsModalProps {
@@ -29,7 +29,7 @@ export function PaymentDetailsModal({ payment, onClose }: PaymentDetailsModalPro
     <Dialog open={payment !== null} onOpenChange={onClose}>
       {payment ? (
         <>
-          <DialogHeader>
+          <DialogHeader close>
             <DialogTitle>Payment Details</DialogTitle>
           </DialogHeader>
           <DialogContent>
@@ -41,7 +41,7 @@ export function PaymentDetailsModal({ payment, onClose }: PaymentDetailsModalPro
               <Row label="Amount" value={formatBDT(payment.amount)} />
               <Row label="Method" value={payment.method.replace('_', ' ')} />
               <Row label="Gateway" value={payment.paymentGateway} />
-              <Row label="Date" value={payment.date} />
+              <Row label="Date" value={formatShortDate(payment.date)} />
               <Row label="Status" value={<StatusBadge status={payment.status} />} />
             </dl>
           </DialogContent>

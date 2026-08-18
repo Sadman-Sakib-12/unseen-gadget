@@ -49,15 +49,15 @@ export function PaymentModal({ isOpen, onClose, total, onConfirm }: PaymentModal
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogHeader>
-        <DialogTitle>{step === "success" ? "Payment Successful" : "Payment"}</DialogTitle>
-        <DialogDescription>
-          {step === "success"
-            ? `Received ${formatBDT(total)} for this sale.`
-            : "Confirm the payment method to complete the sale."}
-        </DialogDescription>
-      </DialogHeader>
       <DialogContent className="space-y-4">
+        <DialogHeader close>
+          <DialogTitle>{step === "success" ? "Payment Successful" : "Payment"}</DialogTitle>
+          <DialogDescription>
+            {step === "success"
+              ? `Received ${formatBDT(total)} for this sale.`
+              : "Confirm the payment method to complete the sale."}
+          </DialogDescription>
+        </DialogHeader>
         {step === "method" && (
           <>
             <div className="rounded-lg bg-gray-50 p-4 text-center">

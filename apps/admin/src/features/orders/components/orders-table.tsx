@@ -4,12 +4,6 @@ import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -27,8 +21,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { TablePanel } from '@/components/ui/table-panel';
+import { Pagination } from '@/components/ui/pagination';
 import { cn } from '@/components/ui/utils';
-import { formatBDT } from '@/lib/load-dashboard-data';
+import { formatBDT, formatShortDate } from '@/lib/format';
 import type { Order } from '../types';
 
 interface OrdersTableProps {
@@ -185,43 +181,42 @@ export function OrdersTable({ orders, onViewOrder, onStatusChange }: OrdersTable
   };
 
   return (
-    <Card>
-      <CardHeader className="gap-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <CardTitle>Orders ({filteredOrders.length})</CardTitle>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <SearchInput
-              value={searchQuery}
-              onValueChange={(value) => {
-                setSearchQuery(value);
-                setCurrentPage(1);
-              }}
-              placeholder="Search order ID, customer..."
-            />
-            <Select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="sm:w-40"
-              options={STATUS_OPTIONS}
-            />
-            <Select
-              value={paymentFilter}
-              onChange={(e) => {
-                setPaymentFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="sm:w-40"
-              options={PAYMENT_OPTIONS}
-            />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        {selectedOrders.size > 0 ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 bg-blue-50/40 px-5 py-3">
+    <TablePanel
+      title="Orders"
+      count={filteredOrders.length}
+      toolbar={
+        <>
+          <SearchInput
+            value={searchQuery}
+            onValueChange={(value) => {
+              setSearchQuery(value);
+              setCurrentPage(1);
+            }}
+            placeholder="Search order ID, customer..."
+          />
+          <Select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full sm:w-40"
+            options={STATUS_OPTIONS}
+          />
+          <Select
+            value={paymentFilter}
+            onChange={(e) => {
+              setPaymentFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full sm:w-40"
+            options={PAYMENT_OPTIONS}
+          />
+        </>
+      }
+      section={
+        selectedOrders.size > 0 ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-blue-50/40 px-3 py-2">
             <p className="text-sm font-medium text-gray-700">
               {selectedOrders.size} selected
             </p>
@@ -233,9 +228,21 @@ export function OrdersTable({ orders, onViewOrder, onStatusChange }: OrdersTable
               Clear selection
             </Button>
           </div>
-        ) : null}
-
-        {paginatedOrders.length === 0 ? (
+        ) : null
+      }
+      footer={
+        filteredOrders.length > 0 ? (
+          <Pagination
+            page={safePage}
+            pageCount={totalPages}
+            total={filteredOrders.length}
+            pageSize={itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
+        ) : null
+      }
+    >
+      {paginatedOrders.length === 0 ? (
           <EmptyState
             title="No orders found"
             description="Try adjusting your search or filters to find what you are looking for."
@@ -337,7 +344,7 @@ export function OrdersTable({ orders, onViewOrder, onStatusChange }: OrdersTable
                       <StatusBadge status={order.status} />
                     </TableCell>
                     <TableCell className="whitespace-nowrap tabular-nums text-gray-600">
-                      {order.date}
+                      {formatShortDate(order.date)}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
@@ -387,38 +394,6 @@ export function OrdersTable({ orders, onViewOrder, onStatusChange }: OrdersTable
             </TableBody>
           </Table>
         )}
-
-        {filteredOrders.length > 0 ? (
-          <div className="flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-gray-500">
-              Showing {paginatedOrders.length === 0 ? 0 : (safePage - 1) * itemsPerPage + 1}–
-              {Math.min(safePage * itemsPerPage, filteredOrders.length)} of {filteredOrders.length}{' '}
-              orders
-            </p>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={safePage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              >
-                Previous
-              </Button>
-              <span className="text-sm text-gray-500 tabular-nums">
-                Page {safePage} of {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={safePage === totalPages}
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        ) : null}
-      </CardContent>
-    </Card>
+    </TablePanel>
   );
 }

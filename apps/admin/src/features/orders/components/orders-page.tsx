@@ -130,7 +130,7 @@ export function OrdersPage() {
   };
 
   return (
-    <div className={cn('space-y-6', selectedOrder && 'sm:pr-[400px] sm:transition-[padding]')}>
+    <div className={cn('space-y-6', selectedOrder && 'lg:pr-[400px] lg:transition-[padding]')}>
       <PageHeader
         title="Orders"
         description="Manage and track all customer orders."

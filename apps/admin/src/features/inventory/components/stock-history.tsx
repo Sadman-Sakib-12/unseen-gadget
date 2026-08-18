@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SearchInput } from "@/components/ui/search-input";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TablePanel } from "@/components/ui/table-panel";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -14,40 +16,61 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatShortDate } from "@/lib/format";
 import { StockMovement } from "@/features/inventory/types";
 
 interface StockHistoryProps {
   movements: StockMovement[];
 }
 
+const PAGE_SIZE = 10;
+
 export function StockHistory({ movements }: StockHistoryProps) {
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const filtered = movements.filter((movement) => {
+  const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return true;
-    return (
-      movement.productName.toLowerCase().includes(query) ||
-      movement.reference.toLowerCase().includes(query) ||
-      movement.note.toLowerCase().includes(query)
+    if (!query) return movements;
+    return movements.filter(
+      (movement) =>
+        movement.productName.toLowerCase().includes(query) ||
+        movement.reference.toLowerCase().includes(query) ||
+        movement.note.toLowerCase().includes(query)
     );
-  });
+  }, [movements, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const rows = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm font-medium text-gray-900">
-          Stock Movement History{" "}
-          <span className="text-gray-400">({filtered.length})</span>
-        </p>
+    <TablePanel
+      title="Stock Movement History"
+      count={filtered.length}
+      toolbar={
         <SearchInput
           value={search}
-          onValueChange={setSearch}
+          onValueChange={(value) => {
+            setSearch(value);
+            setCurrentPage(1);
+          }}
           placeholder="Search product, reference..."
         />
-      </div>
-
-      {filtered.length === 0 ? (
+      }
+      footer={
+        filtered.length > 0 ? (
+          <Pagination
+            page={safePage}
+            pageCount={totalPages}
+            total={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
+        ) : null
+      }
+    >
+      {rows.length === 0 ? (
         <EmptyState
           icon={History}
           title="No stock movements found"
@@ -66,10 +89,10 @@ export function StockHistory({ movements }: StockHistoryProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((movement) => (
+            {rows.map((movement) => (
               <TableRow key={movement.id}>
                 <TableCell className="whitespace-nowrap text-sm text-gray-500">
-                  {movement.date}
+                  {formatShortDate(movement.date)}
                 </TableCell>
                 <TableCell className="font-medium text-gray-900">
                   {movement.productName}
@@ -103,12 +126,6 @@ export function StockHistory({ movements }: StockHistoryProps) {
           </TableBody>
         </Table>
       )}
-
-      <div className="border-t border-gray-100 px-4 py-3">
-        <p className="text-sm text-gray-500">
-          Showing {filtered.length} of {movements.length} movements
-        </p>
-      </div>
-    </div>
+    </TablePanel>
   );
 }

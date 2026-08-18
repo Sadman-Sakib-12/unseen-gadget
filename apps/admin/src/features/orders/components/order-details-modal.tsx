@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { cn } from '@/components/ui/utils';
-import { formatBDT } from '@/lib/load-dashboard-data';
+import { formatBDT, formatShortDate } from '@/lib/format';
 import type { Order } from '../types';
 
 interface OrderDetailsModalProps {
@@ -132,7 +132,7 @@ export function OrderDetailsModal({ order, onClose, onStatusChange }: OrderDetai
                 </div>
                 <p className="mt-1.5 flex items-center gap-1.5 text-xs text-gray-500">
                   <Calendar className="h-3.5 w-3.5" />
-                  Placed on {order.date}
+                  Placed on {formatShortDate(order.date)}
                 </p>
                 <div className="mt-3">
                   <DropdownMenu

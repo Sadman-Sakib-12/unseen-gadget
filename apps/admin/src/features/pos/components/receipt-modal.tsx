@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -42,11 +43,11 @@ export function ReceiptModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogHeader>
+      <DialogHeader close>
         <DialogTitle>Receipt</DialogTitle>
         <DialogDescription>{orderId}</DialogDescription>
       </DialogHeader>
-      <DialogContent className="space-y-4">
+      <DialogContent>
         <div className="space-y-4">
           <div className="border-b pb-4 text-center">
             <h2 className="text-xl font-bold text-gray-900">Unseen Gadget</h2>
@@ -123,17 +124,19 @@ export function ReceiptModal({
             Thank you for shopping with us!
           </div>
         </div>
-
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={handlePrint}>
-            <Printer className="h-4 w-4" />
-            Print
-          </Button>
-          <Button type="button" onClick={onClose}>
-            New Sale
-          </Button>
-        </div>
       </DialogContent>
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={onClose}>
+          Close
+        </Button>
+        <Button type="button" variant="outline" onClick={handlePrint}>
+          <Printer className="h-4 w-4" />
+          Print
+        </Button>
+        <Button type="button" onClick={onClose}>
+          New Sale
+        </Button>
+      </DialogFooter>
     </Dialog>
   );
 }

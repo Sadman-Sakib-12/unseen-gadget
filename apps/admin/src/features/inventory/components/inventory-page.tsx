@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   CheckCircle2,
   Layers,
@@ -8,7 +9,7 @@ import {
   PackageX,
   TriangleAlert,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/ui/stat-card";
 import { inventoryItems, stockMovements } from "@/features/inventory/data";
@@ -31,6 +32,7 @@ export function InventoryPage() {
   };
 
   const handleSaveAdjustment = (itemId: number, quantity: number, reason: string) => {
+    void reason;
     const item = inventoryItems.find((i) => i.id === itemId);
     if (item) {
       item.stock += quantity;
@@ -38,7 +40,6 @@ export function InventoryPage() {
       else if (item.stock < item.minStock) item.status = "LOW_STOCK";
       else item.status = "IN_STOCK";
       item.lastRestocked = new Date().toISOString().split("T")[0];
-      console.log("Adjustment reason:", reason);
     }
   };
 
@@ -48,10 +49,10 @@ export function InventoryPage() {
         title="Inventory"
         description="Manage stock levels and warehouse inventory."
         actions={
-          <Button onClick={() => alert("Add product feature coming soon")}>
+          <Link href="/products" className={buttonVariants({})}>
             <PackagePlus className="h-4 w-4" />
             Add Product
-          </Button>
+          </Link>
         }
       />
 
