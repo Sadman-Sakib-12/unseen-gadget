@@ -21,9 +21,11 @@ const TONE_OVERRIDES: Record<string, StatusTone> = {
   published: "success",
   in_stock: "success",
   reconciled: "success",
+  refunded: "success",
   critical: "destructive",
 
   pending: "warning",
+  confirmed: "warning",
   processing: "warning",
   scheduled: "warning",
   requested: "warning",
@@ -49,7 +51,6 @@ const TONE_OVERRIDES: Record<string, StatusTone> = {
 
   shipped: "secondary",
   inactive: "secondary",
-  refunded: "secondary",
   draft: "secondary",
   archived: "secondary",
   ended: "secondary",

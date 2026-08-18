@@ -33,17 +33,17 @@ function StatCard({
         {Icon ? (
           <div
             className={cn(
-              "flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100",
+              "flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-current",
               iconClassName
             )}
           >
-            <Icon className="h-5 w-5 text-gray-600" />
+            <Icon className="h-5 w-5" />
           </div>
         ) : null}
-        <div className="mt-4">
+        <div className="mt-3">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <div className="mt-1 flex items-baseline justify-between gap-2">
-            <p className="truncate text-2xl font-bold tracking-tight text-gray-900">
+            <p className="min-w-0 truncate text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
               {value}
             </p>
             {showChange ? (

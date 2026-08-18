@@ -3,6 +3,20 @@
 import * as React from 'react';
 import { cn } from '@/components/ui/utils';
 
+interface DropdownMenuContextValue {
+  close: () => void;
+}
+
+const DropdownMenuContext = React.createContext<DropdownMenuContextValue | undefined>(undefined);
+
+const useDropdownMenuContext = () => {
+  const context = React.useContext(DropdownMenuContext);
+  if (!context) {
+    throw new Error('DropdownMenuItem must be used within a DropdownMenu');
+  }
+  return context;
+};
+
 interface DropdownMenuProps {
   trigger: React.ReactNode;
   children: React.ReactNode;
@@ -13,6 +27,9 @@ interface DropdownMenuProps {
 const DropdownMenu = ({ trigger, children, align = 'end', side = 'bottom' }: DropdownMenuProps) => {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
+
+  const close = React.useCallback(() => setOpen(false), []);
+  const toggle = React.useCallback(() => setOpen((prev) => !prev), []);
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -35,39 +52,45 @@ const DropdownMenu = ({ trigger, children, align = 'end', side = 'bottom' }: Dro
   const sideClass = side === 'top' ? 'bottom-full mb-2' : 'top-full mt-2';
 
   return (
-    <div className="relative inline-block text-left" ref={ref}>
-      <div onClick={() => setOpen(!open)}>{trigger}</div>
-      {open && (
-        <div
-          className={cn(
-            'absolute z-50 min-w-[9rem] overflow-hidden rounded-lg border border-gray-200 bg-white py-1 shadow-lg',
-            alignClass,
-            sideClass
-          )}
-        >
-          {children}
-        </div>
-      )}
-    </div>
+    <DropdownMenuContext.Provider value={{ close }}>
+      <div className="relative inline-block text-left" ref={ref}>
+        <div onClick={toggle}>{trigger}</div>
+        {open && (
+          <div
+            className={cn(
+              'absolute z-50 min-w-[9rem] overflow-hidden rounded-lg border border-gray-200 bg-white py-1 shadow-lg',
+              alignClass,
+              sideClass
+            )}
+          >
+            {children}
+          </div>
+        )}
+      </div>
+    </DropdownMenuContext.Provider>
   );
 };
 
 type DropdownMenuItemProps = React.HTMLAttributes<HTMLDivElement> & { onSelect?: () => void };
 
 const DropdownMenuItem = React.forwardRef<HTMLDivElement, DropdownMenuItemProps>(
-  ({ className, onSelect, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(
-        'flex cursor-pointer items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900',
-        className
-      )}
-      onClick={() => {
-        onSelect?.();
-      }}
-      {...props}
-    />
-  )
+  ({ className, onSelect, ...props }, ref) => {
+    const { close } = useDropdownMenuContext();
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'flex cursor-pointer items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900',
+          className
+        )}
+        onClick={() => {
+          close();
+          onSelect?.();
+        }}
+        {...props}
+      />
+    );
+  }
 );
 DropdownMenuItem.displayName = 'DropdownMenuItem';
 

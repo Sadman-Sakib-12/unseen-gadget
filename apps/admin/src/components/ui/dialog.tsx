@@ -18,14 +18,24 @@ const useDialogContext = () => {
   return context;
 };
 
+type DialogSize = 'md' | 'xl' | '2xl' | '3xl';
+
+const DIALOG_SIZE_CLASSES: Record<DialogSize, string> = {
+  md: 'max-w-lg',
+  xl: 'max-w-xl',
+  '2xl': 'max-w-2xl',
+  '3xl': 'max-w-3xl',
+};
+
 interface DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
   className?: string;
+  size?: DialogSize;
 }
 
-const Dialog = ({ open, onOpenChange, children, className }: DialogProps) => {
+const Dialog = ({ open, onOpenChange, children, className, size = 'md' }: DialogProps) => {
   React.useEffect(() => {
     if (!open) return;
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -53,7 +63,8 @@ const Dialog = ({ open, onOpenChange, children, className }: DialogProps) => {
           role="dialog"
           aria-modal="true"
           className={cn(
-            'relative z-50 flex max-h-[calc(100vh-2rem)] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-white shadow-xl',
+            'relative z-50 flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-xl bg-white shadow-xl',
+            DIALOG_SIZE_CLASSES[size],
             className
           )}
         >
@@ -79,7 +90,7 @@ const DialogHeader = React.forwardRef<HTMLDivElement, DialogHeaderProps>(
   ({ className, close, children, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex flex-col gap-1.5 border-b border-gray-100 px-6 py-5', className)}
+      className={cn('relative flex flex-col gap-1.5 border-b border-gray-100 px-6 py-5', className)}
       {...props}
     >
       {children}
