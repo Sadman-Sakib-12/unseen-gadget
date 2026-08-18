@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["@unseen-gadget/cms-data"],
   images: {
     remotePatterns: [
       {

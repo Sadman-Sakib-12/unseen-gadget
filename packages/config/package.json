@@ -12,6 +12,7 @@
     "typescript": "^5.5.0"
   },
   "dependencies": {
+    "@unseen-gadget/ui": "workspace:*",
     "tailwindcss": "^3.4.0"
   }
 }
