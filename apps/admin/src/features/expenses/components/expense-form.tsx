@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Expense } from "@/features/expenses/types";
 
 interface ExpenseFormProps {
@@ -88,12 +89,11 @@ export function ExpenseForm({ expense, onSave, onCancel }: ExpenseFormProps) {
               <label className="block text-sm font-medium text-gray-700">
                 Description
               </label>
-              <textarea
+              <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={3}
                 required
-                className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
               />
             </div>
           </div>

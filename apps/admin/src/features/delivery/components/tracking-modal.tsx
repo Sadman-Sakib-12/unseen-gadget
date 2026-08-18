@@ -35,7 +35,7 @@ export function TrackingModal({ delivery, onClose }: TrackingModalProps) {
     <Dialog open={delivery !== null} onOpenChange={onClose}>
       {delivery ? (
         <>
-          <DialogHeader>
+          <DialogHeader close>
             <DialogTitle>Tracking Information</DialogTitle>
             <DialogDescription>
               {delivery.orderId} · {delivery.customerName}

@@ -86,7 +86,13 @@ export function CouponsPage() {
         />
       )}
 
-      <CouponsTable data={coupons} />
+      <CouponsTable
+        data={coupons}
+        onEdit={(coupon) => {
+          setEditingCoupon(coupon);
+          setShowForm(true);
+        }}
+      />
     </div>
   );
 }

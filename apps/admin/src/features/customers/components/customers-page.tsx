@@ -1,15 +1,14 @@
 ﻿'use client';
 
 import { useState } from 'react';
-import { CheckCircle2, CreditCard, Plus, ShieldOff, UserRound } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { CheckCircle2, CreditCard, ShieldOff, UserRound } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
 import { StatCard } from '@/components/ui/stat-card';
 import { CustomersTable } from '@/features/customers/components/customers-table';
 import { CustomerDetailsModal } from '@/features/customers/components/customer-details-modal';
 import initialCustomers from '@/features/customers/data/customers.json';
 import type { Customer } from '@/features/customers/types';
-import { formatBDT } from '@/lib/load-dashboard-data';
+import { formatBDT } from '@/lib/format';
 
 export function CustomersPage() {
   const [customers] = useState<Customer[]>(initialCustomers);
@@ -24,12 +23,6 @@ export function CustomersPage() {
       <PageHeader
         title="Customers"
         description="Manage your customer base and their order history."
-        actions={
-          <Button onClick={() => {}}>
-            <Plus className="h-4 w-4" />
-            Add Customer
-          </Button>
-        }
       />
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">

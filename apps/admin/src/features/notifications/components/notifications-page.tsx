@@ -1,7 +1,6 @@
 ﻿"use client";
 import { useState } from "react";
-import { Bell, BellRing, MessageSquareText, TriangleAlert } from "lucide-react";
-import { Plus } from "lucide-react";
+import { Bell, BellRing, MessageSquareText, TriangleAlert, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/ui/stat-card";
@@ -17,6 +16,16 @@ export function NotificationsPage() {
   const handleSave = (notification: Notification) => {
     setNotifications([notification, ...notifications]);
     setShowForm(false);
+  };
+
+  const markRead = (id: string) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+  };
+
+  const markAllRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
   const unread = notifications.filter((n) => !n.read).length;
@@ -63,7 +72,7 @@ export function NotificationsPage() {
         />
       </div>
 
-      <NotificationsList data={notifications} />
+      <NotificationsList data={notifications} onMarkRead={markRead} onMarkAllRead={markAllRead} />
 
       <NotificationForm isOpen={showForm} onClose={() => setShowForm(false)} onSave={handleSave} />
     </div>

@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PackageSearch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SearchInput } from '@/components/ui/search-input';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { TablePanel } from '@/components/ui/table-panel';
+import { Pagination } from '@/components/ui/pagination';
 import {
   Table,
   TableBody,
@@ -14,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { formatBDT } from '@/lib/format';
 import type { Delivery } from '@/features/delivery/types';
 
 interface DeliveriesTableProps {
@@ -22,34 +25,55 @@ interface DeliveriesTableProps {
   onTrack?: (delivery: Delivery) => void;
 }
 
+const PAGE_SIZE = 10;
+
 export function DeliveriesTable({ data, onAssign, onTrack }: DeliveriesTableProps) {
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const filtered = data.filter((d) => {
+  const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return true;
-    return (
-      d.customerName.toLowerCase().includes(query) ||
-      d.orderId.toLowerCase().includes(query) ||
-      d.trackingNumber.toLowerCase().includes(query) ||
-      d.courier.toLowerCase().includes(query)
+    if (!query) return data;
+    return data.filter(
+      (d) =>
+        d.customerName.toLowerCase().includes(query) ||
+        d.orderId.toLowerCase().includes(query) ||
+        d.trackingNumber.toLowerCase().includes(query) ||
+        d.courier.toLowerCase().includes(query)
     );
-  });
+  }, [data, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const rows = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm font-medium text-gray-900">
-          Deliveries <span className="text-gray-400">({filtered.length})</span>
-        </p>
+    <TablePanel
+      title="Deliveries"
+      count={filtered.length}
+      toolbar={
         <SearchInput
           value={search}
-          onValueChange={setSearch}
+          onValueChange={(value) => {
+            setSearch(value);
+            setCurrentPage(1);
+          }}
           placeholder="Search customer, order, tracking..."
         />
-      </div>
-
-      {filtered.length === 0 ? (
+      }
+      footer={
+        filtered.length > 0 ? (
+          <Pagination
+            page={safePage}
+            pageCount={totalPages}
+            total={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
+        ) : null
+      }
+    >
+      {rows.length === 0 ? (
         <EmptyState
           icon={PackageSearch}
           title="No deliveries found"
@@ -69,7 +93,7 @@ export function DeliveriesTable({ data, onAssign, onTrack }: DeliveriesTableProp
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((delivery) => (
+            {rows.map((delivery) => (
               <TableRow key={delivery.id}>
                 <TableCell>
                   <p className="font-medium text-gray-900">{delivery.orderId}</p>
@@ -88,7 +112,7 @@ export function DeliveriesTable({ data, onAssign, onTrack }: DeliveriesTableProp
                   </span>
                 </TableCell>
                 <TableCell className="text-right tabular-nums text-gray-900">
-                  {delivery.shippingCost} BDT
+                  {formatBDT(delivery.shippingCost)}
                 </TableCell>
                 <TableCell>
                   <StatusBadge status={delivery.status} />
@@ -113,12 +137,6 @@ export function DeliveriesTable({ data, onAssign, onTrack }: DeliveriesTableProp
           </TableBody>
         </Table>
       )}
-
-      <div className="border-t border-gray-100 px-4 py-3">
-        <p className="text-sm text-gray-500">
-          Showing {filtered.length} of {data.length} deliveries
-        </p>
-      </div>
-    </div>
+    </TablePanel>
   );
 }

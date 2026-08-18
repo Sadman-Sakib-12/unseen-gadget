@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { StatusBadge } from '@/components/ui/status-badge';
 import type { Customer } from '@/features/customers/types';
-import { formatBDT } from '@/lib/load-dashboard-data';
+import { formatBDT, formatShortDate } from '@/lib/format';
 
 interface CustomerDetailsModalProps {
   customer: Customer | null;
@@ -30,7 +30,7 @@ export function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModal
     <Dialog open={customer !== null} onOpenChange={onClose}>
       {customer ? (
         <>
-          <DialogHeader>
+          <DialogHeader close>
             <DialogTitle>Customer Details</DialogTitle>
             <DialogDescription>{customer.email}</DialogDescription>
           </DialogHeader>
@@ -51,8 +51,8 @@ export function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModal
                 <Row label="Phone" value={customer.phone} />
                 <Row label="Total orders" value={customer.totalOrders} />
                 <Row label="Total spent" value={formatBDT(customer.totalSpent)} />
-                <Row label="Last order" value={customer.lastOrder || 'N/A'} />
-                <Row label="Joined" value={customer.joinDate} />
+                <Row label="Last order" value={customer.lastOrder ? formatShortDate(customer.lastOrder) : 'N/A'} />
+                <Row label="Joined" value={formatShortDate(customer.joinDate)} />
               </dl>
             </div>
           </DialogContent>

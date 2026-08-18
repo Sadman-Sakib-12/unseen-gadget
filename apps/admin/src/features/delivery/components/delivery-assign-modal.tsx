@@ -40,7 +40,7 @@ export function DeliveryAssignModal({ delivery, onClose, onAssign }: DeliveryAss
 
   return (
     <Dialog open={delivery !== null} onOpenChange={onClose}>
-      <DialogHeader>
+      <DialogHeader close>
         <DialogTitle>Assign Courier</DialogTitle>
       </DialogHeader>
       <DialogContent>

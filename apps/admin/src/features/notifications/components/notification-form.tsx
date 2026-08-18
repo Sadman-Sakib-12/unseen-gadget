@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import type { Notification } from "@/features/notifications/types";
 
 interface NotificationFormProps {
@@ -54,7 +55,7 @@ export function NotificationForm({ isOpen, onClose, onSave }: NotificationFormPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogHeader>
+      <DialogHeader close>
         <DialogTitle>Send Notification</DialogTitle>
         <DialogDescription>Create a new system notification for your team.</DialogDescription>
       </DialogHeader>
@@ -85,11 +86,10 @@ export function NotificationForm({ isOpen, onClose, onSave }: NotificationFormPr
             </Field>
             <div className="sm:col-span-2">
               <Field label="Message">
-                <textarea
+                <Textarea
                   value={formData.message}
                   onChange={(e) => update({ message: e.target.value })}
                   rows={3}
-                  className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
                   placeholder="Notification message body"
                   required
                 />

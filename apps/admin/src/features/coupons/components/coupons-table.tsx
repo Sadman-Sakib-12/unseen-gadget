@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { Ticket } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Pencil, Ticket } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SearchInput } from "@/components/ui/search-input";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TablePanel } from "@/components/ui/table-panel";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -13,39 +16,61 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatBDT } from "@/lib/load-dashboard-data";
+import { formatBDT, formatShortDate } from "@/lib/format";
 import { Coupon } from "@/features/coupons/types";
 
 interface CouponsTableProps {
   data: Coupon[];
+  onEdit?: (coupon: Coupon) => void;
 }
 
-export function CouponsTable({ data }: CouponsTableProps) {
-  const [search, setSearch] = useState("");
+const PAGE_SIZE = 10;
 
-  const filtered = data.filter((coupon) => {
+export function CouponsTable({ data, onEdit }: CouponsTableProps) {
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return true;
-    return (
-      coupon.code.toLowerCase().includes(query) ||
-      coupon.id.toLowerCase().includes(query)
+    if (!query) return data;
+    return data.filter(
+      (coupon) =>
+        coupon.code.toLowerCase().includes(query) ||
+        coupon.id.toLowerCase().includes(query)
     );
-  });
+  }, [data, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const rows = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm font-medium text-gray-900">
-          Coupons <span className="text-gray-400">({filtered.length})</span>
-        </p>
+    <TablePanel
+      title="Coupons"
+      count={filtered.length}
+      toolbar={
         <SearchInput
           value={search}
-          onValueChange={setSearch}
+          onValueChange={(value) => {
+            setSearch(value);
+            setCurrentPage(1);
+          }}
           placeholder="Search code, ID..."
         />
-      </div>
-
-      {filtered.length === 0 ? (
+      }
+      footer={
+        filtered.length > 0 ? (
+          <Pagination
+            page={safePage}
+            pageCount={totalPages}
+            total={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
+        ) : null
+      }
+    >
+      {rows.length === 0 ? (
         <EmptyState
           icon={Ticket}
           title="No coupons found"
@@ -62,10 +87,11 @@ export function CouponsTable({ data }: CouponsTableProps) {
               <TableHead>Used</TableHead>
               <TableHead>Expiry</TableHead>
               <TableHead>Status</TableHead>
+              {onEdit ? <TableHead className="text-right">Actions</TableHead> : null}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((coupon) => (
+            {rows.map((coupon) => (
               <TableRow key={coupon.id}>
                 <TableCell>
                   <span className="font-mono text-xs text-gray-500">{coupon.id}</span>
@@ -87,22 +113,28 @@ export function CouponsTable({ data }: CouponsTableProps) {
                   {coupon.usedCount} / {coupon.usageLimit}
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-sm text-gray-500">
-                  {coupon.expiryDate}
+                  {formatShortDate(coupon.expiryDate)}
                 </TableCell>
                 <TableCell>
                   <StatusBadge status={coupon.status} />
                 </TableCell>
+                {onEdit ? (
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEdit(coupon)}
+                      aria-label={`Edit coupon ${coupon.code}`}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                ) : null}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       )}
-
-      <div className="border-t border-gray-100 px-4 py-3">
-        <p className="text-sm text-gray-500">
-          Showing {filtered.length} of {data.length} coupons
-        </p>
-      </div>
-    </div>
+    </TablePanel>
   );
 }
