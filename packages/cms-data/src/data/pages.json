@@ -1,0 +1,367 @@
+[
+  {
+    "slug": "terms",
+    "title": "Terms & Conditions",
+    "description": "Please read these terms carefully before using our website or placing an order.",
+    "blocks": [
+      {
+        "type": "features",
+        "items": [
+          {
+            "title": "Acceptance of Terms",
+            "desc": "By accessing or using our website, you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, please do not use our services."
+          },
+          {
+            "title": "Products & Pricing",
+            "desc": "All products are subject to availability. We reserve the right to discontinue any product at any time. Prices are subject to change without notice. We make every effort to display accurate product information and pricing."
+          },
+          {
+            "title": "Orders & Payments",
+            "desc": "By placing an order, you confirm the information provided is accurate. We reserve the right to refuse or cancel any order for reasons including product availability, errors in pricing, or suspected fraud."
+          },
+          {
+            "title": "Limitation of Liability",
+            "desc": "Unseen Gadget shall not be liable for any indirect, incidental, special, or consequential damages arising from the use or inability to use our products or services."
+          },
+          {
+            "title": "Governing Law",
+            "desc": "These Terms shall be governed by and construed in accordance with the laws of Bangladesh. Any disputes shall be resolved through the courts of Dhaka, Bangladesh."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          {
+            "text": "By continuing to use our site, you accept these terms. For questions, contact "
+          },
+          {
+            "text": "support@unseengadget.com",
+            "marks": [
+              "link"
+            ],
+            "url": "mailto:support@unseengadget.com"
+          },
+          {
+            "text": "."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "privacy",
+    "title": "Privacy Policy",
+    "description": "We are committed to protecting your personal information and being transparent about how we use it.",
+    "blocks": [
+      {
+        "type": "features",
+        "items": [
+          {
+            "title": "Information We Collect",
+            "desc": "We collect information you provide directly to us, such as when you create an account, place an order, or contact us for support. This includes your name, email address, phone number, and delivery address."
+          },
+          {
+            "title": "How We Use Your Information",
+            "desc": "We use the information we collect to process your orders, communicate with you about your purchases, improve our services, and send you updates about new products and promotions."
+          },
+          {
+            "title": "Data Security",
+            "desc": "We implement appropriate security measures to protect your personal information from unauthorized access, alteration, or disclosure. All payment data is encrypted and never stored on our servers."
+          },
+          {
+            "title": "Your Rights",
+            "desc": "You have the right to access, update, or delete your personal information at any time. You may also opt out of promotional communications by clicking the unsubscribe link in any email."
+          },
+          {
+            "title": "Contact Us",
+            "desc": "If you have any questions about this Privacy Policy or how we handle your data, please contact us at support@unseengadget.com or call +8801714039409."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          {
+            "text": "Questions about your data? Reach us at "
+          },
+          {
+            "text": "support@unseengadget.com",
+            "marks": [
+              "link"
+            ],
+            "url": "mailto:support@unseengadget.com"
+          },
+          {
+            "text": "."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "delivery-return",
+    "title": "Delivery & Return",
+    "description": "Fast, reliable delivery across Bangladesh — and easy returns if something isn't right.",
+    "blocks": [
+      {
+        "type": "features",
+        "items": [
+          {
+            "title": "Nationwide Delivery",
+            "desc": "We deliver to all 64 districts across Bangladesh through trusted courier partners."
+          },
+          {
+            "title": "Same-Day in Dhaka",
+            "desc": "Order before 3 PM and receive your package the same day within Dhaka city."
+          },
+          {
+            "title": "Live Tracking",
+            "desc": "Track your order in real-time from our warehouse to your doorstep."
+          },
+          {
+            "title": "Safe Packaging",
+            "desc": "Every product is carefully packed to ensure it arrives in perfect condition."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Delivery Charges"
+      },
+      {
+        "type": "table",
+        "head": [
+          "Zone",
+          "Estimated Time",
+          "Charge"
+        ],
+        "rows": [
+          [
+            "Inside Dhaka City",
+            "Same Day / Next Day",
+            "Free"
+          ],
+          [
+            "Dhaka Suburbs",
+            "1–2 Business Days",
+            "৳60"
+          ],
+          [
+            "Divisional Cities",
+            "1–3 Business Days",
+            "৳100"
+          ],
+          [
+            "District Towns",
+            "2–4 Business Days",
+            "৳120"
+          ],
+          [
+            "Remote Areas",
+            "3–5 Business Days",
+            "৳150–৳200"
+          ]
+        ]
+      },
+      {
+        "type": "note",
+        "variant": "success",
+        "title": "Free inside Dhaka",
+        "text": "Free delivery on all orders inside Dhaka city — no minimum order value required."
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "How Delivery Works"
+      },
+      {
+        "type": "list",
+        "ordered": true,
+        "items": [
+          "Place your order online or call us at +8801714039409",
+          "We confirm stock availability and process your order",
+          "Order is packed and handed to our courier partner",
+          "You receive an SMS with tracking details",
+          "Order delivered to your doorstep"
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Returns & Exchanges"
+      },
+      {
+        "type": "features",
+        "items": [
+          {
+            "title": "7-Day Returns",
+            "desc": "Return any defective product within 7 days of delivery — no questions asked."
+          },
+          {
+            "title": "Easy Exchange",
+            "desc": "Exchange for a different color, variant, or model if available in stock."
+          },
+          {
+            "title": "Full Refund",
+            "desc": "Get a complete refund if the product is defective or not as described."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Eligible for Return"
+      },
+      {
+        "type": "list",
+        "items": [
+          "Product received is defective or damaged",
+          "Wrong product delivered",
+          "Product is not as described on the website",
+          "Missing accessories or parts"
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "Not Eligible for Return"
+      },
+      {
+        "type": "list",
+        "items": [
+          "Physical damage caused by the customer",
+          "Product opened and used without defect",
+          "Return request made after 7 days",
+          "Products with tampered serial numbers"
+        ]
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "text": "How the Return Process Works"
+      },
+      {
+        "type": "list",
+        "ordered": true,
+        "items": [
+          "Contact Us — call or WhatsApp us at +8801714039409 with your order details and issue.",
+          "Verification — our team will verify the issue and approve your return/exchange request.",
+          "Ship Back — we'll arrange a pickup or guide you on how to send the product back.",
+          "Resolution — receive your replacement or refund within 3–5 business days."
+        ]
+      },
+      {
+        "type": "cta",
+        "label": "Need help? Call +8801714039409",
+        "href": "tel:+8801714039409"
+      }
+    ]
+  },
+  {
+    "slug": "career",
+    "title": "Careers",
+    "description": "Be part of Bangladesh's fastest-growing tech store.",
+    "blocks": [
+      {
+        "type": "features",
+        "items": [
+          {
+            "title": "Competitive Salary",
+            "desc": "We pay above market rate"
+          },
+          {
+            "title": "Great Team",
+            "desc": "Work with passionate people"
+          },
+          {
+            "title": "Work-Life Balance",
+            "desc": "Flexible working hours"
+          },
+          {
+            "title": "Growth",
+            "desc": "Fast-track your career"
+          }
+        ]
+      },
+      {
+        "type": "cta",
+        "label": "Don't see a fit? Send your CV to careers@unseengadget.com",
+        "href": "mailto:careers@unseengadget.com"
+      }
+    ]
+  },
+  {
+    "slug": "contact",
+    "title": "Contact",
+    "description": "Reach out through any channel below — we reply within 24 hours.",
+    "blocks": [
+      {
+        "type": "contactRow",
+        "icon": "phone",
+        "label": "Phone",
+        "value": "+8801714039409",
+        "sub": "Available 10 AM – 10 PM"
+      },
+      {
+        "type": "contactRow",
+        "icon": "mail",
+        "label": "Email",
+        "value": "support@unseengadget.com",
+        "sub": "We reply within 24 hours"
+      },
+      {
+        "type": "contactRow",
+        "icon": "map",
+        "label": "Address",
+        "value": "Shop #84, Block C, Level 05, Bashundhara City, Dhaka 1229",
+        "sub": "Bangladesh"
+      },
+      {
+        "type": "contactRow",
+        "icon": "clock",
+        "label": "Working Hours",
+        "value": "Sat – Thu: 10 AM – 10 PM, Friday: 10 AM – 8 PM"
+      }
+    ]
+  },
+  {
+    "slug": "shop",
+    "title": "Unseen Gadget Shop",
+    "description": "Genuine tech and accessories at the best prices in Bangladesh.",
+    "blocks": [
+      {
+        "type": "heading",
+        "level": 2,
+        "text": "Why shop with us"
+      },
+      {
+        "type": "features",
+        "items": [
+          {
+            "title": "100% Authentic",
+            "desc": "Every product is genuine with official warranty."
+          },
+          {
+            "title": "Best Prices",
+            "desc": "We match the market on every device we sell."
+          },
+          {
+            "title": "Fast Delivery",
+            "desc": "Same-day delivery inside Dhaka, nationwide reach."
+          },
+          {
+            "title": "Easy Returns",
+            "desc": "7-day returns and hassle-free exchanges."
+          }
+        ]
+      },
+      {
+        "type": "cta",
+        "label": "Browse the collection",
+        "href": "/category/smartphones/iphones"
+      }
+    ]
+  }
+]

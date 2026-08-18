@@ -1,0 +1,44 @@
+[
+  {
+    "id": "PROMO-001",
+    "title": "Apple Shopping Event",
+    "badge": "Up to 20% OFF",
+    "description": "Hurry and grab massive discounts on all Apple devices. Limited time offer — shop before stocks run out!",
+    "ctaLabel": "Shop Apple Deals",
+    "ctaHref": "/category/computers/macbooks",
+    "icon": "zap",
+    "gradient": "from-primary to-primary-800",
+    "startDate": "2026-08-01",
+    "endDate": "2026-08-31",
+    "order": 1,
+    "active": true
+  },
+  {
+    "id": "PROMO-002",
+    "title": "MacBook Air M5",
+    "badge": "New Launch",
+    "description": "Experience the next generation of performance. The new M5 chip delivers blazing-fast speed and all-day battery life.",
+    "ctaLabel": "Explore MacBooks",
+    "ctaHref": "/category/computers/macbooks",
+    "icon": "tag",
+    "gradient": "from-primary-700 to-primary-500",
+    "startDate": "2026-08-01",
+    "endDate": "2026-09-15",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": "PROMO-003",
+    "title": "iPad Accessories Sale",
+    "badge": "Sale On",
+    "description": "Personalize your iPad with top-branded accessories. Cases, keyboards, pencils and more — all at great prices.",
+    "ctaLabel": "Browse Accessories",
+    "ctaHref": "/category/cases-protectors/ipad",
+    "icon": "gift",
+    "gradient": "from-violet-700 to-violet-500",
+    "startDate": "2026-08-10",
+    "endDate": "2026-08-31",
+    "order": 3,
+    "active": true
+  }
+]
