@@ -24,6 +24,8 @@ import {
   FileText,
   Settings,
   Shield,
+  Bell,
+  Tags,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -51,6 +53,7 @@ const navItems: NavItem[] = [
   { title: 'Suppliers', href: '/suppliers', icon: Truck, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
   { title: 'Purchases', href: '/purchases', icon: ShoppingBag, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
   { title: 'Customers', href: '/customers', icon: Users, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
+  { title: 'Categories', href: '/categories-brands', icon: Tags, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
   { title: 'Coupons', href: '/coupons', icon: Ticket, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
   { title: 'Promotions', href: '/promotions', icon: Megaphone, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
   { title: 'Delivery', href: '/delivery', icon: TruckIcon, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
@@ -59,16 +62,23 @@ const navItems: NavItem[] = [
   { title: 'Reviews', href: '/reviews', icon: Star, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
   { title: 'Expenses', href: '/expenses', icon: Receipt, allowedRoles: ['SUPER_ADMIN'] },
   { title: 'Reports', href: '/reports', icon: BarChart3, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
+  { title: 'Notifications', href: '/notifications', icon: Bell, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
   {
     title: 'CMS',
-    href: '/blog',
+    href: '/cms',
     icon: FileText,
     allowedRoles: ['SUPER_ADMIN', 'MANAGER'],
     subItems: [
+      { title: 'Brands', href: '/cms/brands' },
+      { title: 'Footer', href: '/cms/footer' },
+      { title: 'Pages', href: '/cms/pages' },
+      { title: 'Blog', href: '/blog/posts' },
       { title: 'Banners', href: '/blog/banners' },
+      { title: 'About', href: '/blog/about' },
+      { title: 'Promotions', href: '/cms/promotions' },
+      { title: 'Jobs', href: '/cms/jobs' },
       { title: 'Navbar', href: '/blog/navbar' },
-      { title: 'Landing Pages', href: '/blog/landing' },
-      { title: 'About Us', href: '/blog/about' },
+      { title: 'Home Page', href: '/blog/landing' },
     ],
   },
   { title: 'Settings', href: '/settings', icon: Settings, allowedRoles: ['SUPER_ADMIN'] },
@@ -84,7 +94,7 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
-    '/blog': true,
+    '/cms': true,
   });
   const pathname = usePathname();
 
@@ -95,53 +105,87 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
     }));
   };
 
+  const isItemActive = (item: NavItem) =>
+    pathname === item.href || (pathname.startsWith(item.href + '/') && !item.subItems);
+
+  const isSubmenuActive = (item: NavItem) => item.subItems?.some((sub) => pathname === sub.href);
+
+  const badgeClass = (item: NavItem, isActive: boolean) =>
+    cn(
+      'flex h-5 shrink-0 items-center justify-center rounded-full px-2 text-[10px] font-bold tracking-wide',
+      item.badge?.variant === 'success' && 'bg-emerald-100 text-emerald-700',
+      item.badge?.variant === 'destructive' && 'bg-red-100 text-red-700',
+      (item.badge?.variant === 'default' || !item.badge) && 'bg-primary/10 text-primary',
+      isActive &&
+        (item.badge?.variant === 'default' || item.badge?.variant === 'success') &&
+        'bg-white/20 text-white',
+      isActive && item.badge?.variant === 'destructive' && 'bg-white/20 text-white'
+    );
+
   const renderNav = (collapse: boolean, onNavigate?: () => void) => (
-    <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4">
+    <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 custom-scrollbar">
       <ul className="space-y-1">
         {navItems
           .filter((item) => !item.allowedRoles || (user && item.allowedRoles.includes(user.role)))
           .map((item) => {
-            const isActive =
-              pathname === item.href || (pathname.startsWith(item.href + '/') && !item.subItems);
-            const isSubmenuActive = item.subItems?.some((sub) => pathname === sub.href);
+            const isActive = isItemActive(item);
+            const subActive = isSubmenuActive(item);
             const isExpanded = expandedMenus[item.href];
             const Icon = item.icon;
 
             return (
-              <li key={item.href}>
+              <li key={item.href} title={collapse ? item.title : undefined}>
                 {item.subItems ? (
                   <div>
-                    <button
-                      type="button"
-                      onClick={() => toggleSubmenu(item.href)}
+                    <div
                       className={cn(
-                        'flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                        isSubmenuActive
-                          ? 'bg-primary/10 text-primary'
+                        'flex items-center rounded-lg transition-colors',
+                        subActive || pathname === item.href
+                          ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
                           : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                       )}
                     >
-                      <span className="flex items-center gap-3">
+                      <Link
+                        href={item.href}
+                        onClick={onNavigate}
+                        aria-label={item.title}
+                        className={cn(
+                          'flex min-w-0 flex-1 items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-colors',
+                          collapse ? 'justify-center px-0' : 'px-3',
+                          subActive || pathname === item.href
+                            ? 'text-primary-foreground'
+                            : 'text-gray-600 hover:text-gray-900'
+                        )}
+                      >
                         <Icon
                           className={cn(
                             'h-5 w-5 shrink-0',
-                            isSubmenuActive ? 'text-primary' : 'text-gray-500'
+                            subActive || pathname === item.href ? 'text-white' : 'text-gray-500'
                           )}
                         />
-                        {!collapse && <span>{item.title}</span>}
-                      </span>
+                        {!collapse && <span className="truncate">{item.title}</span>}
+                      </Link>
                       {!collapse && (
-                        <ChevronDown
+                        <button
+                          type="button"
+                          onClick={() => toggleSubmenu(item.href)}
+                          aria-expanded={isExpanded}
+                          aria-label={`Toggle ${item.title} submenu`}
                           className={cn(
-                            'h-4 w-4 transition-transform',
-                            isExpanded && 'rotate-180',
-                            isSubmenuActive ? 'text-primary' : 'text-gray-400'
+                            'mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors',
+                            subActive || pathname === item.href
+                              ? 'text-white/80 hover:bg-white/10'
+                              : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
                           )}
-                        />
+                        >
+                          <ChevronDown
+                            className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-180')}
+                          />
+                        </button>
                       )}
-                    </button>
+                    </div>
                     {!collapse && isExpanded && (
-                      <ul className="mt-1 space-y-0.5 pl-10">
+                      <ul className="mt-1 space-y-0.5 pl-4">
                         {item.subItems.map((subItem) => {
                           const isSubActive = pathname === subItem.href;
                           return (
@@ -150,10 +194,10 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
                                 href={subItem.href}
                                 onClick={onNavigate}
                                 className={cn(
-                                  'block rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                                  'block rounded-md border-l-2 py-2 pl-5 pr-3 text-sm font-medium transition-colors',
                                   isSubActive
-                                    ? 'bg-primary text-white shadow-sm shadow-primary/30'
-                                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'border-primary bg-primary/5 text-primary'
+                                    : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                                 )}
                               >
                                 {subItem.title}
@@ -168,33 +212,31 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
                   <Link
                     href={item.href}
                     onClick={onNavigate}
+                    aria-label={collapse ? item.title : undefined}
                     className={cn(
-                      'flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                      'flex items-center justify-between gap-2 rounded-lg py-2.5 text-sm font-medium transition-colors',
+                      collapse ? 'px-0' : 'px-3',
                       isActive
                         ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                     )}
                   >
-                    <span className="flex items-center gap-3">
+                    <span
+                      className={cn(
+                        'flex min-w-0 items-center gap-3',
+                        collapse && 'w-full justify-center'
+                      )}
+                    >
                       <Icon
-                        className={cn('h-5 w-5 shrink-0', isActive ? 'text-white' : 'text-gray-500')}
+                        className={cn(
+                          'h-5 w-5 shrink-0',
+                          isActive ? 'text-white' : 'text-gray-500'
+                        )}
                       />
-                      {!collapse && <span>{item.title}</span>}
+                      {!collapse && <span className="truncate">{item.title}</span>}
                     </span>
                     {!collapse && item.badge ? (
-                      <span
-                        className={cn(
-                          'flex h-5 items-center justify-center rounded-full px-2 text-[10px] font-bold tracking-wide',
-                          item.badge.variant === 'success'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : 'bg-primary/10 text-primary',
-                          isActive &&
-                            (item.badge.variant === 'default' || item.badge.variant === 'success') &&
-                            'bg-white/20 text-white'
-                        )}
-                      >
-                        {item.badge.text}
-                      </span>
+                      <span className={badgeClass(item, isActive)}>{item.badge.text}</span>
                     ) : null}
                   </Link>
                 )}
@@ -242,8 +284,13 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
   );
 
   const sidebarFooter = (
-    <div className={cn('px-4 pb-4 pt-2', collapsed && 'px-2 text-center')}>
-      <p className="text-xs font-medium text-gray-400">© 2025 Unseen Gadget</p>
+    <div
+      className={cn(
+        'px-4 pb-4 pt-2 text-xs font-medium text-gray-400',
+        collapsed && 'px-2 text-center'
+      )}
+    >
+      {collapsed ? '© 2026' : '© 2026 Unseen Gadget'}
     </div>
   );
 
@@ -252,7 +299,7 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          'relative z-10 hidden h-screen shrink-0 flex-col border-r border-gray-200 bg-white transition-all duration-300 lg:flex',
+          'relative z-10 hidden h-full shrink-0 flex-col border-r border-gray-200 bg-white transition-all duration-300 lg:flex',
           collapsed ? 'lg:w-20' : 'lg:w-72'
         )}
       >

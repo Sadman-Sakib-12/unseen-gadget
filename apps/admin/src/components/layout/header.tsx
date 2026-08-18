@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Bell, LogOut, Menu, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchInput } from '@/components/ui/search-input';
@@ -11,6 +12,8 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/use-auth';
+import { formatRelativeDay } from '@/lib/format';
+import notifications from '@/features/notifications/data/notifications.json';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -34,6 +37,10 @@ function initialsOf(name: string): string {
 const Header = ({ onMenuClick }: HeaderProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { user, logout } = useAuth();
+  const router = useRouter();
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+  const latestNotifications = notifications.slice(0, 4);
 
   return (
     <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 sm:px-6">
@@ -61,15 +68,46 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           trigger={
             <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
               <Bell className="h-5 w-5" />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+              {unreadCount > 0 ? (
+                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                  {unreadCount}
+                </span>
+              ) : null}
             </Button>
           }
         >
           <DropdownMenuLabel>Notifications</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => {}}>New order received</DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => {}}>Low stock alert</DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => {}}>Payment received</DropdownMenuItem>
+          <div className="max-h-72 overflow-y-auto">
+            {latestNotifications.map((notification) => (
+              <div key={notification.id}>
+                <DropdownMenuItem
+                  onSelect={() => notification.actionUrl && router.push(notification.actionUrl)}
+                >
+                  <span className="flex min-w-0 flex-col gap-0.5 py-0.5">
+                    <span className="flex items-center gap-2">
+                      <span
+                        className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                          notification.read ? 'bg-gray-300' : 'bg-blue-600'
+                        }`}
+                      />
+                      <span className="truncate font-medium text-gray-900">
+                        {notification.title}
+                      </span>
+                    </span>
+                    <span className="truncate pl-3.5 text-xs text-gray-500">
+                      {formatRelativeDay(notification.time)}
+                    </span>
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </div>
+            ))}
+          </div>
+          <DropdownMenuItem onSelect={() => router.push('/notifications')}>
+            <Bell className="h-4 w-4" />
+            View all notifications
+          </DropdownMenuItem>
         </DropdownMenu>
 
         <DropdownMenu
@@ -92,7 +130,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
         >
           <DropdownMenuLabel>{user?.email ?? 'Account'}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => {}}>
+          <DropdownMenuItem onSelect={() => router.push('/settings')}>
             <Settings className="h-4 w-4" />
             Settings
           </DropdownMenuItem>
