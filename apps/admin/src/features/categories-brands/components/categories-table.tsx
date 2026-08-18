@@ -1,9 +1,12 @@
 "use client";
-import { useState } from "react";
-import { Tags } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Pencil, Tags, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SearchInput } from "@/components/ui/search-input";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { TablePanel } from "@/components/ui/table-panel";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -14,27 +17,58 @@ import {
 } from "@/components/ui/table";
 import type { Category } from "@/features/categories-brands/types";
 
-export function CategoriesTable({ data }: { data: Category[] }) {
+interface CategoriesTableProps {
+  data: Category[];
+  onEdit: (category: Category) => void;
+  onDelete: (categoryId: string) => void;
+}
+
+const PAGE_SIZE = 10;
+
+export function CategoriesTable({ data, onEdit, onDelete }: CategoriesTableProps) {
   const [search, setSearch] = useState("");
-  const filtered = data.filter((c) => {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return true;
-    return c.name.toLowerCase().includes(query) || c.slug.toLowerCase().includes(query);
-  });
+    if (!query) return data;
+    return data.filter(
+      (c) =>
+        c.name.toLowerCase().includes(query) || c.slug.toLowerCase().includes(query)
+    );
+  }, [data, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const rows = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm font-medium text-gray-900">
-          Categories <span className="text-gray-400">({filtered.length})</span>
-        </p>
+    <TablePanel
+      title="Categories"
+      count={filtered.length}
+      toolbar={
         <SearchInput
           value={search}
-          onValueChange={setSearch}
+          onValueChange={(value) => {
+            setSearch(value);
+            setCurrentPage(1);
+          }}
           placeholder="Search name, slug..."
         />
-      </div>
-
-      {filtered.length === 0 ? (
+      }
+      footer={
+        filtered.length > 0 ? (
+          <Pagination
+            page={safePage}
+            pageCount={totalPages}
+            total={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
+        ) : null
+      }
+    >
+      {rows.length === 0 ? (
         <EmptyState
           icon={Tags}
           title="No categories found"
@@ -49,10 +83,11 @@ export function CategoriesTable({ data }: { data: Category[] }) {
               <TableHead>Slug</TableHead>
               <TableHead>Parent</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((cat) => (
+            {rows.map((cat) => (
               <TableRow key={cat.id}>
                 <TableCell>
                   <span className="font-mono text-xs text-gray-500">{cat.id}</span>
@@ -65,17 +100,32 @@ export function CategoriesTable({ data }: { data: Category[] }) {
                 <TableCell>
                   <StatusBadge status={cat.status} />
                 </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEdit(cat)}
+                      aria-label={`Edit ${cat.name}`}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDelete(cat.id)}
+                      aria-label={`Delete ${cat.name}`}
+                      className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       )}
-
-      <div className="border-t border-gray-100 px-4 py-3">
-        <p className="text-sm text-gray-500">
-          Showing {filtered.length} of {data.length} categories
-        </p>
-      </div>
-    </div>
+    </TablePanel>
   );
 }

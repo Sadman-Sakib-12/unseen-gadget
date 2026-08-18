@@ -1,5 +1,5 @@
-import { CategoriesBrandsPage } from "@/features/categories-brands/components/categories-brands-page";
+import { CategoriesPage } from "@/features/categories-brands/components/categories-page";
 
 export default function Page() {
-  return <CategoriesBrandsPage />;
+  return <CategoriesPage />;
 }

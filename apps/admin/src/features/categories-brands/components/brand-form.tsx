@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,14 +12,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import type { Category } from "@/features/categories-brands/types";
-import allCategories from "@/features/categories-brands/data/categories.json";
+import { BrandLogo } from "./brand-logo";
+import type { Brand } from "@/features/categories-brands/types";
 
-interface CategoryFormProps {
+interface BrandFormProps {
   isOpen: boolean;
   onClose: () => void;
-  category: Category | null;
-  onSave: (category: Category) => void;
+  brand: Brand | null;
+  onSave: (brand: Brand) => void;
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -31,45 +31,69 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export function CategoryForm({ isOpen, onClose, category, onSave }: CategoryFormProps) {
+export function BrandForm({ isOpen, onClose, brand, onSave }: BrandFormProps) {
   const [formData, setFormData] = useState({
-    id: category?.id ?? "",
-    name: category?.name ?? "",
-    slug: category?.slug ?? "",
-    description: category?.description ?? "",
-    image: category?.image ?? null,
-    parentId: category?.parentId ?? null,
-    status: category?.status ?? "active",
+    id: brand?.id ?? "",
+    name: brand?.name ?? "",
+    slug: brand?.slug ?? "",
+    description: brand?.description ?? "",
+    logo: brand?.logo ?? null,
+    status: brand?.status ?? "active",
   });
 
   const update = (patch: Partial<typeof formData>) =>
     setFormData((prev) => ({ ...prev, ...patch }));
 
+  const handleLogoChange = (value: string) => update({ logo: value || null });
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const id = formData.id || `CAT-${Date.now().toString().slice(-3)}`;
-    onSave({ ...formData, id } as Category);
+    const id = formData.id || `BR-${Date.now().toString().slice(-3)}`;
+    onSave({ ...formData, id } as Brand);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogHeader close>
-        <DialogTitle>{category ? "Edit Category" : "Create Category"}</DialogTitle>
+        <DialogTitle>{brand ? "Edit Brand" : "Create Brand"}</DialogTitle>
         <DialogDescription>
-          {category
-            ? `Update the details for ${category.name}.`
-            : "Create a new category to organize your catalog."}
+          {brand
+            ? `Update the details for ${brand.name}.`
+            : "Create a new brand to organize your catalog."}
         </DialogDescription>
       </DialogHeader>
       <DialogContent>
-        <form id="category-form" onSubmit={handleSubmit} className="space-y-5">
+        <form id="brand-form" onSubmit={handleSubmit} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <Field label="Logo">
+                <div className="flex items-center gap-3">
+                  <BrandLogo
+                    key={formData.logo ?? "none"}
+                    name={formData.name}
+                    logo={formData.logo}
+                    className="h-12 w-12"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <Input
+                      type="text"
+                      value={formData.logo ?? ""}
+                      onChange={(e) => handleLogoChange(e.target.value)}
+                      placeholder="/images/brands/techpro.png"
+                    />
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Paste an image URL or path. If it cannot be loaded, the brand initials are shown.
+                    </p>
+                  </div>
+                </div>
+              </Field>
+            </div>
             <Field label="Name">
               <Input
                 type="text"
                 value={formData.name}
                 onChange={(e) => update({ name: e.target.value })}
-                placeholder="e.g. Smartphones"
+                placeholder="e.g. Samsung"
                 required
               />
             </Field>
@@ -78,20 +102,8 @@ export function CategoryForm({ isOpen, onClose, category, onSave }: CategoryForm
                 type="text"
                 value={formData.slug}
                 onChange={(e) => update({ slug: e.target.value })}
-                placeholder="e.g. smartphones"
+                placeholder="e.g. samsung"
                 required
-              />
-            </Field>
-            <Field label="Parent Category">
-              <Select
-                value={formData.parentId ?? ""}
-                onChange={(e) => update({ parentId: e.target.value || null })}
-                options={[
-                  { value: "", label: "None (Top Level)" },
-                  ...allCategories
-                    .filter((c) => c.id !== formData.id)
-                    .map((c) => ({ value: c.id, label: c.name })),
-                ]}
               />
             </Field>
             <Field label="Status">
@@ -110,7 +122,7 @@ export function CategoryForm({ isOpen, onClose, category, onSave }: CategoryForm
                   value={formData.description}
                   onChange={(e) => update({ description: e.target.value })}
                   rows={3}
-                  placeholder="Short category description"
+                  placeholder="Short brand description"
                 />
               </Field>
             </div>
@@ -121,8 +133,8 @@ export function CategoryForm({ isOpen, onClose, category, onSave }: CategoryForm
         <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" form="category-form">
-          {category ? "Update Category" : "Save Category"}
+        <Button type="submit" form="brand-form">
+          {brand ? "Update Brand" : "Save Brand"}
         </Button>
       </DialogFooter>
     </Dialog>
