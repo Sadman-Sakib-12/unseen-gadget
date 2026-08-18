@@ -4,32 +4,74 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    color-scheme: light;
+
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --border: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --card-foreground: 222 47% 11%;
+
+    --primary: 229 59% 27%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+
+    --border: 214 32% 91%;
+    --ring: 228 62% 45%;
     --radius: 0.5rem;
 
     --font-sans: "Open Sans", sans-serif;
 
-    --text-primary: 0 0% 20%;
-    --text-secondary: 0 0% 14%;
-    --text-tertiary: 0 0% 100%;
-    --text-inverse: 0 0% 24%;
+    --text-primary: 222 47% 11%;
+    --text-secondary: 215 16% 47%;
+    --text-tertiary: 210 33% 96%;
+    --text-inverse: 210 33% 98%;
 
-    --surface-base: 0 0% 0%;
-    --surface-raised: 0 0% 95%;
-    --surface-strong: 222.2 47.4% 96%;
+    --surface-base: 0 0% 100%;
+    --surface-raised: 210 33% 98%;
+    --surface-strong: 214 32% 91%;
+  }
+
+  .dark {
+    color-scheme: dark;
+
+    --background: 222 47% 6%;
+    --foreground: 210 40% 96%;
+
+    --card: 217 33% 10%;
+    --card-foreground: 210 40% 96%;
+
+    --primary: 228 62% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 33% 14%;
+    --secondary-foreground: 210 40% 96%;
+
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 14%;
+    --accent-foreground: 210 40% 96%;
+
+    --border: 215 28% 17%;
+    --ring: 228 62% 55%;
+
+    --text-primary: 210 40% 96%;
+    --text-secondary: 215 20% 65%;
+    --text-tertiary: 215 28% 30%;
+    --text-inverse: 222 47% 6%;
+
+    --surface-base: 222 47% 6%;
+    --surface-raised: 217 33% 10%;
+    --surface-strong: 215 28% 17%;
   }
 
   * {
@@ -45,7 +87,7 @@
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
     font-size: 15px;
-    line-height: 24px;
+    line-height: 1.6;
     font-weight: 400;
   }
 
@@ -58,18 +100,125 @@
     color: inherit;
     text-decoration: none;
   }
+
+  html[lang="bn"] body {
+    font-family: var(--font-bengali), var(--font-sans);
+    line-height: 1.75;
+  }
 }
 
 @layer components {
   .container-gadget {
-    @apply mx-auto max-w-[1320px] px-4;
+    @apply mx-auto w-full max-w-[1440px] px-4;
+  }
+
+  .btn-primary {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 hover:bg-primary-700 active:bg-primary-800 disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md bg-secondary px-4 text-sm font-semibold text-secondary-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 hover:bg-accent active:bg-muted disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-outline {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md border border-border bg-transparent px-4 text-sm font-semibold text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 hover:bg-accent active:bg-muted disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-ghost {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md bg-transparent px-4 text-sm font-semibold text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 hover:bg-accent active:bg-muted disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-sm {
+    @apply h-9 px-3 text-sm;
+  }
+
+  .btn-lg {
+    @apply h-12 px-6 text-base;
+  }
+
+  .input-field {
+    @apply h-10 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-card-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50 placeholder:text-muted-foreground;
+  }
+
+  .input-field-error {
+    @apply border-error-600 focus-visible:ring-error-600;
+  }
+
+  .badge-default {
+    @apply inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground;
+  }
+
+  .badge-primary {
+    @apply inline-flex items-center rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700 dark:bg-primary-600/15 dark:text-primary-300;
+  }
+
+  .badge-success {
+    @apply inline-flex items-center rounded-full bg-success-50 px-2.5 py-0.5 text-xs font-medium text-success-700 dark:bg-success-600/15 dark:text-success-300;
+  }
+
+  .badge-error {
+    @apply inline-flex items-center rounded-full bg-error-50 px-2.5 py-0.5 text-xs font-medium text-error-700 dark:bg-error-600/15 dark:text-error-300;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center rounded-full bg-warning-50 px-2.5 py-0.5 text-xs font-medium text-warning-700 dark:bg-warning-600/15 dark:text-warning-300;
   }
 
   .card-surface {
-    @apply rounded-xl border border-gray-200 bg-white;
+    @apply rounded-xl border border-border bg-card shadow-sm;
   }
 
-  .btn-pill {
-    @apply inline-flex items-center justify-center rounded-full font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1;
+  /* ── Swiper carousel navigation ───────────────────────── */
+  .product-carousel {
+    overflow: visible;
+  }
+
+  .product-carousel .swiper-button-prev,
+  .product-carousel .swiper-button-next {
+    width: 40px;
+    height: 40px;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 50%;
+    color: hsl(var(--foreground));
+    box-shadow: 0 4px 12px rgb(15 23 42 / 0.12);
+    z-index: 10;
+    transition: all 150ms ease;
+  }
+
+  .product-carousel .swiper-button-prev:hover,
+  .product-carousel .swiper-button-next:hover {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border-color: hsl(var(--primary));
+    transform: scale(1.05);
+  }
+
+  .product-carousel .swiper-button-prev:after,
+  .product-carousel .swiper-button-next:after {
+    font-size: 16px;
+    font-weight: 900;
+  }
+
+  .product-carousel .swiper-button-disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+@layer utilities {
+  @keyframes dropdown-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .dropdown-enter {
+    animation: dropdown-in 150ms ease;
   }
 }
