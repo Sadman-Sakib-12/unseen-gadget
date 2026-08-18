@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatCard } from "@/components/ui/stat-card";
 import { formatBDT } from "@/lib/load-dashboard-data";
+import { chartAxis, chartColors, chartGridStroke, chartTooltip } from "@/lib/chart-theme";
 import type { ProfitReportData } from "@/features/reports/types";
 
 export function ProfitReport({ data }: { data: ProfitReportData[] }) {
@@ -63,11 +64,14 @@ export function ProfitReport({ data }: { data: ProfitReportData[] }) {
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={report.monthlyBreakdown}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="profit" fill="#111827" radius={[4, 4, 0, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke={chartGridStroke} />
+              <XAxis dataKey="month" tick={{ fill: chartAxis.tickFill, fontSize: chartAxis.fontSize }} stroke={chartAxis.stroke} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fill: chartAxis.tickFill, fontSize: chartAxis.fontSize }} stroke={chartAxis.stroke} tickLine={false} axisLine={false} />
+              <Tooltip
+                {...chartTooltip}
+                formatter={(value) => formatBDT(Number(value))}
+              />
+              <Bar dataKey="profit" fill={chartColors.emerald} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>

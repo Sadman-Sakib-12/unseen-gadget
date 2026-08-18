@@ -12,9 +12,9 @@ export function ReviewsPage() {
   const [reviews] = useState<Review[]>(initialReviews);
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
 
-  const averageRating = Math.round(
+  const averageRating = (
     reviews.reduce((sum, r) => sum + r.rating, 0) / Math.max(reviews.length, 1)
-  );
+  ).toFixed(1);
   const pending = reviews.filter((r) => r.status === "pending").length;
   const approved = reviews.filter((r) => r.status === "approved").length;
 

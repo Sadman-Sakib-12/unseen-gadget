@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { formatBDT } from '@/lib/load-dashboard-data';
+import { formatBDT, formatShortDate } from '@/lib/format';
 import type { Return } from '@/features/returns/types';
 
 interface ReturnDetailsModalProps {
@@ -30,7 +30,7 @@ export function ReturnDetailsModal({ ret, onClose }: ReturnDetailsModalProps) {
     <Dialog open={ret !== null} onOpenChange={onClose}>
       {ret ? (
         <>
-          <DialogHeader>
+          <DialogHeader close>
             <DialogTitle>Return Details</DialogTitle>
             <DialogDescription>{ret.orderId}</DialogDescription>
           </DialogHeader>
@@ -54,8 +54,8 @@ export function ReturnDetailsModal({ ret, onClose }: ReturnDetailsModalProps) {
               <dl className="divide-y divide-gray-100 border-t border-gray-100">
                 <Row label="Return ID" value={ret.id} />
                 <Row label="Refund amount" value={formatBDT(ret.refundAmount)} />
-                <Row label="Request date" value={ret.requestDate} />
-                <Row label="Resolved date" value={ret.resolvedDate ?? 'Pending'} />
+                <Row label="Request date" value={formatShortDate(ret.requestDate)} />
+                <Row label="Resolved date" value={ret.resolvedDate ? formatShortDate(ret.resolvedDate) : 'Pending'} />
               </dl>
             </div>
           </DialogContent>

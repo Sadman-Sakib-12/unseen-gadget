@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/components/ui/utils";
 import type { GeneralSettings } from "@/features/settings/types";
 
@@ -96,11 +97,10 @@ export function GeneralSettingsComponent({ settings, onSave }: GeneralSettingsPr
             </Field>
             <div className="md:col-span-2">
               <Field label="Address">
-                <textarea
+                <Textarea
                   value={formData.storeAddress}
                   onChange={(e) => setFormData({ ...formData, storeAddress: e.target.value })}
                   rows={2}
-                  className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
                 />
               </Field>
             </div>

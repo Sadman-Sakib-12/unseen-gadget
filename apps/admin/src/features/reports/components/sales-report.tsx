@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatCard } from "@/components/ui/stat-card";
 import { formatBDT } from "@/lib/load-dashboard-data";
+import { chartAxis, chartColors, chartGridStroke, chartTooltip } from "@/lib/chart-theme";
 import type { SalesReportData } from "@/features/reports/types";
 
 export function SalesReport({ data }: { data: SalesReportData[] }) {
@@ -63,11 +64,14 @@ export function SalesReport({ data }: { data: SalesReportData[] }) {
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={report.dailyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="revenue" fill="#111827" radius={[4, 4, 0, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke={chartGridStroke} />
+              <XAxis dataKey="date" tick={{ fill: chartAxis.tickFill, fontSize: chartAxis.fontSize }} stroke={chartAxis.stroke} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fill: chartAxis.tickFill, fontSize: chartAxis.fontSize }} stroke={chartAxis.stroke} tickLine={false} axisLine={false} />
+              <Tooltip
+                {...chartTooltip}
+                formatter={(value) => formatBDT(Number(value))}
+              />
+              <Bar dataKey="revenue" fill={chartColors.primary} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>

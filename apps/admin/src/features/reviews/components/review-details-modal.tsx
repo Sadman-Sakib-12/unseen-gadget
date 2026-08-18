@@ -29,7 +29,7 @@ export function ReviewDetailsModal({ review, onClose }: ReviewDetailsModalProps)
     <Dialog open={review !== null} onOpenChange={onClose}>
       {review ? (
         <>
-          <DialogHeader>
+          <DialogHeader close>
             <DialogTitle>Review Details</DialogTitle>
             <DialogDescription>
               {review.productName} by {review.customerName}

@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { formatBDT } from '@/lib/load-dashboard-data';
 import type { Return } from '@/features/returns/types';
 
@@ -31,7 +32,7 @@ export function RefundModal({ ret, onClose, onConfirm }: RefundModalProps) {
 
   return (
     <Dialog open={ret !== null} onOpenChange={onClose}>
-      <DialogHeader>
+      <DialogHeader close>
         <DialogTitle>Process Refund</DialogTitle>
       </DialogHeader>
       <DialogContent>
@@ -48,13 +49,12 @@ export function RefundModal({ ret, onClose, onConfirm }: RefundModalProps) {
             <label className="block text-sm font-medium text-gray-700">
               Refund reason
             </label>
-            <textarea
+            <Textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}
               required
               placeholder="Provide a short reason for this refund…"
-              className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
             />
           </div>
         </form>
