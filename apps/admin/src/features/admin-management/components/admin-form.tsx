@@ -55,7 +55,7 @@ export function AdminForm({ isOpen, onClose, admin, roles, onSave }: AdminFormPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogHeader>
+      <DialogHeader close>
         <DialogTitle>{admin ? "Edit Admin" : "Create Admin"}</DialogTitle>
         <DialogDescription>
           {admin

@@ -55,7 +55,7 @@ export function RoleForm({ isOpen, onClose, role, onSave }: RoleFormProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogHeader>
+      <DialogHeader close>
         <DialogTitle>{role ? "Edit Role" : "Create Role"}</DialogTitle>
         <DialogDescription>
           {role

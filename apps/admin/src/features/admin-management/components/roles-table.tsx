@@ -1,7 +1,8 @@
 "use client";
-import { ShieldCheck } from "lucide-react";
+import { Pencil, ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { TablePanel } from "@/components/ui/table-panel";
 import {
   Table,
   TableBody,
@@ -12,20 +13,21 @@ import {
 } from "@/components/ui/table";
 import type { Role } from "@/features/admin-management/types";
 
-export function RolesTable({ data }: { data: Role[] }) {
+interface RolesTableProps {
+  data: Role[];
+  onEdit?: (role: Role) => void;
+}
+
+export function RolesTable({ data, onEdit }: RolesTableProps) {
   return (
-    <Card className="overflow-hidden">
-      <div className="border-b border-gray-100 p-4">
-        <p className="text-sm font-medium text-gray-900">
-          Roles <span className="text-gray-400">({data.length})</span>
-        </p>
-      </div>
+    <TablePanel title="Roles" count={data.length}>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Permissions</TableHead>
+            {onEdit ? <TableHead className="text-right">Actions</TableHead> : null}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -51,10 +53,22 @@ export function RolesTable({ data }: { data: Role[] }) {
                   ))}
                 </div>
               </TableCell>
+              {onEdit ? (
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onEdit(role)}
+                    aria-label={`Edit role ${role.name}`}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              ) : null}
             </TableRow>
           ))}
         </TableBody>
       </Table>
-    </Card>
+    </TablePanel>
   );
 }

@@ -70,10 +70,22 @@ export function AdminManagementPage() {
           <TabsTrigger value="roles">Roles</TabsTrigger>
         </TabsList>
         <TabsContent value="admins" className="mt-4">
-          <AdminsTable data={admins} />
+          <AdminsTable
+            data={admins}
+            onEdit={(admin) => {
+              setEditingAdmin(admin);
+              setShowAdminForm(true);
+            }}
+          />
         </TabsContent>
         <TabsContent value="roles" className="mt-4">
-          <RolesTable data={roles} />
+          <RolesTable
+            data={roles}
+            onEdit={(role) => {
+              setEditingRole(role);
+              setShowRoleForm(true);
+            }}
+          />
         </TabsContent>
       </Tabs>
 
