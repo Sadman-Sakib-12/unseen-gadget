@@ -2,9 +2,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { salesData } from '@/features/dashboard/data';
+import { chartAxis, chartColors, chartGridStroke, chartTooltip } from '@/lib/chart-theme';
 import {
-  Area,
-  AreaChart,
+  Bar,
+  BarChart,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
@@ -22,56 +23,40 @@ export function SalesOverview({ className }: SalesOverviewProps) {
       <CardHeader className="pb-2">
         <div>
           <CardTitle className="text-base font-semibold text-gray-900">
-            Revenue Overview
+            Orders Overview
           </CardTitle>
-          <p className="text-xs text-gray-500 mt-0.5">Monthly revenue trend</p>
+          <p className="mt-0.5 text-xs text-gray-500">Monthly order volume</p>
         </div>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={salesData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorRevenueOverview" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#1c2b6e" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#1c2b6e" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <BarChart data={salesData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={chartGridStroke} vertical={false} />
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 11, fill: '#9ca3af' }}
+              tick={{ fontSize: chartAxis.fontSize, fill: chartAxis.tickFill }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: '#9ca3af' }}
+              tick={{ fontSize: chartAxis.fontSize, fill: chartAxis.tickFill }}
               axisLine={false}
               tickLine={false}
-              tickFormatter={(v) => `৳${(v / 1000).toFixed(0)}k`}
+              width={34}
             />
             <Tooltip
-              contentStyle={{
-                borderRadius: '10px',
-                border: 'none',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                fontSize: '12px',
-              }}
-              formatter={(value: number) =>
-                new Intl.NumberFormat('en-BD', {
-                  style: 'currency',
-                  currency: 'BDT',
-                }).format(value)
-              }
+              cursor={{ fill: 'rgba(0,0,0,0.04)' }}
+              {...chartTooltip}
+              formatter={(value: number, name: string) => [value, name]}
             />
-            <Area
-              type="monotone"
-              dataKey="revenue"
-              stroke="#1c2b6e"
-              strokeWidth={2}
-              fillOpacity={1}
-              fill="url(#colorRevenueOverview)"
+            <Bar
+              dataKey="orders"
+              name="Orders"
+              fill={chartColors.primary}
+              radius={[6, 6, 0, 0]}
+              maxBarSize={38}
             />
-          </AreaChart>
+          </BarChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

@@ -43,9 +43,10 @@ export function Dashboard() {
         <OutstandingSupplierDue className="lg:col-span-3" />
       </div>
 
-      <Notifications />
-
-      <QuickActions />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Notifications />
+        <QuickActions />
+      </div>
     </div>
   );
 }

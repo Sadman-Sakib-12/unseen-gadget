@@ -2,9 +2,11 @@
 
 import { Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { topSellingProducts } from '@/features/dashboard/data';
 import { formatBDT } from '@/lib/load-dashboard-data';
+import { PRODUCT_IMAGE_FALLBACK } from '@/lib/images';
 
 interface TopSellingProductsProps {
   className?: string;
@@ -15,9 +17,7 @@ export function TopSellingProducts({ className }: TopSellingProductsProps) {
     <Card className={className}>
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle>Top Selling Products</CardTitle>
-        <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-          By units sold
-        </span>
+        <Badge variant="secondary">By units sold</Badge>
       </CardHeader>
       <CardContent className="p-0">
         {topSellingProducts.length === 0 ? (
@@ -39,6 +39,10 @@ export function TopSellingProducts({ className }: TopSellingProductsProps) {
                   <img
                     src={product.image}
                     alt={product.name}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.src = PRODUCT_IMAGE_FALLBACK;
+                    }}
                     className="h-full w-full object-cover"
                   />
                 </div>

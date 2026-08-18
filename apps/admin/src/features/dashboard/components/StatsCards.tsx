@@ -10,7 +10,6 @@ import {
   Receipt,
   ShoppingCart,
   TrendingUp,
-  Truck,
   Users,
   Warehouse,
   XCircle,
@@ -28,6 +27,8 @@ interface StatConfig {
   iconClassName: string;
 }
 
+const averageOrderValue = Math.round(dashboardStats.totalSales / dashboardStats.totalOrders);
+
 const stats: StatConfig[] = [
   {
     title: 'Total Sales',
@@ -41,7 +42,7 @@ const stats: StatConfig[] = [
     title: "Today's Sales",
     value: formatBDT(dashboardStats.todaySales),
     icon: ShoppingCart,
-    iconClassName: 'bg-emerald-50 text-emerald-700',
+    iconClassName: 'bg-primary/10 text-primary',
   },
   {
     title: 'Gross Profit',
@@ -90,10 +91,10 @@ const stats: StatConfig[] = [
     iconClassName: 'bg-red-50 text-red-700',
   },
   {
-    title: 'Total Suppliers',
-    value: dashboardStats.totalSuppliers.toString(),
-    icon: Truck,
-    iconClassName: 'bg-gray-100 text-gray-700',
+    title: 'Avg Order Value',
+    value: formatBDT(averageOrderValue),
+    icon: CreditCard,
+    iconClassName: 'bg-primary/10 text-primary',
   },
   {
     title: 'Total Customers',
@@ -109,19 +110,11 @@ const stats: StatConfig[] = [
     icon: Receipt,
     iconClassName: 'bg-red-50 text-red-700',
   },
-  {
-    title: 'Total Revenue',
-    value: formatBDT(dashboardStats.totalRevenue),
-    change: dashboardStats.revenueChange,
-    changeLabel: 'vs last month',
-    icon: CreditCard,
-    iconClassName: 'bg-emerald-50 text-emerald-700',
-  },
 ];
 
 export function StatsCards() {
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
       {stats.map((stat) => (
         <StatCard
           key={stat.title}

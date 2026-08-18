@@ -2,6 +2,7 @@
 
 import { PackageSearch } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { lowStockProducts } from '@/features/dashboard/data';
@@ -16,9 +17,7 @@ export function LowStockProducts({ className }: LowStockProductsProps) {
     <Card className={className}>
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle>Low Stock Products</CardTitle>
-        <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
-          {lowStockProducts.length} alerts
-        </span>
+        <Badge variant="warning">{lowStockProducts.length} alerts</Badge>
       </CardHeader>
       <CardContent className="p-0">
         {lowStockProducts.length === 0 ? (
@@ -44,7 +43,8 @@ export function LowStockProducts({ className }: LowStockProductsProps) {
                   <p className="text-sm font-semibold tabular-nums text-gray-900">
                     <span
                       className={cn(
-                        product.status === 'CRITICAL' && 'text-red-600'
+                        product.status === 'CRITICAL' && 'text-red-600',
+                        product.status === 'LOW' && 'text-amber-600'
                       )}
                     >
                       {product.stock}

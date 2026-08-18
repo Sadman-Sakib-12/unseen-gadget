@@ -43,7 +43,7 @@ export function QuickActions({ className }: QuickActionsProps) {
         <CardTitle>Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3">
           {quickActions.map((action) => {
             const Icon = iconMap[action.icon] ?? Package;
             return (
