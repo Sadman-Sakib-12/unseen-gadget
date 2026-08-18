@@ -1,4 +1,5 @@
 export * from "./tokens";
+export * from "./lib/utils";
 export * from "./components/button";
 export * from "./components/input";
 export * from "./components/textarea";

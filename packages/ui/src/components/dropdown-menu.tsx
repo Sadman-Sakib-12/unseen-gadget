@@ -113,7 +113,7 @@ export function DropdownMenuContent({
       role="menu"
       aria-orientation="vertical"
       className={cn(
-        "z-50 min-w-[180px] rounded-md border border-gray-200 bg-white p-1 shadow-md",
+        "z-50 min-w-[180px] rounded-md border border-border bg-card p-1 shadow-md",
         side === "bottom" && "mt-1",
         side === "top" && "mb-1",
         align === "start" && "left-0",
@@ -153,10 +153,10 @@ export function DropdownMenuItem({
       disabled={disabled}
       onClick={handleClick}
       className={cn(
-        "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-text-primary",
+        "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-card-foreground",
         "transition-colors duration-instant",
-        "focus-visible:outline-none focus-visible:bg-gray-100",
-        "hover:bg-gray-100",
+        "focus-visible:outline-none focus-visible:bg-accent",
+        "hover:bg-accent",
         "disabled:pointer-events-none disabled:opacity-50",
         className
       )}
@@ -174,7 +174,7 @@ export function DropdownMenuSeparator({ className, ...props }: DropdownMenuSepar
     <div
       role="separator"
       aria-orientation="horizontal"
-      className={cn("-mx-1 my-1 h-px bg-gray-100", className)}
+      className={cn("-mx-1 my-1 h-px bg-border", className)}
       {...props}
     />
   );

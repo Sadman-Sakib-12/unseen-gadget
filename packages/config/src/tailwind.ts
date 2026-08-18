@@ -1,9 +1,12 @@
 import type { Config } from "tailwindcss";
+import { designTokens } from "@unseen-gadget/ui";
 
 export const tailwindConfig: Partial<Config> = {
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
+        ...designTokens.colors,
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -11,7 +14,7 @@ export const tailwindConfig: Partial<Config> = {
           foreground: "hsl(var(--card-foreground))",
         },
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          ...designTokens.colors.primary,
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
@@ -42,41 +45,34 @@ export const tailwindConfig: Partial<Config> = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "Open Sans", "sans-serif"],
+        bengali: ["var(--font-bengali)", "var(--font-sans)", "sans-serif"],
       },
       fontSize: {
-        xs: ["12px", { lineHeight: "16px" }],
-        sm: ["13px", { lineHeight: "20px" }],
-        md: ["13.5px", { lineHeight: "22px" }],
-        lg: ["14px", { lineHeight: "22px" }],
-        xl: ["14.25px", { lineHeight: "24px" }],
-        "2xl": ["15px", { lineHeight: "24px" }],
-        "3xl": ["15.68px", { lineHeight: "26px" }],
-        "4xl": ["18px", { lineHeight: "28px" }],
+        ...designTokens.typography.fontSize,
       },
-      spacing: {
-        "px": "1px",
-        "0.5": "2px",
-        "1": "5px",
-        "2": "6px",
-        "3": "10px",
-        "4": "14px",
-        "5": "15px",
-        "6": "20px",
-        "7": "40px",
-        "8": "55px",
+      fontWeight: Object.fromEntries(
+        Object.entries(designTokens.typography.fontWeight).map(([k, v]) => [k, String(v)])
+      ),
+      lineHeight: {
+        ...designTokens.typography.lineHeight,
       },
       borderRadius: {
-        xs: "5px",
-        sm: "35px",
-        md: "50px",
-        lg: "calc(var(--radius) - 2px)",
+        xs: designTokens.radius.xs,
+        sm: designTokens.radius.sm,
+        md: designTokens.radius.md,
+        lg: designTokens.radius.lg,
+        xl: designTokens.radius.xl,
+        "2xl": designTokens.radius["2xl"],
         DEFAULT: "var(--radius)",
       },
       boxShadow: {
-        DEFAULT: "rgba(0, 0, 0, 0.17) 0px 0px 5px 0px",
+        sm: designTokens.shadow.sm,
+        DEFAULT: designTokens.shadow.DEFAULT,
+        md: designTokens.shadow.md,
       },
       transitionDuration: {
-        instant: "250ms",
+        fast: designTokens.motion.duration.fast,
+        instant: designTokens.motion.duration.instant,
       },
     },
   },

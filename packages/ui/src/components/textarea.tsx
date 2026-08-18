@@ -27,7 +27,7 @@ export function Textarea({
       {label && (
         <label
           htmlFor={textareaId}
-          className="text-sm font-medium text-text-primary"
+          className="text-sm font-medium text-foreground"
         >
           {label}
         </label>
@@ -35,14 +35,14 @@ export function Textarea({
       <textarea
         id={textareaId}
         className={cn(
-          "flex min-h-[80px] w-full rounded-md border bg-white px-3 py-2 text-sm",
+          "flex min-h-[80px] w-full rounded-md border bg-card px-3 py-2 text-sm text-card-foreground",
           "transition-colors duration-instant",
-          "placeholder:text-gray-400",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:border-transparent",
+          "placeholder:text-muted-foreground",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:border-transparent",
           "disabled:cursor-not-allowed disabled:opacity-50",
           error
             ? "border-red-500 focus-visible:ring-red-400"
-            : "border-gray-300 hover:border-gray-400",
+            : "border-border hover:border-gray-400",
           className
         )}
         disabled={disabled}
@@ -56,7 +56,7 @@ export function Textarea({
         </p>
       )}
       {hint && !error && (
-        <p id={hintId} className="text-xs text-gray-500">
+        <p id={hintId} className="text-xs text-muted-foreground">
           {hint}
         </p>
       )}

@@ -2,16 +2,17 @@ import type { HTMLAttributes } from "react";
 import { cn } from "../lib/utils";
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
-  variant?: "default" | "secondary" | "destructive" | "outline" | "success";
+  variant?: "default" | "secondary" | "destructive" | "outline" | "success" | "warning";
   size?: "default" | "sm";
 }
 
 const badgeVariants = {
-  default: "bg-black text-white",
-  secondary: "bg-surface-raised text-text-primary",
+  default: "bg-gray-900 text-white",
+  secondary: "bg-secondary text-secondary-foreground",
   destructive: "bg-red-500 text-white",
-  outline: "border border-gray-300 bg-transparent text-text-primary",
-  success: "bg-green-500 text-white",
+  outline: "border border-border bg-transparent text-foreground",
+  success: "bg-success-600 text-white",
+  warning: "bg-warning-600 text-white",
 };
 
 const badgeSizes = {

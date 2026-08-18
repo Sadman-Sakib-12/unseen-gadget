@@ -83,8 +83,8 @@ export function TabsTrigger({ className, value, children, ...props }: TabsTrigge
         "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-colors duration-instant",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400",
         isActive
-          ? "bg-white text-text-primary shadow-sm"
-          : "text-gray-500 hover:text-text-primary hover:bg-gray-200/50",
+          ? "bg-card text-card-foreground shadow-sm"
+          : "text-muted-foreground hover:text-card-foreground hover:bg-gray-200/50",
         className
       )}
       onClick={() => setActiveTab(value)}

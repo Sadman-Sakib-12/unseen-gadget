@@ -7,9 +7,9 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const cardVariants = {
-  default: "bg-white border border-gray-200",
+  default: "bg-card border border-border shadow-sm",
   outlined: "bg-transparent border-2 border-gray-300",
-  elevated: "bg-white shadow-md",
+  elevated: "bg-card shadow-md",
 };
 
 const cardPadding = {
@@ -62,10 +62,10 @@ export function CardHeader({
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-0.5">
           {title && (
-            <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
+            <h3 className="text-sm font-semibold text-card-foreground">{title}</h3>
           )}
           {description && (
-            <p className="text-xs text-gray-500">{description}</p>
+            <p className="text-xs text-muted-foreground">{description}</p>
           )}
         </div>
         {action && <div className="shrink-0">{action}</div>}
@@ -77,7 +77,7 @@ export function CardHeader({
 export interface CardContentProps extends HTMLAttributes<HTMLDivElement> {}
 
 export function CardContent({ className, ...props }: CardContentProps) {
-  return <div className={cn("text-sm text-text-secondary", className)} {...props} />;
+  return <div className={cn("text-sm text-muted-foreground", className)} {...props} />;
 }
 
 export interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {}
@@ -86,7 +86,7 @@ export function CardFooter({ className, ...props }: CardFooterProps) {
   return (
     <div
       className={cn(
-        "flex items-center justify-between pt-4 border-t border-gray-100",
+        "flex items-center justify-between pt-4 border-t border-border",
         className
       )}
       {...props}

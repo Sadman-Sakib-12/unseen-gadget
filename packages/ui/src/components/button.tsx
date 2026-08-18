@@ -10,12 +10,17 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const buttonVariants = {
-  primary: "bg-black text-white hover:bg-gray-800 active:bg-gray-900 focus-visible:ring-gray-400",
-  secondary: "bg-surface-raised text-text-primary hover:bg-gray-200 active:bg-gray-300",
-  outline: "border border-gray-300 bg-transparent text-text-primary hover:bg-surface-raised active:bg-gray-200 focus-visible:ring-gray-400",
-  ghost: "text-text-primary hover:bg-surface-raised active:bg-gray-200",
-  destructive: "bg-red-500 text-white hover:bg-red-600 active:bg-red-700 focus-visible:ring-red-400",
-  link: "text-black underline-offset-4 hover:underline",
+  primary:
+    "bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 focus-visible:ring-primary-400",
+  secondary:
+    "bg-secondary text-secondary-foreground hover:bg-accent active:bg-muted",
+  outline:
+    "border border-border bg-transparent text-foreground hover:bg-accent active:bg-muted focus-visible:ring-primary-400",
+  ghost:
+    "text-foreground hover:bg-accent active:bg-muted focus-visible:ring-primary-400",
+  destructive:
+    "bg-red-500 text-white hover:bg-red-600 active:bg-red-700 focus-visible:ring-red-400",
+  link: "text-primary underline-offset-4 hover:underline",
 };
 
 const buttonSizes = {
@@ -40,7 +45,7 @@ export function Button({
     <button
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors duration-instant",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         "disabled:pointer-events-none disabled:opacity-50",
         buttonVariants[variant],
         buttonSizes[size],

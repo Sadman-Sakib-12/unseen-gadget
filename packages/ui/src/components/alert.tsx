@@ -7,14 +7,14 @@ export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const alertVariants = {
-  default: "border-gray-200 bg-white text-text-primary",
-  destructive: "border-red-200 bg-red-50 text-red-900",
-  success: "border-green-200 bg-green-50 text-green-900",
-  warning: "border-yellow-200 bg-yellow-50 text-yellow-900",
+  default: "border-border bg-card text-card-foreground",
+  destructive: "border-red-200 bg-red-50 text-red-900 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200",
+  success: "border-green-200 bg-green-50 text-green-900 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-200",
+  warning: "border-yellow-200 bg-yellow-50 text-yellow-900 dark:border-yellow-500/30 dark:bg-yellow-500/10 dark:text-yellow-200",
 };
 
 const alertIconColors = {
-  default: "text-gray-500",
+  default: "text-muted-foreground",
   destructive: "text-red-500",
   success: "text-green-500",
   warning: "text-yellow-500",
