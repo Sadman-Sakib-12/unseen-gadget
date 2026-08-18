@@ -43,7 +43,7 @@ export function ColorSwatches({
         <span
           key={color}
           title={color}
-          className={`${size} rounded-full border border-gray-300`}
+          className={`${size} rounded-full border border-border`}
           style={{ backgroundColor: colorHex(color) }}
         />
       ))}

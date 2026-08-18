@@ -27,5 +27,4 @@ export interface MockProduct {
   warranty?: string[];
 }
 
-export type ViewMode = "grid" | "list";
 export type SortOption = "default" | "price-asc" | "price-desc" | "name-asc" | "rating";

@@ -18,13 +18,13 @@ export function StarRating({
           <Star
             key={i}
             className={`${size} ${
-              i < Math.floor(rating) ? "fill-amber-400 text-amber-400" : "text-gray-300"
+              i < Math.floor(rating) ? "fill-amber-400 text-amber-400" : "text-border"
             }`}
           />
         ))}
       </div>
       {(showValue || (reviews ?? 0) > 0) && (
-        <span className="text-[11.5px] text-gray-500">
+        <span className="text-[11.5px] text-muted-foreground">
           {showValue ? ` ${rating} ` : " "}
           {reviews != null && reviews > 0 ? `(${reviews})` : ""}
         </span>
