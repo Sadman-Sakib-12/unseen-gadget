@@ -3,6 +3,8 @@ import { CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { formatShortDate } from "@/lib/format";
+import { PRODUCT_IMAGE_FALLBACK } from "@/lib/images";
 import type { Post } from "@/features/blog/types";
 
 export function PostCard({ post }: { post: Post }) {
@@ -15,6 +17,9 @@ export function PostCard({ post }: { post: Post }) {
             src={post.featuredImage}
             alt={post.title}
             className="h-full w-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = PRODUCT_IMAGE_FALLBACK;
+            }}
           />
         </div>
       ) : null}
@@ -30,7 +35,7 @@ export function PostCard({ post }: { post: Post }) {
           <Badge variant="secondary">{post.category}</Badge>
           <span className="ml-auto inline-flex items-center gap-1 text-xs text-gray-400">
             <CalendarDays className="h-3.5 w-3.5" />
-            {post.publishedAt || "Draft"}
+            {post.publishedAt ? formatShortDate(post.publishedAt) : "Draft"}
           </span>
         </div>
       </CardContent>

@@ -1,8 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { PageHeader } from '@/components/layout/page-header';
 
 interface Section {
   id: string;
@@ -11,51 +15,66 @@ interface Section {
 }
 
 const initialSections: Section[] = [
-  { id: 'hero', title: 'Hero Banners Slider', isActive: true },
-  { id: 'categories', title: 'Featured Categories', isActive: true },
-  { id: 'flash', title: 'Flash Sale (Countdown)', isActive: true },
-  { id: 'new', title: 'New Arrivals', isActive: true },
-  { id: 'brands', title: 'Top Brands', isActive: false },
-  { id: 'newsletter', title: 'Newsletter Signup', isActive: true },
+  { id: 'hero', title: 'Hero Banners', isActive: true },
+  { id: 'benefits', title: 'Benefits Bar', isActive: true },
+  { id: 'categories', title: 'Shop by Category', isActive: true },
+  { id: 'brands', title: 'Shop By Brand', isActive: true },
+  { id: 'ipads', title: 'iPads', isActive: true },
+  { id: 'new-arrival', title: 'New Arrival', isActive: true },
+  { id: 'budget-tablets', title: 'Budget Tablets', isActive: true },
+  { id: 'top-selling', title: 'Top Selling', isActive: true },
+  { id: 'handpicked', title: 'Handpicked Products', isActive: true },
+  { id: 'why-choose', title: 'Why Choose Us', isActive: true },
+  { id: 'articles', title: 'Our Articles', isActive: true },
+  { id: 'seo', title: 'SEO Text', isActive: true },
 ];
 
 export default function LandingPage() {
   const [sections, setSections] = useState<Section[]>(initialSections);
 
   const toggleSection = (id: string) => {
-    setSections(sections.map(s => s.id === id ? { ...s, isActive: !s.isActive } : s));
+    setSections(sections.map((s) => (s.id === id ? { ...s, isActive: !s.isActive } : s)));
+  };
+
+  const handleSave = () => {
+    toast.success('Landing page layout saved');
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Landing Page Sections</h1>
-          <p className="text-gray-500">Enable or disable sections on the storefront homepage.</p>
-        </div>
-        <Button>Save Changes</Button>
-      </div>
+      <PageHeader
+        title="Home Page Sections"
+        description="Enable or disable sections on the storefront homepage."
+        actions={
+          <Button onClick={handleSave}>
+            <Save className="h-4 w-4" />
+            Save Changes
+          </Button>
+        }
+      />
 
       <Card>
         <CardHeader>
           <CardTitle>Homepage Layout</CardTitle>
-          <p className="text-sm text-gray-500">Drag to reorder (Visual only for now) and toggle visibility.</p>
+          <p className="text-sm text-gray-500">Drag to reorder (visual only for now) and toggle visibility.</p>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {sections.map((section) => (
-              <div key={section.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50">
+              <div
+                key={section.id}
+                className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50/50 p-4"
+              >
                 <div className="font-medium text-gray-900">{section.title}</div>
                 <div className="flex items-center gap-3">
                   <span className={`text-sm ${section.isActive ? 'text-emerald-600' : 'text-gray-500'}`}>
                     {section.isActive ? 'Visible' : 'Hidden'}
                   </span>
-                  <button
-                    onClick={() => toggleSection(section.id)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${section.isActive ? 'bg-[#1c2b6e]' : 'bg-gray-200'}`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${section.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
-                  </button>
+                  <Switch
+                    checked={section.isActive}
+                    onCheckedChange={() => toggleSection(section.id)}
+                    aria-label={`Toggle ${section.title}`}
+                  />
                 </div>
               </div>
             ))}

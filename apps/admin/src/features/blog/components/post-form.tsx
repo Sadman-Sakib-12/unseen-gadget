@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { BlockEditor } from "@/features/cms/components/block-editor";
 import type { Post } from "@/features/blog/types";
 
 interface PostFormProps {
@@ -34,7 +36,6 @@ export function PostForm({ isOpen, onClose, post, onSave }: PostFormProps) {
     id: post?.id ?? "",
     title: post?.title ?? "",
     slug: post?.slug ?? "",
-    content: post?.content ?? "",
     excerpt: post?.excerpt ?? "",
     featuredImage: post?.featuredImage ?? null,
     category: post?.category ?? "",
@@ -42,6 +43,9 @@ export function PostForm({ isOpen, onClose, post, onSave }: PostFormProps) {
     status: post?.status ?? "draft",
     author: post?.author ?? "Admin",
     publishedAt: post?.publishedAt ?? null,
+    seoTitle: post?.seoTitle ?? "",
+    seoDescription: post?.seoDescription ?? "",
+    blocks: post?.blocks ?? [],
   });
 
   const update = (patch: Partial<typeof formData>) =>
@@ -49,13 +53,13 @@ export function PostForm({ isOpen, onClose, post, onSave }: PostFormProps) {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const id = formData.id || `POST-${Date.now().toString().slice(-3)}`;
+    const id = formData.id || `POST-${Date.now().toString().slice(-4)}`;
     onSave({ ...formData, id } as Post);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogHeader>
+      <DialogHeader close>
         <DialogTitle>{post ? "Edit Post" : "Create Post"}</DialogTitle>
         <DialogDescription>
           {post
@@ -63,7 +67,7 @@ export function PostForm({ isOpen, onClose, post, onSave }: PostFormProps) {
             : "Write and publish a new article for your customers."}
         </DialogDescription>
       </DialogHeader>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
         <form id="post-form" onSubmit={handleSubmit} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Title">
@@ -96,7 +100,7 @@ export function PostForm({ isOpen, onClose, post, onSave }: PostFormProps) {
             <Field label="Status">
               <Select
                 value={formData.status}
-                onChange={(e) => update({ status: e.target.value })}
+                onChange={(e) => update({ status: e.target.value as Post["status"] })}
                 options={[
                   { value: "draft", label: "Draft" },
                   { value: "published", label: "Published" },
@@ -104,29 +108,78 @@ export function PostForm({ isOpen, onClose, post, onSave }: PostFormProps) {
                 ]}
               />
             </Field>
+            <Field label="Author">
+              <Input
+                type="text"
+                value={formData.author}
+                onChange={(e) => update({ author: e.target.value })}
+              />
+            </Field>
+            <Field label="Featured image URL">
+              <Input
+                type="text"
+                value={formData.featuredImage ?? ""}
+                onChange={(e) => update({ featuredImage: e.target.value || null })}
+                placeholder="/images/articles/..."
+              />
+            </Field>
+            <Field label="Published date">
+              <Input
+                type="date"
+                value={formData.publishedAt ?? ""}
+                onChange={(e) => update({ publishedAt: e.target.value || null })}
+              />
+            </Field>
+            <Field label="Tags (comma separated)">
+              <Input
+                type="text"
+                value={formData.tags.join(", ")}
+                onChange={(e) =>
+                  update({
+                    tags: e.target.value
+                      .split(",")
+                      .map((t) => t.trim())
+                      .filter(Boolean),
+                  })
+                }
+              />
+            </Field>
             <div className="sm:col-span-2">
               <Field label="Excerpt">
-                <textarea
+                <Textarea
                   value={formData.excerpt}
                   onChange={(e) => update({ excerpt: e.target.value })}
                   rows={2}
-                  className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
                   placeholder="Short summary shown in listings"
                 />
               </Field>
             </div>
             <div className="sm:col-span-2">
-              <Field label="Content">
-                <textarea
-                  value={formData.content}
-                  onChange={(e) => update({ content: e.target.value })}
-                  rows={6}
-                  className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
-                  placeholder="Write the full article content..."
-                  required
+              <Field label="SEO title (optional)">
+                <Input
+                  type="text"
+                  value={formData.seoTitle}
+                  onChange={(e) => update({ seoTitle: e.target.value })}
                 />
               </Field>
             </div>
+            <div className="sm:col-span-2">
+              <Field label="SEO description (optional)">
+                <Input
+                  type="text"
+                  value={formData.seoDescription}
+                  onChange={(e) => update({ seoDescription: e.target.value })}
+                />
+              </Field>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border p-3">
+            <p className="mb-3 text-xs font-semibold text-gray-700">Article content</p>
+            <BlockEditor
+              blocks={formData.blocks}
+              onChange={(blocks) => update({ blocks })}
+            />
           </div>
         </form>
       </DialogContent>

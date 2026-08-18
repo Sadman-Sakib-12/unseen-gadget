@@ -1,26 +1,28 @@
 ﻿"use client";
 import { useState } from "react";
-import { LayoutGrid, List, Plus } from "lucide-react";
+import { LayoutGrid, List, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
-import { cn } from "@/components/ui/utils";
+import { SegmentedControl } from "@/components/ui/segmented-control";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PostsTable } from "./posts-table";
 import { PostForm } from "./post-form";
 import { PostCard } from "./post-card";
-import initialPosts from "@/features/blog/data/posts.json";
+import { useCmsResource } from "@/features/cms/hooks/use-cms-resource";
 import type { Post } from "@/features/blog/types";
 
 export function BlogPage() {
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const { items: posts, loading, create, update, remove } = useCmsResource<Post>("/api/cms/posts");
   const [showForm, setShowForm] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [removingPost, setRemovingPost] = useState<Post | null>(null);
   const [view, setView] = useState<"table" | "grid">("table");
 
   const handleSave = (post: Post) => {
     if (editingPost) {
-      setPosts(posts.map((p) => (p.id === post.id ? post : p)));
+      void update(post);
     } else {
-      setPosts([...posts, post]);
+      void create(post);
     }
     setShowForm(false);
     setEditingPost(null);
@@ -33,30 +35,15 @@ export function BlogPage() {
         description="Manage posts and pages"
         actions={
           <>
-            <div className="inline-flex items-center rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
-              <button
-                type="button"
-                onClick={() => setView("table")}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                  view === "table" ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"
-                )}
-              >
-                <List className="h-4 w-4" />
-                <span className="hidden sm:inline">Table</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setView("grid")}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                  view === "grid" ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"
-                )}
-              >
-                <LayoutGrid className="h-4 w-4" />
-                <span className="hidden sm:inline">Grid</span>
-              </button>
-            </div>
+            <SegmentedControl
+              aria-label="Posts view"
+              value={view}
+              onValueChange={(value) => setView(value as "table" | "grid")}
+              options={[
+                { value: "table", label: "Table", icon: List, iconOnly: false },
+                { value: "grid", label: "Grid", icon: LayoutGrid, iconOnly: false },
+              ]}
+            />
             <Button
               onClick={() => {
                 setEditingPost(null);
@@ -70,12 +57,33 @@ export function BlogPage() {
         }
       />
 
-      {view === "table" ? (
-        <PostsTable data={posts} />
+      {loading ? (
+        <div className="flex items-center justify-center py-20 text-gray-400">
+          <Loader2 className="h-5 w-5 animate-spin" />
+        </div>
+      ) : view === "table" ? (
+        <PostsTable
+          data={posts}
+          onEdit={(post) => {
+            setEditingPost(post);
+            setShowForm(true);
+          }}
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
+            <div key={post.id} className="relative">
+              <PostCard post={post} />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-2 h-8 w-8 text-gray-400 hover:text-red-600"
+                onClick={() => setRemovingPost(post)}
+                aria-label={`Delete post ${post.title}`}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           ))}
         </div>
       )}
@@ -89,6 +97,16 @@ export function BlogPage() {
         }}
         post={editingPost}
         onSave={handleSave}
+      />
+
+      <ConfirmDialog
+        open={removingPost !== null}
+        onOpenChange={(open) => !open && setRemovingPost(null)}
+        title="Delete post?"
+        description={removingPost ? `"${removingPost.title}" will be deleted permanently.` : undefined}
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => removingPost && void remove(removingPost.id)}
       />
     </div>
   );

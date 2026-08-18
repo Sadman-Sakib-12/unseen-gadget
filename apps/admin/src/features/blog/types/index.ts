@@ -1,16 +1,4 @@
-export interface Post {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  excerpt: string;
-  featuredImage: string | null;
-  category: string;
-  tags: string[];
-  status: string;
-  author: string;
-  publishedAt: string | null;
-}
+export type { Post } from "@unseen-gadget/cms-data";
 
 export interface Page {
   id: string;

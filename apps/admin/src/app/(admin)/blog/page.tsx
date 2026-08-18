@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { PageHeader } from '@/components/layout/page-header';
 import { Image, AlignLeft, LayoutTemplate, Info, FileText } from 'lucide-react';
 
 const cmsSections = [
@@ -48,10 +49,10 @@ const cmsSections = [
 export default function CMSDashboard() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Content Management System</h1>
-        <p className="text-gray-500">Manage your storefront's dynamic content, banners, and layouts.</p>
-      </div>
+      <PageHeader
+        title="Content Management System"
+        description="Manage your storefront's dynamic content, banners, and layouts."
+      />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {cmsSections.map((section) => (
