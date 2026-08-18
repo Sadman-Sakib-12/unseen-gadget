@@ -1,12 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { ChevronRight, HelpCircle, Phone, Mail } from "lucide-react";
-
-const cx = "mx-auto w-full max-w-[1320px] px-4";
+import { useTranslation } from "@/hooks/use-translation";
 
 const categories = [
   {
     label: "Orders & Payment",
-    color: "bg-blue-50 text-blue-600",
+    color: "bg-primary/10 text-primary",
     faqs: [
       {
         q: "How can I place an order?",
@@ -20,7 +21,7 @@ const categories = [
   },
   {
     label: "Delivery",
-    color: "bg-emerald-50 text-emerald-600",
+    color: "bg-success/10 text-success",
     faqs: [
       {
         q: "How long does delivery take?",
@@ -34,7 +35,7 @@ const categories = [
   },
   {
     label: "Returns & Warranty",
-    color: "bg-violet-50 text-violet-600",
+    color: "bg-violet-500/10 text-violet-500",
     faqs: [
       {
         q: "Do you offer warranty on products?",
@@ -48,7 +49,7 @@ const categories = [
   },
   {
     label: "Product Authenticity",
-    color: "bg-orange-50 text-orange-600",
+    color: "bg-warning/10 text-warning",
     faqs: [
       {
         q: "Are all products genuine?",
@@ -63,37 +64,39 @@ const categories = [
 ];
 
 export default function FAQsPage() {
+  const { t } = useTranslation();
+
   return (
     <>
       {/* Breadcrumb */}
-      <div className="border-b border-gray-100 bg-white">
-        <div className={cx}>
-          <nav className="flex items-center gap-1.5 py-3 text-xs text-gray-500">
-            <Link href="/" className="hover:text-blue-600">Home</Link>
-            <ChevronRight className="h-3 w-3" />
-            <span className="text-gray-900">FAQs</span>
+      <div className="border-b border-border">
+        <div className="container-gadget">
+          <nav className="flex items-center gap-1.5 py-3 text-xs text-muted-foreground">
+            <Link href="/" className="transition-colors hover:text-primary">{t("shop.breadcrumbHome")}</Link>
+            <ChevronRight className="h-3 w-3 opacity-50" />
+            <span className="text-foreground">{t("faqs.title")}</span>
           </nav>
         </div>
       </div>
 
       {/* Hero */}
-      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-12">
-        <div className={`${cx} text-center`}>
-          <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/20 px-3 py-1 text-xs font-semibold text-blue-400">
+      <div className="bg-gradient-to-br from-primary-800 via-primary to-primary-600 py-12">
+        <div className="container-gadget text-center">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">
             <HelpCircle className="h-3.5 w-3.5" />
-            Help Center
+            {t("faqs.kicker")}
           </div>
-          <h1 className="mt-3 text-2xl font-bold text-white">Frequently Asked Questions</h1>
-          <p className="mx-auto mt-2 max-w-md text-sm text-gray-400">
-            Find quick answers to the most common questions about shopping at Unseen Gadget.
+          <h1 className="mt-3 text-2xl font-bold text-white">{t("faqs.breadcrumb")}</h1>
+          <p className="mx-auto mt-2 max-w-md text-sm text-white/70">
+            {t("faqs.subtitle")}
           </p>
         </div>
       </div>
 
-      <div className={`${cx} py-10`}>
+      <div className="container-gadget py-10">
         <div className="grid gap-6 lg:grid-cols-2">
           {categories.map((cat) => (
-            <div key={cat.label} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <div key={cat.label} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="mb-5 flex items-center gap-2">
                 <span className={`rounded-lg px-2.5 py-1 text-xs font-bold ${cat.color}`}>
                   {cat.label}
@@ -101,12 +104,12 @@ export default function FAQsPage() {
               </div>
               <div className="space-y-4">
                 {cat.faqs.map((faq) => (
-                  <div key={faq.q} className="rounded-xl border border-gray-100 bg-gray-50 p-4">
-                    <p className="flex items-start gap-2 text-sm font-semibold text-gray-900">
-                      <HelpCircle className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+                  <div key={faq.q} className="rounded-xl border border-border bg-muted/40 p-4">
+                    <p className="flex items-start gap-2 text-sm font-semibold text-foreground">
+                      <HelpCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                       {faq.q}
                     </p>
-                    <p className="mt-2 pl-6 text-xs leading-relaxed text-gray-600">{faq.a}</p>
+                    <p className="mt-2 pl-6 text-xs leading-relaxed text-muted-foreground">{faq.a}</p>
                   </div>
                 ))}
               </div>
@@ -115,26 +118,26 @@ export default function FAQsPage() {
         </div>
 
         {/* Still have questions */}
-        <div className="mt-10 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-8">
+        <div className="mt-10 rounded-2xl bg-gradient-to-r from-primary to-primary-800 p-8">
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="text-white">
-              <h2 className="text-lg font-bold">Still have questions?</h2>
-              <p className="mt-1 text-sm text-blue-200">
-                Our team is available 10 AM – 10 PM, 7 days a week to help you out.
+              <h2 className="text-lg font-bold">{t("faqs.still")}</h2>
+              <p className="mt-1 text-sm text-white/70">
+                {t("faqs.stillHint")}
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:items-end sm:justify-center">
               <a
                 href="tel:+8801714039409"
-                className="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
+                className="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-muted"
               >
-                <Phone className="h-4 w-4" /> Call Us
+                <Phone className="h-4 w-4" /> {t("faqs.callUs")}
               </a>
               <a
                 href="mailto:support@unseengadget.com"
-                className="flex items-center gap-2 rounded-xl bg-blue-500/30 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500/50"
+                className="flex items-center gap-2 rounded-xl bg-white/15 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/25"
               >
-                <Mail className="h-4 w-4" /> Email Support
+                <Mail className="h-4 w-4" /> {t("faqs.emailSupport")}
               </a>
             </div>
           </div>

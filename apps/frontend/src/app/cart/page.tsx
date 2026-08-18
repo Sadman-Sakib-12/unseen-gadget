@@ -16,11 +16,11 @@ import { useCartStore, cartItemCount, cartSubtotal, cartSavings } from "@/featur
 import { useHydrated } from "@/hooks/use-hydrated";
 import { formatBDT } from "@/components/price";
 import { ImageWithFallback } from "@/components/image-with-fallback";
-
-const cx = "mx-auto w-full max-w-[1320px] px-4";
+import { useTranslation } from "@/hooks/use-translation";
 
 export default function CartPage() {
   const hydrated = useHydrated();
+  const { t } = useTranslation();
   const items = useCartStore((s) => s.items);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
@@ -35,29 +35,30 @@ export default function CartPage() {
   return (
     <>
       {/* Breadcrumb */}
-      <div className="border-b border-gray-100 bg-white">
-        <div className={cx}>
-          <nav className="flex items-center gap-1.5 py-3 text-xs text-gray-500">
-            <Link href="/" className="hover:text-blue-600">Home</Link>
-            <ChevronRight className="h-3 w-3" />
-            <span className="text-gray-900">Shopping Cart</span>
+      <div className="border-b border-border">
+        <div className="container-gadget">
+          <nav className="flex items-center gap-1.5 py-3 text-xs text-muted-foreground">
+            <Link href="/" className="transition-colors hover:text-primary">{t("shop.breadcrumbHome")}</Link>
+            <ChevronRight className="h-3 w-3 opacity-50" />
+            <span className="text-foreground">{t("cart.breadcrumb")}</span>
           </nav>
         </div>
       </div>
 
-      <div className={`${cx} py-6`}>
+      <div className="container-gadget py-6">
         <div className="mb-5 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Shopping Cart</h1>
-            <p className="mt-0.5 text-xs text-gray-500">
-              {shownItems.length} item{shownItems.length !== 1 && "s"} in your cart
+            <h1 className="text-xl font-bold text-foreground">{t("cart.title")}</h1>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {shownItems.length}{" "}
+              {shownItems.length === 1 ? t("cart.itemInCart") : t("cart.itemsInCart")}
             </p>
           </div>
           <Link
             href="/"
-            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
+            className="flex items-center gap-1 text-xs font-medium text-primary transition-colors hover:underline"
           >
-            Continue Shopping <ChevronRight className="h-3.5 w-3.5" />
+            {t("cart.continueShopping")} <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
@@ -68,17 +69,18 @@ export default function CartPage() {
               {shownItems.map((item) => (
                 <div
                   key={item.key}
-                  className="overflow-hidden rounded-2xl border border-gray-200 bg-white"
+                  className="overflow-hidden rounded-2xl border border-border bg-card"
                 >
                   <div className="flex gap-4 p-4">
                     {/* Image */}
                     <Link
                       href={`/product/${item.slug}`}
-                      className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-gray-100 to-gray-200"
+                      className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted"
                     >
                       <ImageWithFallback
                         src={item.image}
                         alt={item.name}
+                        label={item.name}
                         className="h-full w-full object-contain"
                         iconSize="h-8 w-8"
                       />
@@ -89,14 +91,14 @@ export default function CartPage() {
                         <div>
                           <Link
                             href={`/product/${item.slug}`}
-                            className="text-sm font-semibold text-gray-900 hover:text-blue-600"
+                            className="text-sm font-semibold text-foreground transition-colors hover:text-primary"
                           >
                             {item.name}
                           </Link>
                           <div className="mt-1 flex flex-wrap gap-2">
                             {item.color && (
-                              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500">
-                                Color: {item.color}
+                              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                                {t("cart.color")}: {item.color}
                               </span>
                             )}
                           </div>
@@ -104,7 +106,7 @@ export default function CartPage() {
                         <button
                           onClick={() => removeItem(item.key)}
                           aria-label={`Remove ${item.name} from cart`}
-                          className="rounded-lg p-1.5 text-gray-300 transition hover:bg-red-50 hover:text-red-500"
+                          className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-error/10 hover:text-error"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -112,20 +114,20 @@ export default function CartPage() {
 
                       <div className="flex items-center justify-between">
                         {/* Qty */}
-                        <div className="flex items-center gap-1 rounded-full border border-gray-200">
+                        <div className="flex items-center gap-1 rounded-full border border-border">
                           <button
                             onClick={() => updateQuantity(item.key, item.quantity - 1)}
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-50 hover:text-gray-900"
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                             aria-label="Decrease quantity"
                           >
                             <Minus className="h-3.5 w-3.5" />
                           </button>
-                          <span className="w-8 text-center text-sm font-semibold text-gray-900">
+                          <span className="w-8 text-center text-sm font-semibold text-foreground">
                             {item.quantity}
                           </span>
                           <button
                             onClick={() => updateQuantity(item.key, item.quantity + 1)}
-                            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-50 hover:text-gray-900"
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                             aria-label="Increase quantity"
                           >
                             <Plus className="h-3.5 w-3.5" />
@@ -134,11 +136,11 @@ export default function CartPage() {
 
                         {/* Price */}
                         <div className="text-right">
-                          <p className="text-base font-bold text-gray-900">
+                          <p className="text-base font-bold text-foreground">
                             {formatBDT(item.price * item.quantity)}
                           </p>
                           {item.originalPrice != null && item.originalPrice > item.price && (
-                            <p className="text-xs text-gray-400 line-through">
+                            <p className="text-xs text-muted-foreground line-through">
                               {formatBDT(item.originalPrice * item.quantity)}
                             </p>
                           )}
@@ -148,10 +150,12 @@ export default function CartPage() {
                   </div>
 
                   {item.originalPrice != null && item.originalPrice > item.price && (
-                    <div className="flex items-center gap-1.5 border-t border-dashed border-green-100 bg-green-50 px-4 py-2">
-                      <Tag className="h-3 w-3 text-green-600" />
-                      <span className="text-[11px] font-medium text-green-700">
-                        You&rsquo;re saving {formatBDT((item.originalPrice - item.price) * item.quantity)} on this item
+                    <div className="flex items-center gap-1.5 border-t border-dashed border-success/30 bg-success/5 px-4 py-2">
+                      <Tag className="h-3 w-3 text-success" />
+                      <span className="text-[11px] font-medium text-success">
+                        {t("cart.saving", {
+                          amount: formatBDT((item.originalPrice - item.price) * item.quantity),
+                        })}
                       </span>
                     </div>
                   )}
@@ -159,16 +163,16 @@ export default function CartPage() {
               ))}
 
               {/* Coupon */}
-              <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-4">
-                <p className="mb-2 text-xs font-semibold text-gray-700">Have a coupon?</p>
+              <div className="rounded-2xl border border-dashed border-border bg-card p-4">
+                <p className="mb-2 text-xs font-semibold text-foreground">{t("cart.coupon")}</p>
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Enter coupon code"
-                    className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    placeholder={t("cart.couponPlaceholder")}
+                    className="flex-1 rounded-xl border border-border bg-muted px-3 py-2 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:bg-card focus:ring-2 focus:ring-primary/20"
                   />
-                  <button className="rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-700 transition hover:border-blue-500 hover:text-blue-600">
-                    Apply
+                  <button className="rounded-xl border border-border px-4 py-2 text-xs font-semibold text-foreground transition-colors hover:border-primary hover:text-primary">
+                    {t("common.apply")}
                   </button>
                 </div>
               </div>
@@ -177,53 +181,56 @@ export default function CartPage() {
             {/* Order summary */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-3">
-                <div className="rounded-2xl border border-gray-200 bg-white p-5">
-                  <h3 className="mb-4 text-sm font-bold text-gray-900">Order Summary</h3>
+                <div className="rounded-2xl border border-border bg-card p-5">
+                  <h3 className="mb-4 text-sm font-bold text-foreground">{t("cart.orderSummary")}</h3>
                   <div className="space-y-2.5">
                     <div className="flex justify-between text-xs">
-                      <span className="text-gray-500">Subtotal ({count} items)</span>
-                      <span className="font-medium text-gray-900">
+                      <span className="text-muted-foreground">{t("cart.subtotal")} ({count} {t("common.items")})</span>
+                      <span className="font-medium text-foreground">
                         {formatBDT(subtotal)}
                       </span>
                     </div>
                     {savings > 0 && (
                       <div className="flex justify-between text-xs">
-                        <span className="text-gray-500">Discount</span>
-                        <span className="font-medium text-green-600">
+                        <span className="text-muted-foreground">{t("cart.discount")}</span>
+                        <span className="font-medium text-success">
                           -{formatBDT(savings)}
                         </span>
                       </div>
                     )}
                     <div className="flex justify-between text-xs">
-                      <span className="text-gray-500">Shipping</span>
-                      <span className="font-medium text-emerald-600">Free</span>
+                      <span className="text-muted-foreground">{t("cart.shipping")}</span>
+                      <span className="font-medium text-success">{t("cart.free")}</span>
                     </div>
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-2.5">
-                      <span className="text-sm font-bold text-gray-900">Total</span>
-                      <span className="text-lg font-bold text-gray-900">
+                    <div className="flex items-center justify-between border-t border-border pt-2.5">
+                      <span className="text-sm font-bold text-foreground">{t("cart.total")}</span>
+                      <span className="text-lg font-bold text-foreground">
                         {formatBDT(total)}
                       </span>
                     </div>
                   </div>
 
-                  <button className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white transition hover:bg-blue-700">
-                    Proceed to Checkout <ArrowRight className="h-4 w-4" />
-                  </button>
+                  <Link
+                    href="/checkout"
+                    className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary-700"
+                  >
+                    {t("cart.checkout")} <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
 
                 {/* Trust row */}
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { icon: Truck, label: "Free Delivery" },
-                    { icon: Shield, label: "Secure Pay" },
-                    { icon: Tag, label: "Best Price" },
-                  ].map((t, i) => (
+                    { icon: Truck, label: t("cart.freeDelivery") },
+                    { icon: Shield, label: t("cart.securePay") },
+                    { icon: Tag, label: t("cart.bestPrice") },
+                  ].map((trust, i) => (
                     <div
                       key={i}
-                      className="flex flex-col items-center gap-1 rounded-xl border border-gray-100 bg-white py-3 text-center"
+                      className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card py-3 text-center"
                     >
-                      <t.icon className="h-4 w-4 text-blue-600" />
-                      <span className="text-[10px] font-medium text-gray-600">{t.label}</span>
+                      <trust.icon className="h-4 w-4 text-primary" />
+                      <span className="text-[10px] font-medium text-muted-foreground">{trust.label}</span>
                     </div>
                   ))}
                 </div>
@@ -232,17 +239,17 @@ export default function CartPage() {
           </div>
         ) : (
           /* Empty state */
-          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 py-24 text-center">
-            <ShoppingCart className="h-14 w-14 text-gray-200" />
-            <h2 className="mt-4 text-lg font-bold text-gray-700">Your cart is empty</h2>
-            <p className="mt-1 text-sm text-gray-400">
-              Looks like you haven&rsquo;t added anything yet.
+          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border py-24 text-center">
+            <ShoppingCart className="h-14 w-14 text-muted-foreground" strokeWidth={1.2} />
+            <h2 className="mt-4 text-lg font-bold text-foreground">{t("cart.empty")}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("cart.emptyHint")}
             </p>
             <Link
               href="/"
-              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+              className="btn-primary mt-5 rounded-xl"
             >
-              Start Shopping <ArrowRight className="h-4 w-4" />
+              {t("common.startShopping")} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         )}

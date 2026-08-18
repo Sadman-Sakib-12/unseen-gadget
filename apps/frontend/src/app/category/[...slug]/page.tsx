@@ -5,8 +5,6 @@ import { findAllCategories, findCategoryByHref, getParentChain } from "@/lib/cat
 import type { MockProduct } from "@/components/product-types";
 import { CategoryPageClient } from "./CategoryPageClient";
 
-const cx = "mx-auto w-full max-w-[1320px] px-4";
-
 export default async function CategoryPage({
   params,
 }: {
@@ -19,12 +17,12 @@ export default async function CategoryPage({
 
   if (!category) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className={cx}>
+      <div className="min-h-screen bg-background">
+        <div className="container-gadget">
           <div className="py-20 text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Category Not Found</h1>
-            <p className="mt-2 text-sm text-gray-500">The category you are looking for does not exist.</p>
-            <Link href="/" className="mt-4 inline-flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700">
+            <h1 className="text-2xl font-bold text-foreground">Category Not Found</h1>
+            <p className="mt-2 text-sm text-muted-foreground">The category you are looking for does not exist.</p>
+            <Link href="/" className="btn-primary mt-4">
               Go Home <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </div>

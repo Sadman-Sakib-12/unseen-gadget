@@ -1,126 +1,158 @@
-import { Mail, Phone, MapPin, Clock } from "lucide-react";
+"use client";
 
-const info = [
+import { useState } from "react";
+import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
+import { toast } from "sonner";
+import type { TranslationKey } from "@/lib/i18n";
+import { useTranslation } from "@/hooks/use-translation";
+
+const info: {
+  icon: typeof Phone;
+  title: TranslationKey;
+  lines: string[];
+  sub: string;
+  color: string;
+}[] = [
   {
     icon: Phone,
-    title: "Phone",
+    title: "contact.phone",
     lines: ["+8801714039409"],
     sub: "Available 10 AM – 10 PM",
-    color: "bg-blue-50 text-blue-600",
+    color: "bg-primary/10 text-primary",
   },
   {
     icon: Mail,
-    title: "Email",
+    title: "contact.email",
     lines: ["support@unseengadget.com"],
     sub: "We reply within 24 hours",
-    color: "bg-emerald-50 text-emerald-600",
+    color: "bg-success/10 text-success",
   },
   {
     icon: MapPin,
-    title: "Address",
+    title: "contact.address",
     lines: ["Shop #84, Block C, Level 05", "Bashundhara City, Dhaka 1229"],
     sub: "Bangladesh",
-    color: "bg-violet-50 text-violet-600",
+    color: "bg-violet-500/10 text-violet-500",
   },
   {
     icon: Clock,
-    title: "Working Hours",
+    title: "contact.hours",
     lines: ["Sat – Thu: 10 AM – 10 PM", "Friday: 10 AM – 8 PM"],
     sub: "",
-    color: "bg-orange-50 text-orange-600",
+    color: "bg-warning/10 text-warning",
   },
 ];
 
 export default function ContactPage() {
+  const { t } = useTranslation();
+  const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.success(t("contact.sent"));
+    setForm({ name: "", email: "", phone: "", subject: "", message: "" });
+  };
+
   return (
     <>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-12">
-        <div className="mx-auto max-w-4xl px-4 text-center">
-          <span className="inline-block rounded-full bg-blue-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-blue-400">
-            Contact Us
+      <section className="bg-gradient-to-br from-primary-800 via-primary to-primary-600 py-12">
+        <div className="mx-auto w-full max-w-4xl px-4 text-center">
+          <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white">
+            {t("contact.kicker")}
           </span>
-          <h1 className="mt-3 text-3xl font-bold text-white">Get in Touch</h1>
-          <p className="mx-auto mt-3 max-w-md text-sm text-gray-400">
-            Have questions? We&rsquo;re here to help. Reach out through any channel below.
+          <h1 className="mt-3 text-3xl font-bold text-white">{t("contact.title")}</h1>
+          <p className="mx-auto mt-3 max-w-md text-sm text-white/70">
+            {t("contact.subtitle")}
           </p>
         </div>
       </section>
 
-      <section className="bg-gray-50 py-10">
-        <div className="mx-auto max-w-5xl px-4">
+      <section className="bg-muted/50 py-10">
+        <div className="mx-auto w-full max-w-5xl px-4">
           {/* Info cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {info.map((item) => (
               <div
                 key={item.title}
-                className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm"
+                className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5 shadow-sm"
               >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${item.color}`}>
                   <item.icon className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-gray-900">{item.title}</p>
+                  <p className="text-xs font-semibold text-foreground">{t(item.title)}</p>
                   {item.lines.map((l) => (
-                    <p key={l} className="mt-0.5 text-xs text-gray-600">{l}</p>
+                    <p key={l} className="mt-0.5 text-xs text-muted-foreground">{l}</p>
                   ))}
-                  {item.sub && <p className="mt-0.5 text-[11px] text-gray-400">{item.sub}</p>}
+                  {item.sub && <p className="mt-0.5 text-[11px] text-muted-foreground/70">{item.sub}</p>}
                 </div>
               </div>
             ))}
           </div>
 
           {/* Contact form */}
-          <div className="mt-8 rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
-            <h2 className="text-lg font-bold text-gray-900">Send us a Message</h2>
-            <p className="mt-1 text-xs text-gray-500">Fill in the form and we&rsquo;ll get back to you within 24 hours.</p>
-            <form className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="mt-8 rounded-2xl border border-border bg-card p-8 shadow-sm">
+            <h2 className="text-lg font-bold text-foreground">{t("contact.sendMessage")}</h2>
+            <p className="mt-1 text-xs text-muted-foreground">{t("contact.sendHint")}</p>
+            <form onSubmit={submit} className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-700">Full Name</label>
+                <label className="mb-1.5 block text-xs font-medium text-foreground">{t("contact.name")}</label>
                 <input
                   type="text"
-                  className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                  required
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="input-field"
                   placeholder="Your name"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-700">Email Address</label>
+                <label className="mb-1.5 block text-xs font-medium text-foreground">{t("contact.emailField")}</label>
                 <input
                   type="email"
-                  className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                  required
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="input-field"
                   placeholder="your@email.com"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-700">Phone Number</label>
+                <label className="mb-1.5 block text-xs font-medium text-foreground">{t("contact.phoneField")}</label>
                 <input
                   type="tel"
-                  className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className="input-field"
                   placeholder="+880..."
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-700">Subject</label>
+                <label className="mb-1.5 block text-xs font-medium text-foreground">{t("contact.subject")}</label>
                 <input
                   type="text"
-                  className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                  value={form.subject}
+                  onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                  className="input-field"
                   placeholder="How can we help?"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-xs font-medium text-gray-700">Message</label>
+                <label className="mb-1.5 block text-xs font-medium text-foreground">{t("contact.message")}</label>
                 <textarea
                   rows={5}
-                  className="w-full resize-none rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                  required
+                  value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  className="input-field resize-none"
                   placeholder="Tell us more about your inquiry..."
                 />
               </div>
               <div className="sm:col-span-2">
-                <button
-                  type="button"
-                  className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                  Send Message
+                <button type="submit" className="btn-primary">
+                  <Send className="h-4 w-4" />
+                  {t("contact.sendBtn")}
                 </button>
               </div>
             </form>
