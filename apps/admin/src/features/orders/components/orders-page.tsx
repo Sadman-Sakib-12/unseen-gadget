@@ -66,6 +66,16 @@ const EMPTY_CREATE_STATE: CreateOrderState = {
   price: 0,
 };
 
+const ORDER_STATUS_META: Record<string, { label: string; value: Order['status']; description: string }> = {
+  pending: { label: 'Pending Orders', value: 'PENDING', description: 'View and manage pending customer orders.' },
+  confirmed: { label: 'Confirmed Orders', value: 'CONFIRMED', description: 'Orders confirmed by the team and waiting to be processed.' },
+  processing: { label: 'Processing Orders', value: 'PROCESSING', description: 'Orders currently being picked, packed and prepared.' },
+  shipped: { label: 'Shipped Orders', value: 'SHIPPED', description: 'Orders handed over to the delivery partner.' },
+  delivered: { label: 'Delivered Orders', value: 'DELIVERED', description: 'Orders successfully delivered to customers.' },
+  cancelled: { label: 'Cancelled Orders', value: 'CANCELLED', description: 'Orders that were cancelled before delivery.' },
+  returned: { label: 'Returned Orders', value: 'RETURNED', description: 'Orders returned by customers.' },
+};
+
 export function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>(allOrders);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
