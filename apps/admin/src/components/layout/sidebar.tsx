@@ -34,56 +34,67 @@ import {
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/components/ui/utils';
 import { Button } from '@/components/ui/button';
+import navigationConfig from '@/data/navigation.json';
+
+interface SubNavItem {
+  title: string;
+  href: string;
+  subItems?: { title: string; href: string }[];
+}
 
 interface NavItem {
   title: string;
   href: string;
   icon: LucideIcon;
   badge?: { text: string; variant: 'default' | 'success' | 'destructive' };
-  subItems?: { title: string; href: string }[];
+  subItems?: SubNavItem[];
+  collapseOnly?: boolean;
   allowedRoles?: string[];
 }
 
-const navItems: NavItem[] = [
-  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { title: 'POS', href: '/pos', icon: ShoppingCart, badge: { text: 'New', variant: 'success' } },
-  { title: 'Orders', href: '/orders', icon: ClipboardList, badge: { text: '24', variant: 'default' } },
-  { title: 'Products', href: '/products', icon: Package, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { title: 'Inventory', href: '/inventory', icon: Warehouse, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { title: 'Suppliers', href: '/suppliers', icon: Truck, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { title: 'Purchases', href: '/purchases', icon: ShoppingBag, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { title: 'Customers', href: '/customers', icon: Users, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { title: 'Categories', href: '/categories-brands', icon: Tags, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { title: 'Coupons', href: '/coupons', icon: Ticket, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { title: 'Promotions', href: '/promotions', icon: Megaphone, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { title: 'Delivery', href: '/delivery', icon: TruckIcon, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { title: 'Payments', href: '/payments', icon: CreditCard, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { title: 'Returns & Refunds', href: '/returns', icon: RotateCcw, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { title: 'Reviews', href: '/reviews', icon: Star, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { title: 'Expenses', href: '/expenses', icon: Receipt, allowedRoles: ['SUPER_ADMIN'] },
-  { title: 'Reports', href: '/reports', icon: BarChart3, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  { title: 'Notifications', href: '/notifications', icon: Bell, allowedRoles: ['SUPER_ADMIN', 'MANAGER'] },
-  {
-    title: 'CMS',
-    href: '/cms',
-    icon: FileText,
-    allowedRoles: ['SUPER_ADMIN', 'MANAGER'],
-    subItems: [
-      { title: 'Brands', href: '/cms/brands' },
-      { title: 'Footer', href: '/cms/footer' },
-      { title: 'Pages', href: '/cms/pages' },
-      { title: 'Blog', href: '/blog/posts' },
-      { title: 'Banners', href: '/blog/banners' },
-      { title: 'About', href: '/blog/about' },
-      { title: 'Promotions', href: '/cms/promotions' },
-      { title: 'Jobs', href: '/cms/jobs' },
-      { title: 'Navbar', href: '/blog/navbar' },
-      { title: 'Home Page', href: '/blog/landing' },
-    ],
-  },
-  { title: 'Settings', href: '/settings', icon: Settings, allowedRoles: ['SUPER_ADMIN'] },
-  { title: 'Admin & Roles', href: '/admin-management', icon: Shield, allowedRoles: ['SUPER_ADMIN'] },
-];
+interface NavConfigBadge {
+  text: string;
+  variant: 'default' | 'success' | 'destructive';
+}
+
+interface NavConfigItem {
+  title: string;
+  href: string;
+  icon: string;
+  badge?: NavConfigBadge;
+  subItems?: SubNavItem[];
+  collapseOnly?: boolean;
+  allowedRoles?: string[];
+}
+
+const navIconMap: Record<string, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  pos: ShoppingCart,
+  orders: ClipboardList,
+  products: Package,
+  inventory: Warehouse,
+  suppliers: Truck,
+  purchases: ShoppingBag,
+  customers: Users,
+  categories: Tags,
+  coupons: Ticket,
+  promotions: Megaphone,
+  delivery: TruckIcon,
+  payments: CreditCard,
+  returns: RotateCcw,
+  reviews: Star,
+  expenses: Receipt,
+  reports: BarChart3,
+  notifications: Bell,
+  cms: FileText,
+  settings: Settings,
+  admin: Shield,
+};
+
+const navItems: NavItem[] = (navigationConfig as unknown as NavConfigItem[]).map((item) => ({
+  ...item,
+  icon: navIconMap[item.icon] ?? LayoutDashboard,
+}));
 
 interface SidebarProps {
   mobileOpen: boolean;
