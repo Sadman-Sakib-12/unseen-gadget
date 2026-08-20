@@ -125,13 +125,66 @@ export interface ContactPageContent {
   contactCta: { heading: string; description: string; cta: CtaLink };
 }
 
+export interface DeliveryHero {
+  heading: string;
+  description: string;
+}
 
+export interface DeliveryInfo {
+  areas: string[];
+  charges: string;
+  time: string;
+  notes: string;
+}
+
+export type DeliveryStepIcon = "check" | "package" | "truck" | "home";
+
+export interface DeliveryStep {
+  title: string;
+  description: string;
+  icon: DeliveryStepIcon;
+  order: number;
+  enabled: boolean;
+}
+
+export interface ReturnPolicy {
+  eligibility: string;
+  returnWindow: string;
+  conditions: string[];
+  nonReturnable: string[];
+  process: string[];
+  refundInfo: string;
+}
+
+export interface DeliveryReturnPageContent {
+  type: "delivery-return";
+  hero: DeliveryHero;
+  delivery: DeliveryInfo;
+  deliveryProcess: { steps: DeliveryStep[] };
+  returnPolicy: ReturnPolicy;
+  importantNotes: ContentBlock[];
+}
+
+export interface LegalPageContent {
+  type: "terms" | "privacy";
+  effectiveDate: string;
+}
+
+export type CmsPageContent =
+  | ShopPageContent
+  | ContactPageContent
+  | DeliveryReturnPageContent
+  | LegalPageContent;
 
 export interface CmsPage {
-  slug: string;
+  slug: CmsPageSlug;
   title: string;
   description?: string;
+  status: PageStatus;
+  lastUpdated: string | null;
+  seo: CmsSeo;
   blocks: ContentBlock[];
+  content: CmsPageContent;
 }
 
 export interface FooterLink {
