@@ -20,7 +20,7 @@ import { DeliveryReturnEditor } from "@/features/cms/components/pages/delivery-r
 import type { CmsPage, CmsPageSlug, PageStatus } from "@unseen-gadget/cms-data";
 
 function formatDate(value: string | null | undefined): string {
-  if (!value) return "???";
+  if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString();
@@ -73,78 +73,211 @@ export function PageEditor({ slug }: { slug: CmsPageSlug }) {
     return () => {
       active = false;
     };
-  }, [slug]);
+  }, [slug, reloadKey]);
 
-  const handleSave = async () => {
+  const retry = () => {
+    setLoading(true);
+    setLoadError(null);
+    setReloadKey((key) => key + 1);
+  };
+
+  const handleSave = async (status: PageStatus) => {
     if (!page) return;
-    setSaving(true);
+    const error = validatePage(page);
+    if (error) {
+      toast.error(error);
+      return;
+    }
+    setSaving(status);
     try {
-      const res = await fetch(`/api/cms/pages/${slug}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(page),
-      });
-      if (!res.ok) throw new Error("Failed to save");
-      toast.success("Page saved");
+      const saved = await savePage({ ...page, status, lastUpdated: new Date().toISOString() });
+      setPage(saved);
+      toast.success(status === "published" ? "Page published" : "Draft saved");
     } catch {
       toast.error("Failed to save page");
     } finally {
-      setSaving(false);
+      setSaving(null);
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-gray-400">
+      <div className="flex items-center justify-center rounded-lg border border-border bg-white py-20 text-gray-400">
         <Loader2 className="h-5 w-5 animate-spin" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="rounded-lg border border-border bg-white p-6">
+        <EmptyState
+          icon={AlertTriangle}
+          title="Unable to load page"
+          description={loadError}
+          action={
+            <Button variant="outline" onClick={retry}>
+              <RefreshCw className="h-4 w-4" />
+              Retry
+            </Button>
+          }
+        />
       </div>
     );
   }
 
   if (!page) {
     return (
-      <p className="rounded-lg border border-dashed border-border bg-gray-50 px-4 py-10 text-center text-sm text-gray-400">
-        Page not found.
-      </p>
+      <div className="rounded-lg border border-border bg-white p-6">
+        <EmptyState title="Page not found" description="This page does not exist in the CMS." />
+      </div>
     );
   }
 
+  const content = page.content;
+
+  const renderContentTab = () => {
+    switch (content.type) {
+      case "shop":
+        return <ShopEditor content={content} onChange={(next) => setPage({ ...page, content: next })} />;
+      case "contact":
+        return <ContactEditor content={content} onChange={(next) => setPage({ ...page, content: next })} />;
+      case "delivery-return":
+        return <DeliveryReturnEditor content={content} onChange={(next) => setPage({ ...page, content: next })} />;
+      case "terms":
+      case "privacy":
+        return (
+          <SectionCard title="Document content" description="Edit the legal sections as rich-text blocks.">
+            <FormField label="Effective date" required>
+              <Input
+                type="date"
+                value={content.effectiveDate}
+                onChange={(e) => setPage({ ...page, content: { ...content, effectiveDate: e.target.value } })}
+              />
+            </FormField>
+            <BlockEditor
+              blocks={page.blocks}
+              onChange={(blocks) => setPage({ ...page, blocks })}
+            />
+          </SectionCard>
+        );
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4 rounded-lg border border-border bg-white p-4 shadow-sm">
-        <div className="grid flex-1 gap-4 sm:grid-cols-2">
-          <Field label="Page title">
-            <Input
-              value={page.title}
-              onChange={(e) => setPage({ ...page, title: e.target.value })}
-            />
-          </Field>
-          <Field label="Description">
-            <Input
-              value={page.description ?? ""}
-              onChange={(e) => setPage({ ...page, description: e.target.value })}
-            />
-          </Field>
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-white p-4 shadow-sm">
+        <div className="min-w-0 space-y-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-lg font-bold text-gray-900">{page.title}</h2>
+            <StatusBadge status={page.status} />
+          </div>
+          <p className="text-xs text-gray-500">Last updated {formatDate(page.lastUpdated)}</p>
         </div>
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          Save Page
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" onClick={() => handleSave("draft")} disabled={saving !== null}>
+            {saving === "draft" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            Save Draft
+          </Button>
+          <Button onClick={() => handleSave("published")} disabled={saving !== null}>
+            {saving === "published" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            Publish
+          </Button>
+        </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-white p-4 shadow-sm">
-        <BlockEditor
-          blocks={page.blocks}
-          onChange={(blocks) => setPage({ ...page, blocks })}
-        />
-      </div>
+      <Tabs defaultValue="content">
+        <TabsList>
+          <TabsTrigger value="content">Content</TabsTrigger>
+          <TabsTrigger value="seo">SEO</TabsTrigger>
+          <TabsTrigger value="publishing">Publishing</TabsTrigger>
+        </TabsList>
 
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          Save Page
-        </Button>
-      </div>
+        <TabsContent value="content">
+          <div className="space-y-6">
+            <SectionCard title="General" description="Page title and description.">
+              <FormField label="Page title" required>
+                <Input
+                  value={page.title}
+                  onChange={(e) => setPage({ ...page, title: e.target.value })}
+                />
+              </FormField>
+              <FormField label="Description">
+                <Textarea
+                  rows={2}
+                  value={page.description ?? ""}
+                  onChange={(e) => setPage({ ...page, description: e.target.value })}
+                />
+              </FormField>
+            </SectionCard>
+
+            {renderContentTab()}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="seo">
+          <SectionCard title="SEO" description="Search engine metadata for this page.">
+            <FormField label="Meta title">
+              <Input
+                value={page.seo.metaTitle}
+                onChange={(e) => setPage({ ...page, seo: { ...page.seo, metaTitle: e.target.value } })}
+              />
+            </FormField>
+            <FormField label="Meta description">
+              <Textarea
+                rows={3}
+                value={page.seo.metaDescription}
+                onChange={(e) => setPage({ ...page, seo: { ...page.seo, metaDescription: e.target.value } })}
+              />
+            </FormField>
+            <FormField label="OG image" hint="URL or path to the social sharing image.">
+              <Input
+                value={page.seo.ogImage}
+                onChange={(e) => setPage({ ...page, seo: { ...page.seo, ogImage: e.target.value } })}
+              />
+            </FormField>
+          </SectionCard>
+        </TabsContent>
+
+        <TabsContent value="publishing">
+          <div className="space-y-6">
+            <SectionCard title="Status" description="Control whether this page is live on the storefront or a draft.">
+              <FormField label="Publishing status">
+                <SegmentedControl
+                  aria-label="Publishing status"
+                  options={[
+                    { value: "draft", label: "Draft" },
+                    { value: "published", label: "Published" },
+                  ]}
+                  value={page.status}
+                  onValueChange={(status) => setPage({ ...page, status: status as PageStatus })}
+                />
+              </FormField>
+            </SectionCard>
+
+            <SectionCard title="Publishing details">
+              <dl className="space-y-2 text-sm">
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-gray-500">Status</dt>
+                  <dd>
+                    <StatusBadge status={page.status} />
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-gray-500">Last updated</dt>
+                  <dd className="text-right text-gray-900">{formatDate(page.lastUpdated)}</dd>
+                </div>
+                {content.type === "terms" || content.type === "privacy" ? (
+                  <div className="flex items-center justify-between gap-4">
+                    <dt className="text-gray-500">Effective date</dt>
+                    <dd className="text-gray-900">{content.effectiveDate}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            </SectionCard>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
