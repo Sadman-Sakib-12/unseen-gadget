@@ -1,37 +1,71 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Save } from "lucide-react";
+import { AlertTriangle, Loader2, RefreshCw, Save, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { FormField } from "@/components/ui/form-field";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { SegmentedControl } from "@/components/ui/segmented-control";
+import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "sonner";
+import { getPage, savePage } from "@/features/cms/data/pages";
 import { BlockEditor } from "@/features/cms/components/block-editor";
-import type { CmsPage } from "@unseen-gadget/cms-data";
+import { SectionCard } from "@/features/cms/components/pages/section-card";
+import { ShopEditor } from "@/features/cms/components/pages/shop-editor";
+import { ContactEditor } from "@/features/cms/components/pages/contact-editor";
+import { DeliveryReturnEditor } from "@/features/cms/components/pages/delivery-return-editor";
+import type { CmsPage, CmsPageSlug, PageStatus } from "@unseen-gadget/cms-data";
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-1.5">
-      <label className="block text-xs font-medium text-gray-700">{label}</label>
-      {children}
-    </div>
-  );
+function formatDate(value: string | null | undefined): string {
+  if (!value) return "???";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString();
 }
 
-export function PageEditor({ slug }: { slug: string }) {
+function validatePage(page: CmsPage): string | null {
+  if (!page.title.trim()) return "Page title is required.";
+  const content = page.content;
+  switch (content.type) {
+    case "shop":
+      if (!content.hero.heading.trim()) return "Shop hero heading is required.";
+      if (!content.hero.description.trim()) return "Shop hero description is required.";
+      if (!content.hero.primaryCta.label.trim() || !content.hero.primaryCta.url.trim()) {
+        return "Shop hero primary CTA is required.";
+      }
+      break;
+    case "contact":
+      if (!content.hero.heading.trim()) return "Contact hero heading is required.";
+      break;
+    case "delivery-return":
+      if (!content.hero.heading.trim()) return "Delivery hero heading is required.";
+      break;
+    case "terms":
+    case "privacy":
+      if (!content.effectiveDate) return "Effective date is required.";
+      break;
+  }
+  return null;
+}
+
+export function PageEditor({ slug }: { slug: CmsPageSlug }) {
   const [page, setPage] = useState<CmsPage | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saving, setSaving] = useState<PageStatus | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const res = await fetch(`/api/cms/pages/${slug}`, { cache: "no-store" });
-        if (!res.ok) throw new Error("Failed to load page");
-        const data = (await res.json()) as CmsPage;
+        const data = await getPage(slug);
         if (active) setPage(data);
-      } catch {
-        if (active) toast.error("Failed to load page");
+      } catch (err) {
+        if (active) setLoadError(err instanceof Error ? err.message : "Failed to load page");
       } finally {
         if (active) setLoading(false);
       }
