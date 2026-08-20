@@ -76,8 +76,10 @@ const ORDER_STATUS_META: Record<string, { label: string; value: Order['status'];
   returned: { label: 'Returned Orders', value: 'RETURNED', description: 'Orders returned by customers.' },
 };
 
-export function OrdersPage() {
+export function OrdersPage({ status }: { status?: string }) {
   const [orders, setOrders] = useState<Order[]>(allOrders);
+  const statusMeta = status ? ORDER_STATUS_META[status] : undefined;
+  const visibleOrders = statusMeta ? orders.filter((o) => o.status === statusMeta.value) : orders;
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createState, setCreateState] = useState<CreateOrderState>(EMPTY_CREATE_STATE);
@@ -133,17 +135,17 @@ export function OrdersPage() {
   };
 
   const counts = {
-    total: orders.length,
-    pending: orders.filter((o) => o.status === 'PENDING').length,
-    processing: orders.filter((o) => o.status === 'PROCESSING' || o.status === 'CONFIRMED').length,
-    delivered: orders.filter((o) => o.status === 'DELIVERED').length,
+    total: visibleOrders.length,
+    pending: visibleOrders.filter((o) => o.status === 'PENDING').length,
+    processing: visibleOrders.filter((o) => o.status === 'PROCESSING' || o.status === 'CONFIRMED').length,
+    delivered: visibleOrders.filter((o) => o.status === 'DELIVERED').length,
   };
 
   return (
     <div className={cn('space-y-6', selectedOrder && 'lg:pr-[400px] lg:transition-[padding]')}>
       <PageHeader
-        title="Orders"
-        description="Manage and track all customer orders."
+        title={statusMeta?.label ?? 'Orders'}
+        description={statusMeta?.description ?? 'Manage and track all customer orders.'}
         actions={
           <>
             <Button variant="outline" onClick={() => exportOrdersCsv(orders)}>
@@ -188,7 +190,7 @@ export function OrdersPage() {
       </div>
 
       <OrdersTable
-        orders={orders}
+        orders={visibleOrders}
         onViewOrder={handleViewOrder}
         onStatusChange={handleStatusChange}
       />
