@@ -34,6 +34,99 @@ export type ContentBlock =
     }
   | { type: "divider" };
 
+export type CmsPageSlug = "shop" | "contact" | "delivery-return" | "terms" | "privacy";
+
+export type PageStatus = "draft" | "published";
+
+export interface CmsSeo {
+  metaTitle: string;
+  metaDescription: string;
+  ogImage: string;
+}
+
+export interface CtaLink {
+  label: string;
+  url: string;
+}
+
+export interface ShopHero {
+  eyebrow: string;
+  heading: string;
+  description: string;
+  image: string;
+  primaryCta: CtaLink;
+  secondaryCta?: CtaLink;
+}
+
+export interface ShopCategoryItem {
+  categoryRef: string;
+  order: number;
+  enabled: boolean;
+}
+
+export interface ShopPromoBanner {
+  title: string;
+  description: string;
+  image: string;
+  cta: CtaLink;
+  enabled: boolean;
+}
+
+export interface ShopProductItem {
+  productRef: string;
+  order: number;
+  enabled: boolean;
+}
+
+export interface ShopBottomCta {
+  heading: string;
+  description: string;
+  cta: CtaLink;
+  image: string;
+}
+
+export interface ShopPageContent {
+  type: "shop";
+  hero: ShopHero;
+  featuredCategories: { title: string; description: string; items: ShopCategoryItem[] };
+  promoBanner: ShopPromoBanner;
+  featuredProducts: { title: string; items: ShopProductItem[] };
+  bottomCta: ShopBottomCta;
+}
+
+export interface ContactHero {
+  heading: string;
+  description: string;
+}
+
+export type ContactIcon = "phone" | "mail" | "map" | "clock";
+
+export interface ContactItem {
+  label: string;
+  value: string;
+  icon: ContactIcon;
+  link?: string;
+  enabled: boolean;
+  order: number;
+}
+
+export interface SocialLink {
+  platform: string;
+  url: string;
+  enabled: boolean;
+}
+
+export interface ContactPageContent {
+  type: "contact";
+  hero: ContactHero;
+  contactInfo: { items: ContactItem[] };
+  location: { address: string; mapUrl: string };
+  socialLinks: { items: SocialLink[] };
+  contactCta: { heading: string; description: string; cta: CtaLink };
+}
+
+
+
 export interface CmsPage {
   slug: string;
   title: string;
