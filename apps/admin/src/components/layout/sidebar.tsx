@@ -108,7 +108,8 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
   const isItemActive = (item: NavItem) =>
     pathname === item.href || (pathname.startsWith(item.href + '/') && !item.subItems);
 
-  const isSubmenuActive = (item: NavItem) => item.subItems?.some((sub) => pathname === sub.href);
+  const isSubmenuActive = (item: NavItem) =>
+    item.subItems?.some((sub) => pathname === sub.href || pathname.startsWith(sub.href + "/"));
 
   const badgeClass = (item: NavItem, isActive: boolean) =>
     cn(
@@ -130,64 +131,156 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
           .map((item) => {
             const isActive = isItemActive(item);
             const subActive = isSubmenuActive(item);
-            const isExpanded = expandedMenus[item.href];
+            const isExpanded = expandedMenus[item.href] ?? subActive;
+            const headerActive = subActive || pathname === item.href;
+            const activeSubHref = item.subItems
+              ? item.subItems.reduce<string | null>((best, sub) => {
+                  const matches = pathname === sub.href || pathname.startsWith(sub.href + "/");
+                  if (!matches) return best;
+                  if (best === null || sub.href.length > best.length) return sub.href;
+                  return best;
+                }, null)
+              : null;
             const Icon = item.icon;
 
             return (
               <li key={item.href} title={collapse ? item.title : undefined}>
                 {item.subItems ? (
                   <div>
-                    <div
-                      className={cn(
-                        'flex items-center rounded-lg transition-colors',
-                        subActive || pathname === item.href
-                          ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
-                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                      )}
-                    >
-                      <Link
-                        href={item.href}
-                        onClick={onNavigate}
-                        aria-label={item.title}
+                    {item.collapseOnly && !collapse ? (
+                      <button
+                        type="button"
+                        onClick={() => toggleSubmenu(item.href)}
+                        aria-expanded={isExpanded}
                         className={cn(
-                          'flex min-w-0 flex-1 items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-colors',
-                          collapse ? 'justify-center px-0' : 'px-3',
-                          subActive || pathname === item.href
-                            ? 'text-primary-foreground'
-                            : 'text-gray-600 hover:text-gray-900'
+                          'flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                          headerActive
+                            ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
+                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                         )}
                       >
-                        <Icon
+                        <span className="flex min-w-0 items-center gap-3">
+                          <Icon
+                            className={cn(
+                              'h-5 w-5 shrink-0',
+                              headerActive ? 'text-white' : 'text-gray-500'
+                            )}
+                          />
+                          <span className="truncate">{item.title}</span>
+                          {item.badge ? (
+                            <span className={badgeClass(item, headerActive)}>{item.badge.text}</span>
+                          ) : null}
+                        </span>
+                        {isExpanded ? (
+                          <ChevronDown className="h-4 w-4 shrink-0" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 shrink-0" />
+                        )}
+                      </button>
+                    ) : (
+                      <div
+                        className={cn(
+                          'flex items-center rounded-lg transition-colors',
+                          headerActive
+                            ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
+                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                        )}
+                      >
+                        <Link
+                          href={item.href}
+                          onClick={onNavigate}
+                          aria-label={item.title}
                           className={cn(
-                            'h-5 w-5 shrink-0',
-                            subActive || pathname === item.href ? 'text-white' : 'text-gray-500'
-                          )}
-                        />
-                        {!collapse && <span className="truncate">{item.title}</span>}
-                      </Link>
-                      {!collapse && (
-                        <button
-                          type="button"
-                          onClick={() => toggleSubmenu(item.href)}
-                          aria-expanded={isExpanded}
-                          aria-label={`Toggle ${item.title} submenu`}
-                          className={cn(
-                            'mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors',
-                            subActive || pathname === item.href
-                              ? 'text-white/80 hover:bg-white/10'
-                              : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                            'flex min-w-0 flex-1 items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-colors',
+                            collapse ? 'justify-center px-0' : 'px-3',
+                            headerActive
+                              ? 'text-primary-foreground'
+                              : 'text-gray-600 hover:text-gray-900'
                           )}
                         >
-                          <ChevronDown
-                            className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-180')}
+                          <Icon
+                            className={cn(
+                              'h-5 w-5 shrink-0',
+                              headerActive ? 'text-white' : 'text-gray-500'
+                            )}
                           />
-                        </button>
-                      )}
-                    </div>
+                          {!collapse && <span className="truncate">{item.title}</span>}
+                        </Link>
+                        {!collapse && (
+                          <button
+                            type="button"
+                            onClick={() => toggleSubmenu(item.href)}
+                            aria-expanded={isExpanded}
+                            aria-label={`Toggle ${item.title} submenu`}
+                            className={cn(
+                              'mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors',
+                              headerActive
+                                ? 'text-white/80 hover:bg-white/10'
+                                : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+                            )}
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    )}
                     {!collapse && isExpanded && (
                       <ul className="mt-1 space-y-0.5 pl-4">
                         {item.subItems.map((subItem) => {
-                          const isSubActive = pathname === subItem.href;
+                          if (subItem.subItems && subItem.subItems.length > 0) {
+                            const nestedActive =
+                              pathname === subItem.href ||
+                              pathname.startsWith(subItem.href + "/");
+                            const nestedExpanded = expandedMenus[subItem.href] ?? nestedActive;
+                            return (
+                              <li key={subItem.href}>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleSubmenu(subItem.href)}
+                                  aria-expanded={nestedExpanded}
+                                  aria-label={`Toggle ${subItem.title} submenu`}
+                                  className={cn(
+                                    'flex w-full items-center justify-between gap-2 rounded-md border-l-2 py-2 pl-5 pr-3 text-sm font-medium transition-colors',
+                                    nestedActive
+                                      ? 'border-primary bg-primary/5 text-primary'
+                                      : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                                  )}
+                                >
+                                  <span className="truncate">{subItem.title}</span>
+                                  {nestedExpanded ? (
+                                    <ChevronDown className="h-4 w-4 shrink-0" />
+                                  ) : (
+                                    <ChevronRight className="h-4 w-4 shrink-0" />
+                                  )}
+                                </button>
+                                {nestedExpanded && (
+                                  <ul className="mt-0.5 space-y-0.5 pl-4">
+                                    {subItem.subItems.map((leaf) => (
+                                      <li key={leaf.href}>
+                                        <Link
+                                          href={leaf.href}
+                                          onClick={onNavigate}
+                                          className={cn(
+                                            'block rounded-md border-l-2 py-2 pl-5 pr-3 text-sm font-medium transition-colors',
+                                            pathname === leaf.href
+                                              ? 'border-primary bg-primary/5 text-primary'
+                                              : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                                          )}
+                                        >
+                                          {leaf.title}
+                                        </Link>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </li>
+                            );
+                          }
+                          const isSubActive = activeSubHref === subItem.href;
                           return (
                             <li key={subItem.href}>
                               <Link
