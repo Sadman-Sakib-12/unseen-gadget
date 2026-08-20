@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { readJson, writeJson } from "@unseen-gadget/cms-data/writer";
-import type { CmsPage } from "@unseen-gadget/cms-data";
+import type { CmsPage, CmsPageSlug } from "@unseen-gadget/cms-data";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,7 @@ export async function PUT(request: Request, context: { params: Promise<{ slug: s
   const pages = await readJson<CmsPage[]>("pages.json");
   const index = pages.findIndex((p) => p.slug === slug);
   if (index === -1) return NextResponse.json({ error: "Page not found" }, { status: 404 });
-  pages[index] = { ...body, slug };
+  pages[index] = { ...body, slug: slug as CmsPageSlug };
   await writeJson("pages.json", pages);
   return NextResponse.json(pages[index]);
 }
