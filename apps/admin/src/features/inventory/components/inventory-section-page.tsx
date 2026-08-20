@@ -85,3 +85,64 @@ const SECTION_CONFIG: Record<string, SectionConfig> = {
     kind: "history",
   },
 };
+
+export function InventorySectionPage({ section }: { section: string }) {
+  const config = SECTION_CONFIG[section];
+  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+  const [showAdjustModal, setShowAdjustModal] = useState(false);
+
+  const handleAdjust = (item: InventoryItem) => {
+    setSelectedItem(item);
+    setShowAdjustModal(true);
+  };
+
+  const handleSaveAdjustment = (itemId: number, quantity: number, reason: string) => {
+    void reason;
+    const item = inventoryItems.find((i) => i.id === itemId);
+    if (item) {
+      item.stock += quantity;
+      if (item.stock <= 0) item.status = "OUT_OF_STOCK";
+      else if (item.stock < item.minStock) item.status = "LOW_STOCK";
+      else item.status = "IN_STOCK";
+      item.lastRestocked = new Date().toISOString().split("T")[0];
+    }
+  };
+
+  if (!config) return null;
+
+  const items = config.statusFilter
+    ? inventoryItems.filter((i) => i.status === config.statusFilter)
+    : inventoryItems;
+  const movements = config.typeFilter
+    ? stockMovements.filter((m) => m.type === config.typeFilter)
+    : stockMovements;
+
+  return (
+    <div className="space-y-6">
+      <PageHeader title={config.title} description={config.description} />
+
+      {config.kind === "table" && <StockTable items={items} onAdjust={handleAdjust} />}
+
+      {config.kind === "history" && <StockHistory movements={movements} />}
+
+      {config.kind === "placeholder" && (
+        <EmptyState
+          icon={config.placeholderIcon}
+          title={config.placeholderTitle ?? ""}
+          description={config.placeholderDescription ?? ""}
+        />
+      )}
+
+      <StockAdjustmentModal
+        key={selectedItem?.id ?? "adjust"}
+        item={selectedItem}
+        open={showAdjustModal}
+        onClose={() => {
+          setShowAdjustModal(false);
+          setSelectedItem(null);
+        }}
+        onSave={handleSaveAdjustment}
+      />
+    </div>
+  );
+}
