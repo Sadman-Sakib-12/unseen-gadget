@@ -1,14 +1,18 @@
+"use client";
+
 import Link from "next/link";
-import { FileText, Truck, Briefcase, LayoutTemplate } from "lucide-react";
+import { ScrollText, ShieldCheck, Truck, Phone, Store, Pencil } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { Card } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/components/ui/utils";
 
 const pages = [
-  { href: "/cms/pages/terms", title: "Terms & Conditions", desc: "Edit the public terms page content.", icon: FileText },
-  { href: "/cms/pages/privacy", title: "Privacy Policy", desc: "Edit the public privacy policy content.", icon: FileText },
+  { href: "/cms/pages/shop", title: "Shop Landing", desc: "Hero content shown above the shop/product listing.", icon: Store },
+  { href: "/cms/pages/contact", title: "Contact", desc: "Contact info cards shown on the contact page.", icon: Phone },
   { href: "/cms/pages/delivery-return", title: "Delivery & Return", desc: "Delivery charges, steps and return rules.", icon: Truck },
-  { href: "/cms/pages/career", title: "Career", desc: "Career page content and perks.", icon: Briefcase },
-  { href: "/cms/pages/contact", title: "Contact", desc: "Contact info cards shown on the contact page.", icon: FileText },
-  { href: "/cms/pages/shop", title: "Shop Landing", desc: "Hero content shown above the shop listing.", icon: LayoutTemplate },
+  { href: "/cms/pages/terms", title: "Terms & Conditions", desc: "Edit the public terms page content.", icon: ScrollText },
+  { href: "/cms/pages/privacy", title: "Privacy Policy", desc: "Edit the public privacy policy content.", icon: ShieldCheck },
 ];
 
 export default function CmsPagesHubPage() {
@@ -24,15 +28,23 @@ export default function CmsPagesHubPage() {
           <Link
             key={page.href}
             href={page.href}
-            className="group rounded-xl border border-border bg-white p-5 shadow-sm transition-colors hover:border-primary/40 hover:shadow-md"
+            className="group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <page.icon className="h-5 w-5" />
-            </div>
-            <h3 className="mt-3 text-sm font-bold text-gray-900 group-hover:text-primary">
-              {page.title}
-            </h3>
-            <p className="mt-1 text-xs leading-relaxed text-gray-500">{page.desc}</p>
+            <Card className="h-full p-5 transition-colors group-hover:border-primary/40 group-hover:shadow-md">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <page.icon className="h-5 w-5" />
+                </div>
+                <span className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
+                  <Pencil className="h-3.5 w-3.5" />
+                  Edit
+                </span>
+              </div>
+              <h3 className="mt-3 text-sm font-bold text-gray-900 group-hover:text-primary">
+                {page.title}
+              </h3>
+              <p className="mt-1 text-xs leading-relaxed text-gray-500">{page.desc}</p>
+            </Card>
           </Link>
         ))}
       </div>
