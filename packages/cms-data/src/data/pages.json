@@ -330,38 +330,100 @@
     "slug": "shop",
     "title": "Unseen Gadget Shop",
     "description": "Genuine tech and accessories at the best prices in Bangladesh.",
-    "blocks": [
-      {
-        "type": "heading",
-        "level": 2,
-        "text": "Why shop with us"
+    "status": "draft",
+    "lastUpdated": "2026-08-19T18:49:29.636Z",
+    "seo": {
+      "metaTitle": "Unseen Gadget | Genuine Tech & Accessories in Bangladesh",
+      "metaDescription": "Shop 100% authentic phones, laptops, audio and accessories with official warranty. Same-day delivery inside Dhaka, nationwide reach.",
+      "ogImage": "/images/shop-og.jpg"
+    },
+    "blocks": [],
+    "content": {
+      "type": "shop",
+      "hero": {
+        "eyebrow": "New & Authentic Tech",
+        "heading": "Genuine tech and accessories at the best prices in Bangladesh",
+        "description": "100% authentic products with official warranty, best prices on every device we sell, same-day delivery inside Dhaka and easy 7-day returns.",
+        "image": "/images/shop-hero.jpg",
+        "primaryCta": {
+          "label": "Browse the collection",
+          "url": "/category/smartphones/iphones"
+        },
+        "secondaryCta": {
+          "label": "View current deals",
+          "url": "/promotions"
+        }
       },
-      {
-        "type": "features",
+      "featuredCategories": {
+        "title": "Shop by category",
+        "description": "Explore our most popular categories — all genuine, all warrantied.",
         "items": [
           {
-            "title": "100% Authentic",
-            "desc": "Every product is genuine with official warranty."
+            "categoryRef": "smartphones",
+            "order": 1,
+            "enabled": true
           },
           {
-            "title": "Best Prices",
-            "desc": "We match the market on every device we sell."
+            "categoryRef": "laptops",
+            "order": 2,
+            "enabled": true
           },
           {
-            "title": "Fast Delivery",
-            "desc": "Same-day delivery inside Dhaka, nationwide reach."
+            "categoryRef": "audio",
+            "order": 3,
+            "enabled": true
           },
           {
-            "title": "Easy Returns",
-            "desc": "7-day returns and hassle-free exchanges."
+            "categoryRef": "accessories",
+            "order": 4,
+            "enabled": false
           }
         ]
       },
-      {
-        "type": "cta",
-        "label": "Browse the collection",
-        "href": "/category/smartphones/iphones"
+      "promoBanner": {
+        "title": "Flash Sale — up to 20% off",
+        "description": "Limited-time deals on select phones, laptops and audio gear.",
+        "image": "/images/promo-banner.jpg",
+        "cta": {
+          "label": "Shop deals",
+          "url": "/promotions"
+        },
+        "enabled": true
+      },
+      "featuredProducts": {
+        "title": "Featured products",
+        "items": [
+          {
+            "productRef": "iphone-15-pro",
+            "order": 1,
+            "enabled": true
+          },
+          {
+            "productRef": "macbook-air-m2",
+            "order": 2,
+            "enabled": true
+          },
+          {
+            "productRef": "airpods-pro",
+            "order": 3,
+            "enabled": true
+          },
+          {
+            "productRef": "smartwatch-series-9",
+            "order": 4,
+            "enabled": false
+          }
+        ]
+      },
+      "bottomCta": {
+        "heading": "Ready to upgrade your gear?",
+        "description": "Browse the full collection online or visit our store in Bashundhara City.",
+        "cta": {
+          "label": "Browse the collection",
+          "url": "/category/smartphones/iphones"
+        },
+        "image": "/images/shop-bottom-cta.jpg"
       }
-    ]
+    }
   }
 ]
