@@ -1,7 +1,6 @@
 ﻿'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { salesTrendData } from '@/features/dashboard/data';
 import { chartAxis, chartColors, chartGridStroke, chartTooltip } from '@/lib/chart-theme';
 import {
   Line,
@@ -13,14 +12,16 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import type { SalesTrend as SalesTrendType } from '@/features/dashboard/types';
 
 interface SalesTrendProps {
   className?: string;
+  data: SalesTrendType[];
 }
 
 const formatBDTK = (value: number) => `৳${(value / 1000).toFixed(0)}k`;
 
-export function SalesTrend({ className }: SalesTrendProps) {
+export function SalesTrend({ className, data }: SalesTrendProps) {
   return (
     <Card className={className}>
       <CardHeader className="pb-2">
@@ -33,7 +34,7 @@ export function SalesTrend({ className }: SalesTrendProps) {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={salesTrendData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+          <LineChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={chartGridStroke} />
             <XAxis
               dataKey="month"

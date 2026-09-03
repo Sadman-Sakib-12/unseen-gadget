@@ -1,19 +1,36 @@
 "use client";
 
+import { Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
 import { FormField } from "@/components/ui/form-field";
-import { SectionCard } from "./section-card";
-import { Repeater } from "./repeater";
-import type { ContactIcon, ContactPageContent } from "@unseen-gadget/cms-data";
+import { SectionCard } from "@/features/cms/components/pages/section-card";
 
-const ICON_OPTIONS: { value: ContactIcon; label: string }[] = [
-  { value: "phone", label: "Phone" },
-  { value: "mail", label: "Email" },
-  { value: "map", label: "Address" },
-  { value: "clock", label: "Hours" },
-];
+interface ShowroomBranch {
+  name: string;
+  address: string;
+}
+
+export interface ContactPageContent {
+  type: "contact";
+  mapEmbedUrl?: string;
+  heading?: string;
+  paragraphs?: string[];
+  bengaliNote?: string;
+  hotline?: {
+    phone?: string;
+    details?: string;
+  };
+  showrooms?: ShowroomBranch[];
+  corporateHq?: {
+    name?: string;
+    address?: string;
+  };
+  // Backwards compatibility fields
+  hero?: { heading: string; description: string };
+  contactInfo?: { items: any[] };
+}
 
 interface ContactEditorProps {
   content: ContactPageContent;
@@ -21,149 +38,202 @@ interface ContactEditorProps {
 }
 
 export function ContactEditor({ content, onChange }: ContactEditorProps) {
+  const showrooms = content.showrooms || [];
+  const paragraphs = content.paragraphs || [];
+
   const update = (patch: Partial<ContactPageContent>) => onChange({ ...content, ...patch });
+
+  const addShowroom = () => {
+    update({
+      showrooms: [...showrooms, { name: "New Showroom", address: "Showroom Address" }],
+    });
+  };
+
+  const updateShowroom = (idx: number, patch: Partial<ShowroomBranch>) => {
+    const updated = [...showrooms];
+    updated[idx] = { ...updated[idx], ...patch };
+    update({ showrooms: updated });
+  };
+
+  const removeShowroom = (idx: number) => {
+    update({ showrooms: showrooms.filter((_, i) => i !== idx) });
+  };
+
+  const addParagraph = () => {
+    update({ paragraphs: [...paragraphs, ""] });
+  };
+
+  const updateParagraph = (idx: number, val: string) => {
+    const updated = [...paragraphs];
+    updated[idx] = val;
+    update({ paragraphs: updated });
+  };
+
+  const removeParagraph = (idx: number) => {
+    update({ paragraphs: paragraphs.filter((_, i) => i !== idx) });
+  };
 
   return (
     <div className="space-y-6">
-      <SectionCard title="Hero" description="Heading and description shown at the top of the contact page.">
-        <FormField label="Heading">
+      {/* ── 1. Map Embed ── */}
+      <SectionCard title="Map Embed & Header" description="Google Map iframe URL and main shop introduction.">
+        <FormField label="Google Maps Embed URL">
           <Input
-            value={content.hero.heading}
-            onChange={(e) => update({ hero: { ...content.hero, heading: e.target.value } })}
+            value={content.mapEmbedUrl || ""}
+            onChange={(e) => update({ mapEmbedUrl: e.target.value })}
+            placeholder="https://www.google.com/maps/embed?pb=..."
           />
         </FormField>
-        <FormField label="Description">
-          <Textarea
-            rows={2}
-            value={content.hero.description}
-            onChange={(e) => update({ hero: { ...content.hero, description: e.target.value } })}
-          />
-        </FormField>
-      </SectionCard>
-
-      <SectionCard
-        title="Contact Information"
-        description="Phone, email, address and hours — shown as info cards, in display order."
-      >
-        <Repeater
-          label="Contact items"
-          items={content.contactInfo.items}
-          onChange={(items) => update({ contactInfo: { items } })}
-          makeItem={() => ({ label: "", value: "", icon: "phone" as ContactIcon, link: "", enabled: true, order: 1 })}
-          getEnabled={(item) => item.enabled}
-          applyEnabled={(item, enabled) => ({ ...item, enabled })}
-          getOrder={(item) => item.order}
-          applyOrder={(item, order) => ({ ...item, order })}
-          renderItem={(item, setItem) => (
-            <>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <FormField label="Label">
-                  <Input
-                    value={item.label}
-                    placeholder="e.g. Phone"
-                    onChange={(e) => setItem({ ...item, label: e.target.value })}
-                  />
-                </FormField>
-                <FormField label="Icon">
-                  <Select
-                    value={item.icon}
-                    onChange={(e) => setItem({ ...item, icon: e.target.value as ContactIcon })}
-                    options={ICON_OPTIONS}
-                  />
-                </FormField>
-              </div>
-              <FormField label="Value">
-                <Input
-                  value={item.value}
-                  onChange={(e) => setItem({ ...item, value: e.target.value })}
-                />
-              </FormField>
-              <FormField label="Link" hint="Optional — e.g. tel:+8801714039409.">
-                <Input
-                  value={item.link ?? ""}
-                  onChange={(e) => setItem({ ...item, link: e.target.value })}
-                />
-              </FormField>
-            </>
-          )}
-        />
-      </SectionCard>
-
-      <SectionCard title="Location" description="Store address and map link.">
-        <FormField label="Address">
-          <Textarea
-            rows={2}
-            value={content.location.address}
-            onChange={(e) => update({ location: { ...content.location, address: e.target.value } })}
-          />
-        </FormField>
-        <FormField label="Map URL" hint="Optional — Google Maps link or embed URL.">
+        <FormField label="Main Heading">
           <Input
-            value={content.location.mapUrl}
-            onChange={(e) => update({ location: { ...content.location, mapUrl: e.target.value } })}
+            value={content.heading || content.hero?.heading || ""}
+            onChange={(e) => update({ heading: e.target.value })}
+            placeholder="Visit Our Unseen Gadget Shops in Dhaka, Bashundhara City"
           />
         </FormField>
       </SectionCard>
 
-      <SectionCard title="Social Links" description="Social media profiles shown on the contact page.">
-        <Repeater
-          label="Links"
-          items={content.socialLinks.items}
-          onChange={(items) => update({ socialLinks: { items } })}
-          makeItem={() => ({ platform: "", url: "", enabled: true })}
-          getEnabled={(item) => item.enabled}
-          applyEnabled={(item, enabled) => ({ ...item, enabled })}
-          renderItem={(item, setItem) => (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <FormField label="Platform">
-                <Input
-                  value={item.platform}
-                  placeholder="e.g. Facebook"
-                  onChange={(e) => setItem({ ...item, platform: e.target.value })}
-                />
-              </FormField>
-              <FormField label="URL">
-                <Input
-                  value={item.url}
-                  onChange={(e) => setItem({ ...item, url: e.target.value })}
-                />
-              </FormField>
+      {/* ── 2. Introduction Paragraphs ── */}
+      <SectionCard title="Shop Narrative Paragraphs" description="Information paragraphs about showrooms, online ordering, and corporate office.">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-gray-700">Paragraphs:</span>
+            <Button type="button" onClick={addParagraph} size="sm" className="text-xs">
+              <Plus className="h-3.5 w-3.5 mr-1" /> Add Paragraph
+            </Button>
+          </div>
+
+          {paragraphs.map((p, idx) => (
+            <div key={idx} className="flex items-start gap-2">
+              <Textarea
+                rows={2}
+                value={p}
+                onChange={(e) => updateParagraph(idx, e.target.value)}
+                placeholder="Write paragraph..."
+                className="text-xs flex-1"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => removeParagraph(idx)}
+                className="text-red-500 hover:text-red-700 h-7 w-7 p-0 mt-1"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
             </div>
-          )}
-        />
+          ))}
+
+          <FormField label="Bengali Highlight Note (Optional)">
+            <Input
+              value={content.bengaliNote || ""}
+              onChange={(e) => update({ bengaliNote: e.target.value })}
+              placeholder="আমাদের আউটলেটে এসে সরাসরি দেখে শুনে..."
+              className="text-xs"
+            />
+          </FormField>
+        </div>
       </SectionCard>
 
-      <SectionCard title="Contact CTA" description="Closing call-to-action block.">
-        <FormField label="Heading">
-          <Input
-            value={content.contactCta.heading}
-            onChange={(e) => update({ contactCta: { ...content.contactCta, heading: e.target.value } })}
-          />
-        </FormField>
-        <FormField label="Description">
-          <Textarea
-            rows={2}
-            value={content.contactCta.description}
-            onChange={(e) => update({ contactCta: { ...content.contactCta, description: e.target.value } })}
-          />
-        </FormField>
+      {/* ── 3. Hotline & HQ ── */}
+      <SectionCard title="Hotline & Corporate HQ" description="Hotline numbers, emails and corporate office.">
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField label="CTA text">
+          <FormField label="Hotline Phone">
             <Input
-              value={content.contactCta.cta.label}
+              value={content.hotline?.phone || ""}
               onChange={(e) =>
-                update({ contactCta: { ...content.contactCta, cta: { ...content.contactCta.cta, label: e.target.value } } })
+                update({
+                  hotline: {
+                    phone: e.target.value,
+                    details: content.hotline?.details || "",
+                  },
+                })
               }
+              placeholder="e.g. +880 1XXX-XXXXXX"
             />
           </FormField>
-          <FormField label="CTA URL">
+          <FormField label="Hotline Details / Email">
             <Input
-              value={content.contactCta.cta.url}
+              value={content.hotline?.details || ""}
               onChange={(e) =>
-                update({ contactCta: { ...content.contactCta, cta: { ...content.contactCta.cta, url: e.target.value } } })
+                update({
+                  hotline: {
+                    phone: content.hotline?.phone || "",
+                    details: e.target.value,
+                  },
+                })
               }
+              placeholder="Shipping, Order Status & General Query: contact@unseengadget.com"
             />
           </FormField>
+          <FormField label="Corporate HQ Title">
+            <Input
+              value={content.corporateHq?.name || ""}
+              onChange={(e) =>
+                update({
+                  corporateHq: {
+                    name: e.target.value,
+                    address: content.corporateHq?.address || "",
+                  },
+                })
+              }
+              placeholder="Corporate HQ"
+            />
+          </FormField>
+          <FormField label="Corporate HQ Address">
+            <Input
+              value={content.corporateHq?.address || ""}
+              onChange={(e) =>
+                update({
+                  corporateHq: {
+                    name: content.corporateHq?.name || "Corporate HQ",
+                    address: e.target.value,
+                  },
+                })
+              }
+              placeholder="House 07, Main Road, Block: H, Banasree, Dhaka"
+            />
+          </FormField>
+        </div>
+      </SectionCard>
+
+      {/* ── 4. Showroom Branches ── */}
+      <SectionCard title="Showroom Branches" description="Physical showroom branch cards shown on the contact page.">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-gray-700">Showrooms:</span>
+            <Button type="button" onClick={addShowroom} size="sm" className="text-xs">
+              <Plus className="h-3.5 w-3.5 mr-1" /> Add Showroom
+            </Button>
+          </div>
+
+          {showrooms.map((branch, idx) => (
+            <div key={idx} className="rounded-lg border border-gray-200 bg-gray-50/50 p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <Input
+                  value={branch.name}
+                  onChange={(e) => updateShowroom(idx, { name: e.target.value })}
+                  placeholder="Showroom Title (e.g. Showroom 1 (Main Branch))"
+                  className="font-bold text-xs bg-white"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeShowroom(idx)}
+                  className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              <Input
+                value={branch.address}
+                onChange={(e) => updateShowroom(idx, { address: e.target.value })}
+                placeholder="Shop 84, Block: C, Level: 04, Bashundhara City Shopping Mall, Dhaka"
+                className="text-xs bg-white"
+              />
+            </div>
+          ))}
         </div>
       </SectionCard>
     </div>

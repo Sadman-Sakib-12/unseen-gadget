@@ -6,6 +6,7 @@ export interface ApiResponse<T = unknown> {
 }
 
 export interface PaginatedResponse<T> {
+  success?: boolean;
   data: T[];
   total: number;
   page: number;

@@ -1,57 +1,67 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ChevronRight, Tag, Zap, Gift, type LucideIcon } from "lucide-react";
+import { ChevronRight, Tag, Gift, Sparkles, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/use-translation";
+import { apiRequest } from "@/lib/api";
 
-const promos: {
-  icon: LucideIcon;
+interface PromotionItem {
+  id?: string;
+  icon?: LucideIcon;
   badge: string;
   title: string;
   desc: string;
   href: string;
   cta: string;
   gradient: string;
-}[] = [
-  {
-    icon: Zap,
-    badge: "Up to 20% OFF",
-    title: "Apple Shopping Event",
-    desc: "Hurry and grab massive discounts on all Apple devices. Limited time offer — shop before stocks run out!",
-    href: "/category/computers/macbooks",
-    cta: "Shop Apple Deals",
-    gradient: "from-primary to-primary-800",
-  },
-  {
-    icon: Tag,
-    badge: "New Launch",
-    title: "MacBook Air M5",
-    desc: "Experience the next generation of performance. The new M5 chip delivers blazing-fast speed and all-day battery life.",
-    href: "/category/computers/macbooks",
-    cta: "Explore MacBooks",
-    gradient: "from-primary-700 to-primary-500",
-  },
-  {
-    icon: Gift,
-    badge: "Sale On",
-    title: "iPad Accessories Sale",
-    desc: "Personalize your iPad with top-branded accessories. Cases, keyboards, pencils and more — all at great prices.",
-    href: "/category/cases-protectors/ipad",
-    cta: "Browse Accessories",
-    gradient: "from-violet-700 to-violet-500",
-  },
-];
+}
 
 export default function PromotionsPage() {
   const { t } = useTranslation();
+  const [promotions, setPromotions] = useState<PromotionItem[]>([]);
   const [email, setEmail] = useState("");
+  const [isSubscribing, setIsSubscribing] = useState(false);
 
-  const subscribe = () => {
-    if (!email) return;
-    toast.success(t("footer.newsletter"));
-    setEmail("");
+  useEffect(() => {
+    apiRequest("/cms/promotions")
+      .then((res) => {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          const mapped: PromotionItem[] = res.data.map((p: any) => ({
+            id: p.id,
+            icon: p.icon === "gift" ? Gift : p.icon === "tag" ? Tag : Sparkles,
+            badge: p.badge || (p.discountValue ? `${p.discountValue}% OFF` : "Special Offer"),
+            title: p.title || p.name,
+            desc: p.description || "",
+            href: p.ctaHref || "/products",
+            cta: p.ctaLabel || "Shop Now",
+            gradient: p.gradient || "from-primary to-primary-800",
+          }));
+          setPromotions(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const subscribe = async () => {
+    if (!email || !email.includes("@")) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    setIsSubscribing(true);
+    try {
+      await apiRequest("/newsletter", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+      toast.success(t("footer.newsletter") || "Subscribed to newsletter!");
+      setEmail("");
+    } catch (err: any) {
+      toast.error(err.error || err.message || "Failed to subscribe");
+    } finally {
+      setIsSubscribing(false);
+    }
   };
 
   return (
@@ -83,33 +93,36 @@ export default function PromotionsPage() {
 
       <div className="container-gadget py-10">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {promos.map((promo) => (
-            <div
-              key={promo.title}
-              className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${promo.gradient} p-6 text-white`}
-            >
-              <span className="inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-bold">
-                {promo.badge}
-              </span>
-
-              <div className="mt-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
-                <promo.icon className="h-6 w-6 text-white" />
-              </div>
-
-              <h3 className="mt-4 text-lg font-bold">{promo.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-white/80">{promo.desc}</p>
-
-              <Link
-                href={promo.href}
-                className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-foreground transition hover:bg-muted"
+          {promotions.map((promo, idx) => {
+            const IconComponent = promo.icon || Tag;
+            return (
+              <div
+                key={promo.id || idx}
+                className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${promo.gradient} p-6 text-white`}
               >
-                {t("listings.promotions.cta")} <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
+                <span className="inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-bold">
+                  {promo.badge}
+                </span>
 
-              <div className="pointer-events-none absolute -bottom-8 -right-8 h-32 w-32 rounded-full bg-white/5" />
-              <div className="pointer-events-none absolute -bottom-4 -right-4 h-20 w-20 rounded-full bg-white/5" />
-            </div>
-          ))}
+                <div className="mt-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
+                  <IconComponent className="h-6 w-6 text-white" />
+                </div>
+
+                <h3 className="mt-4 text-lg font-bold">{promo.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/80">{promo.desc}</p>
+
+                <Link
+                  href={promo.href}
+                  className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-foreground transition hover:bg-muted"
+                >
+                  {promo.cta} <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+
+                <div className="pointer-events-none absolute -bottom-8 -right-8 h-32 w-32 rounded-full bg-white/5" />
+                <div className="pointer-events-none absolute -bottom-4 -right-4 h-20 w-20 rounded-full bg-white/5" />
+              </div>
+            );
+          })}
         </div>
 
         {/* Newsletter CTA */}
@@ -126,9 +139,10 @@ export default function PromotionsPage() {
             />
             <button
               onClick={subscribe}
+              disabled={isSubscribing}
               className="btn-primary"
             >
-              {t("listings.promotions.subscribe")}
+              {isSubscribing ? "Subscribing..." : t("listings.promotions.subscribe")}
             </button>
           </div>
         </div>

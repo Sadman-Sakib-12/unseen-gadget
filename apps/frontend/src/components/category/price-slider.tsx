@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback, useRef } from "react";
 import { formatBDT } from "@/components/price";
 
 export function PriceSlider({
@@ -18,73 +17,55 @@ export function PriceSlider({
   onLowChange: (v: number) => void;
   onHighChange: (v: number) => void;
 }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-
-  const pct = (v: number) => ((v - min) / (max - min)) * 100;
-
-  const clamp = (v: number, lo: number, hi: number) =>
-    Math.min(hi, Math.max(lo, v));
-
-  const valueFromEvent = useCallback(
-    (clientX: number) => {
-      if (!trackRef.current) return 0;
-      const rect = trackRef.current.getBoundingClientRect();
-      const ratio = clamp((clientX - rect.left) / rect.width, 0, 1);
-      return Math.round(min + ratio * (max - min));
-    },
-    [min, max]
-  );
-
-  const startDrag = (
-    e: React.MouseEvent | React.TouchEvent,
-    which: "low" | "high"
-  ) => {
-    e.preventDefault();
-    const move = (ev: MouseEvent | TouchEvent) => {
-      const x =
-        "touches" in ev ? ev.touches[0]!.clientX : (ev as MouseEvent).clientX;
-      const v = valueFromEvent(x);
-      if (which === "low") onLowChange(clamp(v, min, high - 1));
-      else onHighChange(clamp(v, low + 1, max));
-    };
-    const up = () => {
-      window.removeEventListener("mousemove", move);
-      window.removeEventListener("mouseup", up);
-      window.removeEventListener("touchmove", move);
-      window.removeEventListener("touchend", up);
-    };
-    window.addEventListener("mousemove", move);
-    window.addEventListener("mouseup", up);
-    window.addEventListener("touchmove", move, { passive: false });
-    window.addEventListener("touchend", up);
-  };
-
-  const lowPct = pct(low);
-  const highPct = pct(high);
+  const lowPct = max > min ? Math.max(0, Math.min(100, ((low - min) / (max - min)) * 100)) : 0;
+  const highPct = max > min ? Math.max(0, Math.min(100, ((high - min) / (max - min)) * 100)) : 100;
 
   return (
     <div className="px-2 py-1">
-      <div
-        ref={trackRef}
-        className="relative h-1.5 w-full cursor-pointer rounded-full bg-muted"
-        style={{ touchAction: "none" }}
-      >
-        <div
-          className="absolute h-full rounded-full bg-primary"
-          style={{ left: `${lowPct}%`, right: `${100 - highPct}%` }}
-        />
-        <button
+      <div className="relative h-4 w-full flex items-center">
+        {/* Track bar */}
+        <div className="absolute inset-x-0 h-1.5 rounded-full bg-muted overflow-hidden">
+          <div
+            className="absolute h-full bg-primary rounded-full"
+            style={{ left: `${lowPct}%`, width: `${Math.max(0, highPct - lowPct)}%` }}
+          />
+        </div>
+
+        {/* Native React Low Range Input */}
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={low}
           aria-label="Minimum price"
-          onMouseDown={(e) => startDrag(e, "low")}
-          onTouchStart={(e) => startDrag(e, "low")}
-          className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full border-2 border-primary bg-card shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            if (v <= high) onLowChange(v);
+          }}
+          className="pointer-events-none absolute inset-0 w-full appearance-none bg-transparent opacity-0 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:cursor-pointer"
+        />
+
+        {/* Native React High Range Input */}
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={high}
+          aria-label="Maximum price"
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            if (v >= low) onHighChange(v);
+          }}
+          className="pointer-events-none absolute inset-0 w-full appearance-none bg-transparent opacity-0 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:cursor-pointer"
+        />
+
+        {/* Visual Knobs */}
+        <div
+          className="pointer-events-none absolute h-4 w-4 -translate-x-1/2 rounded-full border-2 border-primary bg-card shadow-md"
           style={{ left: `${lowPct}%` }}
         />
-        <button
-          aria-label="Maximum price"
-          onMouseDown={(e) => startDrag(e, "high")}
-          onTouchStart={(e) => startDrag(e, "high")}
-          className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full border-2 border-primary bg-card shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+        <div
+          className="pointer-events-none absolute h-4 w-4 -translate-x-1/2 rounded-full border-2 border-primary bg-card shadow-md"
           style={{ left: `${highPct}%` }}
         />
       </div>

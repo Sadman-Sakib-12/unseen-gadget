@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Open_Sans, Noto_Sans_Bengali } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
+import { StorefrontShell } from "@/components/storefront-shell";
+import { AuthSessionProvider } from "@/components/providers/session-provider";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { GoogleTranslate } from "@/components/google-translate";
 
 const openSans = Open_Sans({
   subsets: ["latin"],
@@ -24,6 +26,16 @@ export const metadata: Metadata = {
   description: "Bangladesh's trusted online store for genuine Apple accessories, MacBooks, iPhones, iPads, and premium tech gadgets.",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#182C61",
+};
+
+import { LanguageProvider } from "@/hooks/use-language";
+import { ThemeProvider } from "@/hooks/use-theme";
+
 export default function RootLayout({
   children,
 }: {
@@ -32,10 +44,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${openSans.variable} ${bengali.variable}`}>
       <body className="min-h-screen bg-background text-foreground antialiased" suppressHydrationWarning>
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
-        <Toaster position="bottom-center" richColors toastOptions={{ style: { fontSize: "13px" } }} />
+        <AuthSessionProvider>
+          <QueryProvider>
+            <ThemeProvider>
+              <LanguageProvider>
+                <StorefrontShell>{children}</StorefrontShell>
+                <Toaster position="bottom-center" richColors toastOptions={{ style: { fontSize: "13px" } }} />
+                <GoogleTranslate />
+              </LanguageProvider>
+            </ThemeProvider>
+          </QueryProvider>
+        </AuthSessionProvider>
       </body>
     </html>
   );

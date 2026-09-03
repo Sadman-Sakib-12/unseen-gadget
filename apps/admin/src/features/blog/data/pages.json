@@ -1,8 +1,0 @@
-[
-  {"id":"PAGE-001","title":"About Us","slug":"about-us","content":"Unseen Gadget is your one-stop shop for all things tech...","status":"published","updatedAt":"2024-01-01"},
-  {"id":"PAGE-002","title":"Terms and Conditions","slug":"terms","content":"By using our services, you agree to the following terms...","status":"published","updatedAt":"2024-01-01"},
-  {"id":"PAGE-003","title":"Privacy Policy","slug":"privacy","content":"We value your privacy and are committed to protecting your personal data...","status":"published","updatedAt":"2024-01-01"},
-  {"id":"PAGE-004","title":"Frequently Asked Questions","slug":"faq","content":"Here are some commonly asked questions...","status":"published","updatedAt":"2024-01-01"},
-  {"id":"PAGE-005","title":"Contact Us","slug":"contact","content":"Get in touch with our support team...","status":"published","updatedAt":"2024-01-01"}
-]
-

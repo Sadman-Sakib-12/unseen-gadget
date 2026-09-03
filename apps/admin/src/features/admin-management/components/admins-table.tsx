@@ -88,36 +88,45 @@ export function AdminsTable({ data, onEdit }: AdminsTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rows.map((admin) => (
-              <TableRow key={admin.id}>
-                <TableCell>
-                  <span className="font-mono text-xs text-gray-500">{admin.id}</span>
-                </TableCell>
-                <TableCell>
-                  <p className="font-medium text-gray-900">{admin.name}</p>
-                </TableCell>
-                <TableCell className="text-gray-600">{admin.email}</TableCell>
-                <TableCell className="text-gray-600">{admin.role}</TableCell>
-                <TableCell className="whitespace-nowrap text-sm text-gray-500">
-                  {admin.lastLogin ? formatShortDate(admin.lastLogin) : "Never"}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={admin.status} />
-                </TableCell>
-                {onEdit ? (
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit(admin)}
-                      aria-label={`Edit admin ${admin.name}`}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+            {rows.map((admin) => {
+              const roleName =
+                typeof admin.role === "object" && admin.role !== null
+                  ? (admin.role as { name?: string }).name || "Admin"
+                  : typeof admin.role === "string"
+                  ? admin.role
+                  : "Admin";
+
+              return (
+                <TableRow key={admin.id}>
+                  <TableCell>
+                    <span className="font-mono text-xs text-gray-500">{admin.id}</span>
                   </TableCell>
-                ) : null}
-              </TableRow>
-            ))}
+                  <TableCell>
+                    <p className="font-medium text-gray-900">{admin.name}</p>
+                  </TableCell>
+                  <TableCell className="text-gray-600">{admin.email}</TableCell>
+                  <TableCell className="text-gray-600 font-medium">{roleName}</TableCell>
+                  <TableCell className="whitespace-nowrap text-sm text-gray-500">
+                    {admin.lastLogin ? formatShortDate(admin.lastLogin) : "Never"}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={admin.status} />
+                  </TableCell>
+                  {onEdit ? (
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(admin)}
+                        aria-label={`Edit admin ${admin.name}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  ) : null}
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       )}

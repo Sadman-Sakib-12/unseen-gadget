@@ -93,10 +93,29 @@ export function CategoriesTable({ data, onEdit, onDelete }: CategoriesTableProps
                   <span className="font-mono text-xs text-gray-500">{cat.id}</span>
                 </TableCell>
                 <TableCell>
-                  <p className="font-medium text-gray-900">{cat.name}</p>
+                  <div className="flex items-center gap-2.5">
+                    {cat.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={cat.image} alt={cat.name} className="h-8 w-8 rounded-lg object-cover border border-gray-200 bg-gray-50 shrink-0" />
+                    ) : null}
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">{cat.name}</p>
+                      {cat.productCount !== undefined && (
+                        <p className="text-[11px] text-gray-500">{cat.productCount} products</p>
+                      )}
+                    </div>
+                  </div>
                 </TableCell>
-                <TableCell className="text-gray-600">{cat.slug}</TableCell>
-                <TableCell className="text-gray-600">{cat.parentId || "None"}</TableCell>
+                <TableCell className="font-mono text-xs text-gray-600">{cat.slug}</TableCell>
+                <TableCell>
+                  {cat.parentId ? (
+                    <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 border border-blue-200">
+                      ↳ {data.find((p) => p.id === cat.parentId)?.name || cat.parentId}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-gray-400 font-medium">Main Category</span>
+                  )}
+                </TableCell>
                 <TableCell>
                   <StatusBadge status={cat.status} />
                 </TableCell>

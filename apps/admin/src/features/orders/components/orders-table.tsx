@@ -31,6 +31,7 @@ interface OrdersTableProps {
   orders: Order[];
   onViewOrder: (order: Order) => void;
   onStatusChange: (orderId: string, status: Order['status']) => void;
+  onDeleteOrder?: (order: Order) => void;
 }
 
 type SortField = 'customerName' | 'amount' | 'date' | 'status';
@@ -105,7 +106,7 @@ function SortableHeader({
   );
 }
 
-export function OrdersTable({ orders, onViewOrder, onStatusChange }: OrdersTableProps) {
+export function OrdersTable({ orders, onViewOrder, onStatusChange, onDeleteOrder }: OrdersTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [paymentFilter, setPaymentFilter] = useState('ALL');
@@ -117,13 +118,24 @@ export function OrdersTable({ orders, onViewOrder, onStatusChange }: OrdersTable
 
   const filteredOrders = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    let result = orders.filter((order) => {
+    let result = (orders || []).filter((order) => {
+      if (!order) return false;
+      const id = String(order.id || '').toLowerCase();
+      const customerName = String(order.customerName || '').toLowerCase();
+      const email = String(order.email || order.customerEmail || '').toLowerCase();
+      const product = String(
+        order.product ||
+          order.items?.[0]?.productName ||
+          (order.items && order.items.length > 0 ? order.items.map((i) => i.productName).join(' ') : '') ||
+          ''
+      ).toLowerCase();
+
       if (
         query &&
-        !order.id.toLowerCase().includes(query) &&
-        !order.customerName.toLowerCase().includes(query) &&
-        !order.email.toLowerCase().includes(query) &&
-        !order.product.toLowerCase().includes(query)
+        !id.includes(query) &&
+        !customerName.includes(query) &&
+        !email.includes(query) &&
+        !product.includes(query)
       ) {
         return false;
       }
@@ -133,10 +145,26 @@ export function OrdersTable({ orders, onViewOrder, onStatusChange }: OrdersTable
     });
 
     result = [...result].sort((a, b) => {
-      const aVal: string | number =
-        typeof a[sortField] === 'string' ? (a[sortField] as string).toLowerCase() : a[sortField];
-      const bVal: string | number =
-        typeof b[sortField] === 'string' ? (b[sortField] as string).toLowerCase() : b[sortField];
+      let aVal: string | number = '';
+      let bVal: string | number = '';
+
+      if (sortField === 'amount') {
+        aVal = a.total ?? a.amount ?? 0;
+        bVal = b.total ?? b.amount ?? 0;
+      } else if (sortField === 'date') {
+        aVal = new Date(a.date || a.createdAt || 0).getTime();
+        bVal = new Date(b.date || b.createdAt || 0).getTime();
+      } else if (sortField === 'customerName') {
+        aVal = (a.customerName || '').toLowerCase();
+        bVal = (b.customerName || '').toLowerCase();
+      } else if (sortField === 'status') {
+        aVal = (a.status || '').toLowerCase();
+        bVal = (b.status || '').toLowerCase();
+      }
+
+      if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+      if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+
       if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
       if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
       return 0;
@@ -248,152 +276,180 @@ export function OrdersTable({ orders, onViewOrder, onStatusChange }: OrdersTable
             description="Try adjusting your search or filters to find what you are looking for."
           />
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-10">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 accent-primary"
-                    checked={selectedOrders.size === paginatedOrders.length && paginatedOrders.length > 0}
-                    onChange={toggleSelectAll}
-                    aria-label="Select all orders"
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded accent-primary border-slate-300 transition-colors cursor-pointer"
+                      checked={selectedOrders.size === paginatedOrders.length && paginatedOrders.length > 0}
+                      onChange={toggleSelectAll}
+                      aria-label="Select all orders"
+                    />
+                  </TableHead>
+                  <TableHead className="w-28">Order</TableHead>
+                  <SortableHeader
+                    label="Customer"
+                    field="customerName"
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={toggleSort}
                   />
-                </TableHead>
-                <TableHead>Order</TableHead>
-                <SortableHeader
-                  label="Customer"
-                  field="customerName"
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSort={toggleSort}
-                />
-                <TableHead>Product</TableHead>
-                <SortableHeader
-                  label="Amount"
-                  field="amount"
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSort={toggleSort}
-                  align="right"
-                />
-                <TableHead>Payment</TableHead>
-                <SortableHeader
-                  label="Status"
-                  field="status"
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSort={toggleSort}
-                />
-                <SortableHeader
-                  label="Date"
-                  field="date"
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSort={toggleSort}
-                />
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedOrders.map((order) => {
-                const isSelected = selectedOrders.has(order.id);
-                return (
-                  <TableRow
-                    key={order.id}
-                    data-state={isSelected ? 'selected' : undefined}
-                    className={cn(isSelected && 'bg-blue-50/50')}
-                  >
-                    <TableCell>
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 accent-primary"
-                        checked={isSelected}
-                        onChange={() => toggleSelect(order.id)}
-                        aria-label={`Select order ${order.id}`}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-semibold text-primary">{order.id}</span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="min-w-0">
-                        <p className="truncate font-medium text-gray-900">
-                          {order.customerName}
-                        </p>
-                        <p className="truncate text-xs text-gray-500">{order.email}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="min-w-0">
-                        <p className="max-w-[12rem] truncate font-medium text-gray-900">
-                          {order.product}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Qty: {order.items.reduce((sum, item) => sum + item.quantity, 0)}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-semibold tabular-nums text-gray-900">
-                      {formatBDT(order.total)}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={order.paymentStatus} />
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={order.status} />
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap tabular-nums text-gray-600">
-                      {formatShortDate(order.date)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-primary"
-                          onClick={() => onViewOrder(order)}
-                        >
-                          View
-                        </Button>
-                        <DropdownMenu
-                          align="end"
-                          trigger={
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              aria-label={`Update status of ${order.id}`}
-                            >
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          }
-                        >
-                          <DropdownMenuLabel>Update status</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          {STATUS_ACTIONS.map((action) => (
-                            <DropdownMenuItem
-                              key={action.value}
-                              onSelect={() => onStatusChange(order.id, action.value)}
-                            >
-                              {action.label}
-                            </DropdownMenuItem>
-                          ))}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onSelect={() => onStatusChange(order.id, 'CANCELLED')}
-                            className="text-red-600"
+                  <TableHead>Product</TableHead>
+                  <SortableHeader
+                    label="Amount"
+                    field="amount"
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={toggleSort}
+                    align="right"
+                  />
+                  <TableHead className="text-center w-28">Payment</TableHead>
+                  <SortableHeader
+                    label="Status"
+                    field="status"
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={toggleSort}
+                  />
+                  <SortableHeader
+                    label="Date"
+                    field="date"
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={toggleSort}
+                  />
+                  <TableHead className="text-right w-24">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedOrders.map((order) => {
+                  const isSelected = selectedOrders.has(order.id);
+                  const itemsCount =
+                    order.items && order.items.length > 0
+                      ? order.items.reduce((sum, item) => sum + (item.quantity || 0), 0)
+                      : order.quantity || 1;
+                  const displayProduct =
+                    order.product ||
+                    order.items?.[0]?.productName ||
+                    (order.items && order.items.length > 0 ? order.items[0].productName : '—');
+                  const extraItemsCount = order.items && order.items.length > 1 ? order.items.length - 1 : 0;
+                  const displayEmail = order.email || order.customerEmail || '—';
+                  const displayTotal = order.total ?? order.amount ?? 0;
+                  const displayDate = order.date || order.createdAt || '';
+
+                  return (
+                    <TableRow
+                      key={order.id}
+                      data-state={isSelected ? 'selected' : undefined}
+                      className={cn(isSelected && 'bg-blue-50/60')}
+                    >
+                      <TableCell>
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded accent-primary border-slate-300 transition-colors cursor-pointer"
+                          checked={isSelected}
+                          onChange={() => toggleSelect(order.id)}
+                          aria-label={`Select order ${order.id}`}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-xs font-semibold text-slate-800">
+                          {order.id}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="min-w-0 max-w-[14rem]">
+                          <p className="truncate font-semibold text-slate-900 text-sm">
+                            {order.customerName}
+                          </p>
+                          <p className="truncate text-xs text-slate-500">{displayEmail}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="min-w-0 max-w-[14rem]">
+                          <p className="truncate font-medium text-slate-900 text-sm" title={displayProduct}>
+                            {displayProduct}
+                            {extraItemsCount > 0 && (
+                              <span className="ml-1.5 inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
+                                +{extraItemsCount}
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-xs text-slate-500 font-medium">
+                            Qty: <span className="text-slate-700">{itemsCount}</span>
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-bold tabular-nums text-slate-900">
+                        {formatBDT(displayTotal)}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <StatusBadge status={order.paymentStatus || 'PENDING'} />
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={order.status || 'PENDING'} />
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap tabular-nums text-slate-600 text-xs font-medium">
+                        {formatShortDate(displayDate)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 text-xs font-semibold text-primary hover:bg-primary/10 hover:text-primary rounded-lg transition-colors"
+                            onClick={() => onViewOrder(order)}
                           >
-                            Cancel order
-                          </DropdownMenuItem>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        )}
-    </TablePanel>
-  );
-}
+                            View
+                          </Button>
+                          <DropdownMenu
+                            align="end"
+                            trigger={
+                              <button
+                                type="button"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus:outline-none"
+                                aria-label={`Update status of ${order.id}`}
+                              >
+                                <MoreVertical className="h-4 w-4" />
+                              </button>
+                            }
+                          >
+                            <DropdownMenuLabel>Update status</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            {STATUS_ACTIONS.map((action) => (
+                              <DropdownMenuItem
+                                key={action.value}
+                                onSelect={() => onStatusChange(order.id, action.value)}
+                              >
+                                {action.label}
+                              </DropdownMenuItem>
+                            ))}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onSelect={() => onStatusChange(order.id, 'CANCELLED')}
+                              className="text-red-600 hover:bg-red-50 hover:text-red-700 font-semibold"
+                            >
+                              Cancel order
+                            </DropdownMenuItem>
+                            {onDeleteOrder && (
+                              <DropdownMenuItem
+                                onSelect={() => onDeleteOrder(order)}
+                                className="text-red-600 hover:bg-red-50 hover:text-red-700 font-semibold"
+                              >
+                                Delete order
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+      </TablePanel>
+    );
+  }

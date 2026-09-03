@@ -1,24 +1,40 @@
-﻿'use client';
+'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle2, Clock, PackageCheck, TruckIcon } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
 import { StatCard } from '@/components/ui/stat-card';
 import { DeliveriesTable } from '@/features/delivery/components/deliveries-table';
 import { DeliveryAssignModal } from '@/features/delivery/components/delivery-assign-modal';
 import { TrackingModal } from '@/features/delivery/components/tracking-modal';
-import initialDeliveries from '@/features/delivery/data/deliveries.json';
+import { api } from '@/lib/api';
 import type { Delivery } from '@/features/delivery/types';
 
 export function DeliveriesPage() {
-  const [deliveries, setDeliveries] = useState<Delivery[]>(initialDeliveries);
+  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [assignModal, setAssignModal] = useState<Delivery | null>(null);
   const [trackingModal, setTrackingModal] = useState<Delivery | null>(null);
 
-  const handleAssign = (deliveryId: string, courier: string, tracking: string) => {
-    setDeliveries((prev) =>
-      prev.map((d) => (d.id === deliveryId ? { ...d, courier, trackingNumber: tracking } : d))
-    );
+  useEffect(() => {
+    api.deliveries
+      .list()
+      .then((res) => setDeliveries((res.data as Delivery[]) ?? []))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleAssign = async (deliveryId: string, courier: string, tracking: string) => {
+    try {
+      const res = await api.deliveries.update(deliveryId, { courier, trackingNumber: tracking });
+      setDeliveries((prev) =>
+        prev.map((d) => (d.id === deliveryId ? (res.data as Delivery) : d))
+      );
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string };
+      setError(errorObj.message || 'Failed to update delivery');
+    }
   };
 
   const stats = {
@@ -59,11 +75,19 @@ export function DeliveriesPage() {
         />
       </div>
 
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
+        </div>
+      ) : error ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
+      ) : (
       <DeliveriesTable
         data={deliveries}
         onAssign={setAssignModal}
         onTrack={setTrackingModal}
       />
+      )}
 
       <DeliveryAssignModal
         key={assignModal?.id ?? 'assign'}

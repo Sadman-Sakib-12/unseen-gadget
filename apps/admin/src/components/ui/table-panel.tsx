@@ -23,8 +23,7 @@ interface TablePanelProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'ti
 
 /**
  * The single table shell used across the admin so every list page shares the
- * same elevation, header rhythm, and density. Drop-in replacement for the
- * hand-rolled `div.rounded-xl.border` wrappers and the older `Card` lists.
+ * same elevation, header rhythm, and density.
  */
 function TablePanel({
   title,
@@ -40,32 +39,36 @@ function TablePanel({
   const hasHeader = title !== undefined || toolbar !== undefined;
 
   return (
-    <Card className={cn('overflow-hidden', className)} {...props}>
+    <Card className={cn('rounded-xl border border-slate-200/90 bg-white shadow-sm', className)} {...props}>
       {hasHeader ? (
-        <CardHeader className="gap-2.5">
+        <CardHeader className="p-4 sm:p-5 border-b border-slate-100/90 gap-2.5">
           <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
             {title !== undefined ? (
-              <div className="flex min-w-0 items-center gap-2">
-                <CardTitle className="text-base">{title}</CardTitle>
-                {count !== undefined ? <Badge variant="secondary">{count}</Badge> : null}
+              <div className="flex min-w-0 items-center gap-2.5">
+                <CardTitle className="text-base font-bold text-slate-900 tracking-tight">{title}</CardTitle>
+                {count !== undefined ? (
+                  <Badge variant="secondary" className="px-2 py-0.5 text-xs font-semibold">
+                    {count}
+                  </Badge>
+                ) : null}
               </div>
             ) : null}
             {toolbar ? (
-              <div className="flex flex-wrap items-center gap-2">{toolbar}</div>
+              <div className="flex flex-wrap items-center gap-2.5">{toolbar}</div>
             ) : null}
           </div>
           {description ? (
-            <p className="text-sm text-muted-foreground">{description}</p>
+            <p className="text-xs text-slate-500">{description}</p>
           ) : null}
         </CardHeader>
       ) : null}
 
-      {section ? <div className="border-b border-gray-100 px-4 pb-4">{section}</div> : null}
+      {section ? <div className="border-b border-slate-100 bg-slate-50/40 px-4 py-3">{section}</div> : null}
 
       <CardContent className="p-0">{children}</CardContent>
 
       {footer ? (
-        <div className="border-t border-gray-100 px-4 py-3">{footer}</div>
+        <div className="border-t border-slate-100 bg-slate-50/30 px-4 py-3">{footer}</div>
       ) : null}
     </Card>
   );

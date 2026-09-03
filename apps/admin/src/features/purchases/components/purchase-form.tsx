@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Purchase, PurchaseItem } from "@/features/purchases/types";
-import { suppliers } from "@/features/suppliers/data";
+import { fetchSuppliers } from "@/features/suppliers/data";
+import { Supplier } from "@/features/suppliers/types";
 import { PurchaseItems } from "@/features/purchases/components/purchase-items";
 import { formatBDT } from "@/lib/load-dashboard-data";
 
@@ -30,12 +31,19 @@ function nextInvoiceNumber(): string {
 }
 
 export function PurchaseForm({ purchase, open, onClose, onSave }: PurchaseFormProps) {
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [supplierId, setSupplierId] = useState(purchase?.supplierId || 0);
   const [items, setItems] = useState<PurchaseItem[]>(purchase?.items || []);
   const [discount, setDiscount] = useState(purchase?.discount || 0);
   const [tax, setTax] = useState(purchase?.tax || 0);
   const [paidAmount, setPaidAmount] = useState(purchase?.paidAmount || 0);
   const [status, setStatus] = useState<Purchase["status"]>(purchase?.status || "DRAFT");
+
+  useEffect(() => {
+    if (open) {
+      fetchSuppliers().then(setSuppliers).catch(() => {});
+    }
+  }, [open]);
 
   const selectedSupplier = suppliers.find((s) => s.id === supplierId);
   const subtotal = items.reduce((sum, item) => sum + item.total, 0);

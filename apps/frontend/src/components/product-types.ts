@@ -4,8 +4,8 @@ export interface DeliveryInfo {
   shippingCost?: string;
 }
 
-export interface MockProduct {
-  id: number;
+export interface Product {
+  id: string | number;
   name: string;
   slug: string;
   category: string;
@@ -24,7 +24,12 @@ export interface MockProduct {
   features?: string[];
   specifications?: Record<string, string>;
   deliveryInfo?: DeliveryInfo;
-  warranty?: string[];
+  warranty?: string[] | string;
+  sku?: string | null;
+  variants?: any[];
 }
+
+// Export canonical Product and backward-compatible alias
+export type MockProduct = Product;
 
 export type SortOption = "default" | "price-asc" | "price-desc" | "name-asc" | "rating";

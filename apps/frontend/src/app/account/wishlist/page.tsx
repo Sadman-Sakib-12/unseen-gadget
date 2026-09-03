@@ -3,34 +3,108 @@
 import { Heart, ShoppingBag, Trash2, Eye } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import products from "@/data/products.json";
-import type { MockProduct } from "@/components/product-types";
+import { useState, useEffect } from "react";
 import { formatBDT } from "@/components/price";
-import { ImageWithFallback } from "@/components/image-with-fallback";
-import { useWishlistStore } from "@/features/wishlist-store";
-import { useCartStore } from "@/features/cart-store";
+
 import { useHydrated } from "@/hooks/use-hydrated";
 import { useTranslation } from "@/hooks/use-translation";
+import { apiRequest, wishlistApi } from "@/lib/api";
+
+interface WishlistProduct {
+  id: string;
+  productId: string;
+  name: string;
+  slug: string;
+  price: number;
+  originalPrice?: number;
+  image?: string;
+  inStock?: boolean;
+}
+
+function normalizeWishlistItem(raw: any): WishlistProduct {
+  const p = raw.product || raw;
+  const productId = String(raw.productId || p.id || raw.id || "");
+  return {
+    id: String(raw.id || productId),
+    productId,
+    name: p.name || raw.name || "Product",
+    slug: p.slug || raw.slug || "",
+    price: Number(p.price ?? raw.price ?? 0),
+    originalPrice:
+      p.originalPrice != null
+        ? Number(p.originalPrice)
+        : raw.originalPrice != null
+        ? Number(raw.originalPrice)
+        : undefined,
+    image: p.images?.[0] || p.image || raw.image || "",
+    inStock: typeof p.stock === "number" ? p.stock > 0 : (p.inStock ?? true),
+  };
+}
+
+import { useSession } from "next-auth/react";
 
 export default function WishlistPage() {
+  const { status } = useSession();
   const hydrated = useHydrated();
   const { t } = useTranslation();
-  const ids = useWishlistStore((s) => s.ids);
-  const toggle = useWishlistStore((s) => s.toggle);
-  const addItem = useCartStore((s) => s.addItem);
 
-  const wishlistProducts: MockProduct[] = hydrated
-    ? (products as MockProduct[]).filter((p) => ids.includes(p.id))
-    : [];
+  const [products, setProducts] = useState<WishlistProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [addingToCartId, setAddingToCartId] = useState<string | null>(null);
 
-  const handleRemove = (id: number, name: string) => {
-    toggle(id);
-    toast.success(t("product.wishlist.removed"), { description: name });
+  useEffect(() => {
+    if (status !== "authenticated") {
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    wishlistApi
+      .list()
+      .then((res) => {
+        const rawItems = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.items)
+          ? res.data.items
+          : [];
+        setProducts(rawItems.map(normalizeWishlistItem));
+      })
+      .catch(() => {
+        setProducts([]);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [status]);
+
+  const wishlistProducts: WishlistProduct[] = hydrated ? products : [];
+
+  const handleRemove = async (productId: string, name: string) => {
+    setRemovingId(productId);
+    try {
+      await wishlistApi.remove(productId);
+      setProducts((prev) => prev.filter((p) => p.productId !== productId && p.id !== productId));
+      toast.success(t("product.wishlist.removed"), { description: name });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to remove from wishlist");
+    } finally {
+      setRemovingId(null);
+    }
   };
 
-  const handleAddToCart = (product: MockProduct) => {
-    addItem(product);
-    toast.success(t("product.addedToCart"), { description: product.name });
+  const handleAddToCart = async (product: WishlistProduct) => {
+    setAddingToCartId(product.id);
+    try {
+      await apiRequest("/cart/current/items", {
+        method: "POST",
+        body: JSON.stringify({ productId: product.productId || product.id, quantity: 1 }),
+      });
+      toast.success(t("product.addedToCart"), { description: product.name });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to add to cart");
+    } finally {
+      setAddingToCartId(null);
+    }
   };
 
   return (
@@ -49,7 +123,13 @@ export default function WishlistPage() {
         )}
       </div>
 
-      {wishlistProducts.length === 0 ? (
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-card py-20 text-center">
+          <Heart className="h-12 w-12 text-muted-foreground" strokeWidth={1.2} />
+          <h3 className="mt-3 text-sm font-semibold text-foreground">Loading wishlist...</h3>
+          <p className="mt-1 text-xs text-muted-foreground">Please wait...</p>
+        </div>
+      ) : wishlistProducts.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-card py-20 text-center">
           <Heart className="h-12 w-12 text-muted-foreground" strokeWidth={1.2} />
           <h3 className="mt-3 text-sm font-semibold text-foreground">{t("account.noWishlist")}</h3>
@@ -70,13 +150,18 @@ export default function WishlistPage() {
                 href={`/product/${product.slug}`}
                 className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted"
               >
-                <ImageWithFallback
-                  src={product.image}
-                  alt={product.name}
-                  label={product.name}
-                  className="h-full w-full object-contain"
-                  iconSize="h-8 w-8"
-                />
+                {product.image ? (
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="h-full w-full object-contain"
+                    loading="lazy"
+                  />
+                ) : (
+                  <span className="text-[11px] font-bold text-muted-foreground">
+                    {product.name.slice(0, 2).toUpperCase()}
+                  </span>
+                )}
               </Link>
 
               <div className="flex min-w-0 flex-1 flex-col">
@@ -103,11 +188,11 @@ export default function WishlistPage() {
                 <div className="mt-auto flex items-center gap-2 pt-3">
                   <button
                     onClick={() => handleAddToCart(product)}
-                    disabled={!product.inStock}
+                    disabled={!product.inStock || addingToCartId === product.id}
                     className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <ShoppingBag className="h-3.5 w-3.5" />
-                    {t("wishlist.addToCart")}
+                    {addingToCartId === product.id ? t("state.loading") : t("wishlist.addToCart")}
                   </button>
                   <Link
                     href={`/product/${product.slug}`}
@@ -117,9 +202,10 @@ export default function WishlistPage() {
                     <Eye className="h-4 w-4" />
                   </Link>
                   <button
-                    onClick={() => handleRemove(product.id, product.name)}
+                    onClick={() => handleRemove(product.productId || product.id, product.name)}
+                    disabled={removingId === (product.productId || product.id)}
                     aria-label={`Remove ${product.name}`}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:border-error hover:text-error"
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:border-error hover:text-error disabled:opacity-50"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

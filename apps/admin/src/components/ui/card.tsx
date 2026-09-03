@@ -24,8 +24,12 @@ const CardTitle = ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElem
   />
 );
 
+const CardDescription = ({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => (
+  <p className={cn("text-xs text-gray-500", className)} {...props} />
+);
+
 const CardContent = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div className={cn("p-6 pt-0", className)} {...props} />
 );
 
-export { Card, CardHeader, CardTitle, CardContent };
+export { Card, CardHeader, CardTitle, CardDescription, CardContent };

@@ -7,7 +7,9 @@ export type StatusTone =
   | "destructive"
   | "outline"
   | "success"
-  | "warning";
+  | "warning"
+  | "info"
+  | "purple";
 
 const TONE_OVERRIDES: Record<string, StatusTone> = {
   delivered: "success",
@@ -21,20 +23,20 @@ const TONE_OVERRIDES: Record<string, StatusTone> = {
   published: "success",
   in_stock: "success",
   reconciled: "success",
-  refunded: "success",
-  critical: "destructive",
+
+  shipped: "info",
+  processing: "info",
+  confirmed: "info",
+  in_transit: "info",
+  picked_up: "info",
 
   pending: "warning",
-  confirmed: "warning",
-  processing: "warning",
   scheduled: "warning",
   requested: "warning",
   awaiting: "warning",
   unpaid: "warning",
   low: "warning",
   low_stock: "warning",
-  picked_up: "warning",
-  in_transit: "warning",
   reserved: "warning",
   partially_fulfilled: "warning",
 
@@ -49,7 +51,7 @@ const TONE_OVERRIDES: Record<string, StatusTone> = {
   returned: "destructive",
   void: "destructive",
 
-  shipped: "secondary",
+  refunded: "purple",
   inactive: "secondary",
   draft: "secondary",
   archived: "secondary",
@@ -59,13 +61,15 @@ const TONE_OVERRIDES: Record<string, StatusTone> = {
 };
 
 /** Resolve the tone for any status string, normalizing case first. */
-export function resolveStatusTone(status: string): StatusTone {
+export function resolveStatusTone(status?: string | null): StatusTone {
+  if (!status || typeof status !== "string") return "secondary";
   const key = status.trim().toLowerCase().replace(/-/g, "_");
   return TONE_OVERRIDES[key] ?? "secondary";
 }
 
 /** Humanize a status string, e.g. "IN_TRANSIT" -> "In Transit". */
-export function humanizeStatus(status: string): string {
+export function humanizeStatus(status?: string | null): string {
+  if (!status || typeof status !== "string") return "Unknown";
   return status
     .trim()
     .toLowerCase()
@@ -74,18 +78,19 @@ export function humanizeStatus(status: string): string {
 }
 
 interface StatusBadgeProps {
-  status: string;
+  status?: string | null;
   tone?: StatusTone;
   className?: string;
 }
 
-function StatusBadge({ status, tone, className }: StatusBadgeProps) {
+function StatusBadge({ status = "unknown", tone, className }: StatusBadgeProps) {
+  const safeStatus = status || "unknown";
   return (
     <Badge
-      variant={tone ?? resolveStatusTone(status)}
+      variant={tone ?? resolveStatusTone(safeStatus)}
       className={cn("font-medium", className)}
     >
-      {humanizeStatus(status)}
+      {humanizeStatus(safeStatus)}
     </Badge>
   );
 }

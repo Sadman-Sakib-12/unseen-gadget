@@ -14,6 +14,8 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { Notification } from "@/features/notifications/types";
 
+import { apiRequest } from "@/lib/api";
+
 interface NotificationFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -30,6 +32,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export function NotificationForm({ isOpen, onClose, onSave }: NotificationFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     id: "",
     title: "",
@@ -43,14 +46,45 @@ export function NotificationForm({ isOpen, onClose, onSave }: NotificationFormPr
   const update = (patch: Partial<typeof formData>) =>
     setFormData((prev) => ({ ...prev, ...patch }));
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    onSave({
-      ...formData,
-      id: `NOTIF-${Date.now().toString().slice(-3)}`,
-      time: new Date().toISOString(),
-      actionUrl: null,
-    } as Notification);
+    setIsSubmitting(true);
+    try {
+      const typeMap: Record<string, string> = {
+        order: "ORDER",
+        payment: "PAYMENT",
+        shipping: "DELIVERY",
+        alert: "ALERT",
+        system: "SYSTEM",
+      };
+      const res = await apiRequest("/admin/notifications", {
+        method: "POST",
+        body: JSON.stringify({
+          title: formData.title,
+          message: formData.message,
+          type: typeMap[formData.type] || "SYSTEM",
+        }),
+      });
+      if (res.success && res.data) {
+        onSave(res.data as Notification);
+      } else {
+        onSave({
+          ...formData,
+          id: `NOTIF-${Date.now().toString().slice(-3)}`,
+          time: new Date().toISOString(),
+          actionUrl: null,
+        } as Notification);
+      }
+    } catch {
+      onSave({
+        ...formData,
+        id: `NOTIF-${Date.now().toString().slice(-3)}`,
+        time: new Date().toISOString(),
+        actionUrl: null,
+      } as Notification);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -102,8 +136,8 @@ export function NotificationForm({ isOpen, onClose, onSave }: NotificationFormPr
         <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" form="notification-form">
-          Send Notification
+        <Button type="submit" form="notification-form" disabled={isSubmitting}>
+          {isSubmitting ? "Sending..." : "Send Notification"}
         </Button>
       </DialogFooter>
     </Dialog>

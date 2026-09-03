@@ -2,63 +2,68 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { apiRequest } from "@/lib/api";
 
-interface CmsListResponse<T> {
-  items: T[];
-}
-
-/** Generic data hook for the CMS collection endpoints
- *  (/api/cms/jobs, /api/cms/posts, /api/cms/promotions). */
-export function useCmsResource<T extends { id: string }>(url: string) {
+/** Generic data hook for CMS collection endpoints.
+ *  Uses the backend API via apiRequest. */
+export function useCmsResource<T extends { id: string }>(endpoint: string) {
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
 
   const reload = useCallback(async () => {
     try {
-      const res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) throw new Error("Failed to load");
-      const data = (await res.json()) as T[];
-      setItems(Array.isArray(data) ? data : []);
+      const res = await apiRequest(endpoint, { cache: "no-store" });
+      setItems(Array.isArray(res.data) ? res.data : []);
     } catch {
       toast.error("Failed to load data");
     } finally {
       setLoading(false);
     }
-  }, [url]);
+  }, [endpoint]);
 
   useEffect(() => {
-    void reload();
-  }, [reload]);
-
-  const save = useCallback(
-    async (method: "POST" | "PUT" | "DELETE", body: unknown, id?: string) => {
-      const res = await fetch(
-        id ? `${url}?id=${encodeURIComponent(id)}` : url,
-        {
-          method,
-          headers: body === undefined ? undefined : { "Content-Type": "application/json" },
-          body: body === undefined ? undefined : JSON.stringify(body),
+    let ignore = false;
+    async function init() {
+      try {
+        const res = await apiRequest(endpoint, { cache: "no-store" });
+        if (!ignore) {
+          setItems(Array.isArray(res.data) ? res.data : []);
+          setLoading(false);
         }
-      );
-      if (!res.ok) throw new Error("Request failed");
-      const json = (await res.json()) as CmsListResponse<T>;
-      setItems(json.items ?? []);
-    },
-    [url]
-  );
+      } catch {
+        if (!ignore) {
+          toast.error("Failed to load data");
+          setLoading(false);
+        }
+      }
+    }
+    void init();
+    return () => {
+      ignore = true;
+    };
+  }, [endpoint]);
 
   const create = async (item: T) => {
-    await save("POST", item);
+    await apiRequest(endpoint, {
+      method: "POST",
+      body: JSON.stringify(item),
+    });
+    await reload();
     toast.success("Created");
   };
 
   const update = async (item: T) => {
-    await save("PUT", item, item.id);
+    await apiRequest(`${endpoint}/${item.id}`, {
+      method: "PUT",
+      body: JSON.stringify(item),
+    });
+    await reload();
     toast.success("Saved");
   };
 
   const remove = async (id: string) => {
-    await save("DELETE", undefined, id);
+    await apiRequest(`${endpoint}/${id}`, { method: "DELETE" });
+    await reload();
     toast.success("Deleted");
   };
 

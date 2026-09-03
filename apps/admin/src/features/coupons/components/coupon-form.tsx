@@ -8,7 +8,7 @@ import { Select } from "@/components/ui/select";
 import { Coupon } from "@/features/coupons/types";
 
 interface CouponFormProps {
-  coupon?: Coupon;
+  coupon?: Coupon | null;
   onSave: (coupon: Coupon) => void;
   onCancel: () => void;
 }

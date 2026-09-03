@@ -1,38 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { toast } from 'sonner';
 import { CheckCircle2, Clock, Download, Plus, RefreshCw, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/layout/page-header';
 import { StatCard } from '@/components/ui/stat-card';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { cn } from '@/components/ui/utils';
 import { OrdersTable } from './orders-table';
 import { OrderDetailsModal } from './order-details-modal';
-import allOrders from '@/features/orders/data/orders.json';
 import type { Order } from '../types';
+import {
+  useAdminOrders,
+  useUpdateAdminOrderStatus,
+  useCreateAdminOrder,
+  useDeleteAdminOrder,
+} from '@/hooks/use-admin-queries';
 
 function exportOrdersCsv(orders: Order[]) {
-  const headers = ['ID', 'Customer', 'Email', 'Product', 'Amount', 'Status', 'Payment', 'Date'];
-  const esc = (value: string | number) => `"${String(value).replace(/"/g, '""')}"`;
+  const headers = ['ID', 'Customer', 'Email', 'Phone', 'Product', 'Amount', 'Status', 'Payment', 'Date'];
+  const esc = (value: string | number | undefined | null) => `"${String(value ?? '').replace(/"/g, '""')}"`;
   const rows = orders.map((order) => [
     order.id,
     order.customerName,
-    order.email,
-    order.product,
-    order.total,
+    order.email || order.customerEmail || '',
+    order.phone || order.customerPhone || '',
+    order.product || order.items?.[0]?.productName || '',
+    order.total ?? order.amount ?? 0,
     order.status,
     order.paymentStatus,
-    order.date,
+    order.date || order.createdAt || '',
   ]);
   const csv = [headers.map(esc).join(','), ...rows.map((row) => row.map(esc).join(','))].join('\n');
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -76,62 +76,106 @@ const ORDER_STATUS_META: Record<string, { label: string; value: Order['status'];
   returned: { label: 'Returned Orders', value: 'RETURNED', description: 'Orders returned by customers.' },
 };
 
-export function OrdersPage({ status }: { status?: string }) {
-  const [orders, setOrders] = useState<Order[]>(allOrders);
+export function OrdersPage({ status, orderId }: { status?: string; orderId?: string }) {
+  const { data: ordersRes } = useAdminOrders();
+  const updateOrderStatusMutation = useUpdateAdminOrderStatus();
+  const createOrderMutation = useCreateAdminOrder();
+  const deleteOrderMutation = useDeleteAdminOrder();
+  const [deleteTarget, setDeleteTarget] = useState<Order | null>(null);
+
+  const orders = useMemo(() => {
+    const raw = (ordersRes as any)?.data ?? ordersRes;
+    return (Array.isArray(raw) ? raw : []) as Order[];
+  }, [ordersRes]);
+
   const statusMeta = status ? ORDER_STATUS_META[status] : undefined;
-  const visibleOrders = statusMeta ? orders.filter((o) => o.status === statusMeta.value) : orders;
+  const visibleOrders = useMemo(() => {
+    if (orderId) {
+      const matched = orders.filter((o) => o.id === orderId || (o as any).orderNumber === orderId);
+      if (matched.length > 0) return matched;
+    }
+    return statusMeta ? orders.filter((o) => o.status === statusMeta.value) : orders;
+  }, [orders, statusMeta, orderId]);
+
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  useEffect(() => {
+    if (orderId && orders.length > 0) {
+      const found = orders.find((o) => o.id === orderId || (o as any).orderNumber === orderId);
+      if (found) setSelectedOrder(found);
+    }
+  }, [orderId, orders]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createState, setCreateState] = useState<CreateOrderState>(EMPTY_CREATE_STATE);
+
+  const handleDeleteOrder = (order: Order) => {
+    setDeleteTarget(order);
+  };
+
+  const confirmDeleteOrder = async () => {
+    if (deleteTarget) {
+      try {
+        await deleteOrderMutation.mutateAsync(String(deleteTarget.id));
+        toast.success(`Order #${(deleteTarget as any).orderNumber || deleteTarget.id} deleted successfully`);
+        if (selectedOrder && selectedOrder.id === deleteTarget.id) {
+          setSelectedOrder(null);
+        }
+        setDeleteTarget(null);
+      } catch (err: any) {
+        toast.error(err.message || 'Failed to delete order');
+      }
+    }
+  };
 
   const handleViewOrder = (order: Order) => {
     setSelectedOrder(order);
   };
 
-  const handleStatusChange = (orderId: string, status: Order['status']) => {
-    setOrders((prev) => prev.map((order) => (order.id === orderId ? { ...order, status } : order)));
+  const handleStatusChange = async (orderId: string, status: Order['status']) => {
+    try {
+      await updateOrderStatusMutation.mutateAsync({ id: orderId, status });
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder((prev) => (prev ? { ...prev, status } : null));
+      }
+      toast.success(`Order status updated to ${status}`);
+    } catch {
+      toast.error('Failed to update order status');
+    }
   };
 
-  const handleCreateOrder = (e: React.FormEvent) => {
+  const handlePaymentStatusChange = async (orderId: string, paymentStatus: string) => {
+    try {
+      await updateOrderStatusMutation.mutateAsync({ id: orderId, paymentStatus });
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder((prev) => (prev ? { ...prev, paymentStatus } : null));
+      }
+      toast.success(`Payment marked as ${paymentStatus}`);
+    } catch {
+      toast.error('Failed to update payment status');
+    }
+  };
+
+  const handleCreateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    const total = createState.price * createState.quantity;
-    const id = `ORD-${Date.now().toString(36).toUpperCase().slice(-5)}`;
-    const today = new Date().toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-    const newOrder: Order = {
-      id,
-      customerName: createState.customerName,
-      email: createState.email,
-      phone: createState.phone,
-      city: createState.city || 'Dhaka',
-      shippingAddress: createState.shippingAddress || '—',
-      product: createState.product,
-      amount: total,
-      status: 'PENDING',
-      paymentStatus: 'PENDING',
-      date: today,
-      items: [
-        {
-          id: `I-${Date.now()}`,
-          productId: 0,
-          productName: createState.product,
-          quantity: createState.quantity,
-          price: createState.price,
-          total,
-        },
-      ],
-      subtotal: total,
-      discount: 0,
-      shippingCost: 0,
-      total,
-    };
-    setOrders((prev) => [newOrder, ...prev]);
-    setIsCreateOpen(false);
-    setCreateState(EMPTY_CREATE_STATE);
-    toast.success(`Order ${id} created`);
+    try {
+      await createOrderMutation.mutateAsync({
+        customerName: createState.customerName,
+        email: createState.email,
+        phone: createState.phone,
+        city: createState.city,
+        shippingAddress: createState.shippingAddress,
+        product: createState.product,
+        quantity: createState.quantity,
+        price: createState.price,
+        status: 'PENDING',
+        paymentStatus: 'PENDING',
+      });
+      toast.success('Order created successfully');
+      setIsCreateOpen(false);
+      setCreateState(EMPTY_CREATE_STATE);
+    } catch {
+      toast.error('Failed to create order');
+    }
   };
 
   const counts = {
@@ -148,7 +192,7 @@ export function OrdersPage({ status }: { status?: string }) {
         description={statusMeta?.description ?? 'Manage and track all customer orders.'}
         actions={
           <>
-            <Button variant="outline" onClick={() => exportOrdersCsv(orders)}>
+            <Button variant="outline" onClick={() => exportOrdersCsv(visibleOrders)}>
               <Download className="h-4 w-4" />
               Export
             </Button>
@@ -179,7 +223,7 @@ export function OrdersPage({ status }: { status?: string }) {
           title="Processing"
           value={counts.processing}
           icon={RefreshCw}
-          iconClassName="bg-blue-50 text-blue-700"
+          iconClassName="bg-blue-50 text-blue-500"
         />
         <StatCard
           title="Delivered"
@@ -193,12 +237,24 @@ export function OrdersPage({ status }: { status?: string }) {
         orders={visibleOrders}
         onViewOrder={handleViewOrder}
         onStatusChange={handleStatusChange}
+        onDeleteOrder={handleDeleteOrder}
       />
 
       <OrderDetailsModal
         order={selectedOrder}
         onClose={() => setSelectedOrder(null)}
         onStatusChange={handleStatusChange}
+        onPaymentStatusChange={handlePaymentStatusChange}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        onConfirm={confirmDeleteOrder}
+        title="Delete Order"
+        description={`Are you sure you want to permanently delete order #${(deleteTarget as any)?.orderNumber || deleteTarget?.id}? This action cannot be undone.`}
+        confirmLabel="Delete Order"
+        destructive
       />
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>

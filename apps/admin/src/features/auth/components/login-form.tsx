@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,17 +25,21 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    if (onLogin) {
-      onLogin(email, password);
-    } else {
-      const success = await login(email, password);
-      if (success) {
-        router.push('/dashboard');
+    try {
+      if (onLogin) {
+        onLogin(email, password);
       } else {
-        alert('Invalid email or password');
+        const result = await login(email, password);
+        if (result.success) {
+          toast.success('Signed in successfully');
+          router.push('/dashboard');
+        } else {
+          toast.error(result.error || 'Invalid email or password');
+        }
       }
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
@@ -113,7 +118,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
         </form>
 
         <div className="mt-8 text-center text-sm text-gray-500">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/register" className="text-[#1c2b6e] font-semibold hover:underline">
             Create Account
           </Link>

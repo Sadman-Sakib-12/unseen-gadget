@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCmsResource } from "@/features/cms/hooks/use-cms-resource";
-import type { Job } from "@unseen-gadget/cms-data";
+import type { Job } from "@unseen-gadget/types";
 
 const lineToItems = (value: string): string[] =>
   value
@@ -47,7 +47,7 @@ const emptyJob = (): Job => ({
 });
 
 export function JobsManager() {
-  const { items, loading, create, update, remove } = useCmsResource<Job>("/api/cms/jobs");
+  const { items, loading, create, update, remove } = useCmsResource<Job>("/cms/jobs");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Job | null>(null);
   const [draft, setDraft] = useState<Job>(emptyJob());

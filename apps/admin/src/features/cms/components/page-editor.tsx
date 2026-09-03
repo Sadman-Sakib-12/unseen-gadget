@@ -17,7 +17,9 @@ import { SectionCard } from "@/features/cms/components/pages/section-card";
 import { ShopEditor } from "@/features/cms/components/pages/shop-editor";
 import { ContactEditor } from "@/features/cms/components/pages/contact-editor";
 import { DeliveryReturnEditor } from "@/features/cms/components/pages/delivery-return-editor";
-import type { CmsPage, CmsPageSlug, PageStatus } from "@unseen-gadget/cms-data";
+import { PrivacyEditor } from "@/features/cms/components/pages/privacy-editor";
+import { TermsEditor } from "@/features/cms/components/pages/terms-editor";
+import type { CmsPage, CmsPageSlug, PageStatus } from "@unseen-gadget/types";
 
 function formatDate(value: string | null | undefined): string {
   if (!value) return "—";
@@ -27,27 +29,7 @@ function formatDate(value: string | null | undefined): string {
 }
 
 function validatePage(page: CmsPage): string | null {
-  if (!page.title.trim()) return "Page title is required.";
-  const content = page.content;
-  switch (content.type) {
-    case "shop":
-      if (!content.hero.heading.trim()) return "Shop hero heading is required.";
-      if (!content.hero.description.trim()) return "Shop hero description is required.";
-      if (!content.hero.primaryCta.label.trim() || !content.hero.primaryCta.url.trim()) {
-        return "Shop hero primary CTA is required.";
-      }
-      break;
-    case "contact":
-      if (!content.hero.heading.trim()) return "Contact hero heading is required.";
-      break;
-    case "delivery-return":
-      if (!content.hero.heading.trim()) return "Delivery hero heading is required.";
-      break;
-    case "terms":
-    case "privacy":
-      if (!content.effectiveDate) return "Effective date is required.";
-      break;
-  }
+  if (!page.title?.trim()) return "Page title is required.";
   return null;
 }
 
@@ -137,26 +119,44 @@ export function PageEditor({ slug }: { slug: CmsPageSlug }) {
   const content = page.content;
 
   const renderContentTab = () => {
-    switch (content.type) {
+    switch (content?.type) {
       case "shop":
         return <ShopEditor content={content} onChange={(next) => setPage({ ...page, content: next })} />;
       case "contact":
-        return <ContactEditor content={content} onChange={(next) => setPage({ ...page, content: next })} />;
+        return (
+          <ContactEditor
+            content={{ type: "contact", ...(content as any) }}
+            onChange={(next) => setPage({ ...page, content: next as any })}
+          />
+        );
       case "delivery-return":
-        return <DeliveryReturnEditor content={content} onChange={(next) => setPage({ ...page, content: next })} />;
-      case "terms":
+        return (
+          <DeliveryReturnEditor
+            content={{ type: "delivery-return", ...(content as any) }}
+            onChange={(next) => setPage({ ...page, content: next as any })}
+          />
+        );
       case "privacy":
         return (
-          <SectionCard title="Document content" description="Edit the legal sections as rich-text blocks.">
-            <FormField label="Effective date" required>
-              <Input
-                type="date"
-                value={content.effectiveDate}
-                onChange={(e) => setPage({ ...page, content: { ...content, effectiveDate: e.target.value } })}
-              />
-            </FormField>
+          <PrivacyEditor
+            content={{ type: "privacy", ...(content as any) }}
+            onChange={(next) => setPage({ ...page, content: next as any })}
+          />
+        );
+      case "terms":
+        return (
+          <TermsEditor
+            content={{ type: "terms", ...(content as any) }}
+            onChange={(next) => setPage({ ...page, content: next as any })}
+          />
+        );
+      case "warranty":
+      case "shipping":
+      default:
+        return (
+          <SectionCard title="Page content" description="Edit sections and content blocks for this page.">
             <BlockEditor
-              blocks={page.blocks}
+              blocks={page.blocks || []}
               onChange={(blocks) => setPage({ ...page, blocks })}
             />
           </SectionCard>

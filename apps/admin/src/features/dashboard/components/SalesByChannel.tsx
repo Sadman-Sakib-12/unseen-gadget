@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { salesByChannelData } from '@/features/dashboard/data';
 import { chartAxis, chartGridStroke, chartPalette, chartTooltip } from '@/lib/chart-theme';
 import {
   Bar,
@@ -13,14 +12,16 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import type { SalesByChannel as SalesByChannelType } from '@/features/dashboard/types';
 
 const CHANNEL_COLORS = chartPalette.slice(0, 4);
 
 interface SalesByChannelProps {
   className?: string;
+  data: SalesByChannelType[];
 }
 
-export function SalesByChannel({ className }: SalesByChannelProps) {
+export function SalesByChannel({ className, data }: SalesByChannelProps) {
   return (
     <Card className={className}>
       <CardHeader className="pb-2">
@@ -34,7 +35,7 @@ export function SalesByChannel({ className }: SalesByChannelProps) {
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart
-            data={salesByChannelData}
+            data={data}
             margin={{ top: 4, right: 4, left: 0, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke={chartGridStroke} vertical={false} />
@@ -62,7 +63,7 @@ export function SalesByChannel({ className }: SalesByChannelProps) {
               }
             />
             <Bar dataKey="revenue" radius={[6, 6, 0, 0]} maxBarSize={50}>
-              {salesByChannelData.map((entry, index) => (
+              {data.map((entry, index) => (
                 <Cell
                   key={entry.channel}
                   fill={CHANNEL_COLORS[index % CHANNEL_COLORS.length]}
@@ -73,7 +74,7 @@ export function SalesByChannel({ className }: SalesByChannelProps) {
         </ResponsiveContainer>
 
         <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-gray-100 pt-4">
-          {salesByChannelData.map((entry, index) => (
+          {data.map((entry, index) => (
             <div key={entry.channel} className="flex items-center justify-between gap-2">
               <span className="flex min-w-0 items-center gap-2 text-sm text-gray-600">
                 <span

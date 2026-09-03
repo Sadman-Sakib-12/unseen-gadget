@@ -49,12 +49,14 @@ const RegisterForm = ({ onRegister }: RegisterFormProps) => {
       if (onRegister) {
         onRegister(name, email, password, role);
       } else {
-        const success = await register(name, email, password, role);
-        if (success) {
-          toast.success('Account created. Please sign in.');
+        const res = await register(name, email, password, role);
+        if (res.success) {
+          toast.success(
+            'Account registration submitted! Your account is pending Super Admin approval before you can log in.'
+          );
           router.push('/login');
         } else {
-          toast.error('An account with this email already exists.');
+          toast.error(res.error || 'An account with this email already exists.');
         }
       }
     } finally {

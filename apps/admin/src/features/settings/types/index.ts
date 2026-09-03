@@ -24,6 +24,10 @@ export interface PaymentSettings {
   acceptCardPayments: boolean;
   acceptBankTransfer: boolean;
   acceptMobileBanking: boolean;
+  bkashNumber?: string;
+  nagadNumber?: string;
+  rocketNumber?: string;
+  mobileBankingInstructions?: string;
   currency: string;
   taxRate: number;
   taxIncluded: boolean;

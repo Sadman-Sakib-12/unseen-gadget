@@ -32,12 +32,12 @@ export function StockHistory({ movements }: StockHistoryProps) {
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return movements;
-    return movements.filter(
-      (movement) =>
-        movement.productName.toLowerCase().includes(query) ||
-        movement.reference.toLowerCase().includes(query) ||
-        movement.note.toLowerCase().includes(query)
-    );
+    return movements.filter((movement) => {
+      const productName = (movement.productName || movement.product?.name || "").toLowerCase();
+      const reference = (movement.reference || "").toLowerCase();
+      const note = (movement.note || "").toLowerCase();
+      return productName.includes(query) || reference.includes(query) || note.includes(query);
+    });
   }, [movements, search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -74,7 +74,7 @@ export function StockHistory({ movements }: StockHistoryProps) {
         <EmptyState
           icon={History}
           title="No stock movements found"
-          description="Try adjusting your search to find what you are looking for."
+          description="Try adjusting your search or recording a new stock movement."
         />
       ) : (
         <Table>
@@ -89,40 +89,49 @@ export function StockHistory({ movements }: StockHistoryProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rows.map((movement) => (
-              <TableRow key={movement.id}>
-                <TableCell className="whitespace-nowrap text-sm text-gray-500">
-                  {formatShortDate(movement.date)}
-                </TableCell>
-                <TableCell className="font-medium text-gray-900">
-                  {movement.productName}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge
-                    status={movement.type}
-                    tone={
+            {rows.map((movement) => {
+              const productName = movement.productName || movement.product?.name || "Product";
+              const movementDate = movement.date || movement.createdAt;
+
+              return (
+                <TableRow key={movement.id}>
+                  <TableCell className="whitespace-nowrap text-sm text-gray-500">
+                    {movementDate ? formatShortDate(movementDate) : "—"}
+                  </TableCell>
+                  <TableCell className="font-medium text-gray-900">
+                    {productName}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge
+                      status={movement.type}
+                      tone={
+                        movement.type === "IN"
+                          ? "success"
+                          : movement.type === "OUT"
+                            ? "destructive"
+                            : "secondary"
+                      }
+                    />
+                  </TableCell>
+                  <TableCell
+                    className={`text-right font-mono tabular-nums font-semibold ${
                       movement.type === "IN"
-                        ? "success"
+                        ? "text-emerald-600"
                         : movement.type === "OUT"
-                          ? "destructive"
-                          : "secondary"
-                    }
-                  />
-                </TableCell>
-                <TableCell
-                  className={`text-right font-mono tabular-nums ${
-                    movement.quantity > 0 ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {movement.quantity > 0 ? "+" : ""}
-                  {movement.quantity}
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary">{movement.reference}</Badge>
-                </TableCell>
-                <TableCell className="text-gray-500">{movement.note}</TableCell>
-              </TableRow>
-            ))}
+                          ? "text-red-600"
+                          : "text-blue-600"
+                    }`}
+                  >
+                    {movement.type === "IN" ? "+" : movement.type === "OUT" ? "-" : "±"}
+                    {Math.abs(movement.quantity)}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{movement.reference || "N/A"}</Badge>
+                  </TableCell>
+                  <TableCell className="text-gray-500">{movement.note || "—"}</TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       )}

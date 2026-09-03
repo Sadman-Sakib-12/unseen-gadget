@@ -4,6 +4,7 @@ export interface ProductVariant {
   price: number;
   stock: number;
   sku: string;
+  images?: string[];
 }
 
 export interface Category {
@@ -14,7 +15,7 @@ export interface Category {
 }
 
 export interface Product {
-  id: number;
+  id: string | number;
   name: string;
   brand: string;
   category: string;
@@ -28,5 +29,7 @@ export interface Product {
   warranty: string;
   specifications: Record<string, string | undefined>;
   status: "ACTIVE" | "INACTIVE" | "OUT_OF_STOCK";
+  shippingType?: "FREE" | "PAID";
+  shippingCost?: number;
   variants: ProductVariant[];
 }

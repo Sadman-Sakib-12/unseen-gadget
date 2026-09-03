@@ -1,7 +1,8 @@
 export interface OrderItem {
-  id: string;
-  productId: number;
+  id?: string;
+  productId?: string | number | null;
   productName: string;
+  variantId?: string | null;
   quantity: number;
   price: number;
   total: number;
@@ -10,18 +11,26 @@ export interface OrderItem {
 export interface Order {
   id: string;
   customerName: string;
-  email: string;
-  phone: string;
-  product: string;
-  amount: number;
+  email?: string | null;
+  customerEmail?: string | null;
+  phone?: string | null;
+  customerPhone?: string | null;
+  product?: string;
+  quantity?: number;
+  amount?: number;
   status: string;
   paymentStatus: string;
-  date: string;
-  city: string;
-  shippingAddress: string;
-  items: OrderItem[];
-  subtotal: number;
-  discount: number;
-  shippingCost: number;
-  total: number;
+  paymentMethod?: string;
+  date?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  city?: string | null;
+  shippingAddress?: string | null;
+  items?: OrderItem[];
+  subtotal?: number;
+  discount?: number;
+  shippingCost?: number;
+  total?: number;
+  note?: string | null;
 }
+

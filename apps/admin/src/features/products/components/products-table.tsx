@@ -19,14 +19,13 @@ import {
 import { TablePanel } from '@/components/ui/table-panel';
 import { Pagination } from '@/components/ui/pagination';
 import { formatBDT } from '@/lib/load-dashboard-data';
-import { PRODUCT_IMAGE_FALLBACK } from '@/lib/images';
 import { cn } from '@/components/ui/utils';
 import type { Product } from '../types';
 
 interface ProductsTableProps {
   products: Product[];
   onEdit: (product: Product) => void;
-  onDelete: (productId: number) => void;
+  onDelete: (productId: string | number) => void;
   onView: (product: Product) => void;
 }
 
@@ -260,7 +259,7 @@ export function ProductsTable({
                         alt={product.name}
                         className="h-full w-full object-cover"
                         onError={(e) => {
-                          e.currentTarget.src = PRODUCT_IMAGE_FALLBACK;
+                          e.currentTarget.style.display = 'none';
                         }}
                       />
                     </div>

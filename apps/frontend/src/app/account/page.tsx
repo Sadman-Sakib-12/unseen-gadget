@@ -1,50 +1,71 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Package, Heart, Star, ShoppingBag, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { TranslationKey } from "@/lib/i18n";
-import { useWishlistStore } from "@/features/wishlist-store";
-import { useHydrated } from "@/hooks/use-hydrated";
 import { useTranslation } from "@/hooks/use-translation";
+import { orderApi, apiRequest } from "@/lib/api";
 
-const stats: { icon: typeof ShoppingBag; label: TranslationKey; value: string; color: string }[] = [
-  { icon: ShoppingBag, label: "account.totalOrders", value: "0", color: "bg-primary/10 text-primary" },
-  { icon: Package, label: "account.pending", value: "0", color: "bg-warning/10 text-warning" },
-  { icon: Heart, label: "account.wishlist", value: "0", color: "bg-error/10 text-error" },
-  { icon: Star, label: "account.reviews", value: "0", color: "bg-amber-400/10 text-amber-500" },
-];
+import { useSession } from "next-auth/react";
 
 export default function AccountPage() {
+  const { status } = useSession();
   const { t } = useTranslation();
-  const hydrated = useHydrated();
-  const wishlistIds = useWishlistStore((s) => s.ids);
-  const wishlistCount = hydrated ? wishlistIds.length : 0;
+  const [wishlistCount, setWishlistCount] = useState(0);
+
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    pendingOrders: 0,
+    reviews: 0,
+  });
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    apiRequest("/wishlist")
+      .then((res) => {
+        const items = res.data || [];
+        setWishlistCount(items.length);
+      })
+      .catch(() => setWishlistCount(0));
+    orderApi.myOrders()
+      .then((res) => {
+        const orders = res.data || [];
+        setStats({
+          totalOrders: orders.length,
+          pendingOrders: orders.filter((o: any) => o.status === "PENDING" || o.status === "PROCESSING").length,
+          reviews: 0,
+        });
+      })
+      .catch(() => {});
+  }, [status]);
+
+  const statItems: { icon: typeof ShoppingBag; label: TranslationKey; value: string; color: string }[] = [
+    { icon: ShoppingBag, label: "account.totalOrders", value: String(stats.totalOrders), color: "bg-primary/10 text-primary" },
+    { icon: Package, label: "account.pending", value: String(stats.pendingOrders), color: "bg-warning/10 text-warning" },
+    { icon: Heart, label: "account.wishlist", value: String(wishlistCount), color: "bg-error/10 text-error" },
+    { icon: Star, label: "account.reviews", value: String(stats.reviews), color: "bg-amber-400/10 text-amber-500" },
+  ];
 
   return (
     <div className="space-y-5">
-      {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {stats.map((stat) => {
-          const isWishlist = stat.label === "account.wishlist";
-          const value = isWishlist ? String(wishlistCount) : stat.value;
-          return (
-            <div
-              key={stat.label}
-              className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-5 text-center shadow-sm"
-            >
-              <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.color}`}>
-                <stat.icon className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{value}</p>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">{t(stat.label)}</p>
-              </div>
+        {statItems.map((stat) => (
+          <div
+            key={stat.label}
+            className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-5 text-center shadow-sm"
+          >
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.color}`}>
+              <stat.icon className="h-5 w-5" />
             </div>
-          );
-        })}
+            <div>
+              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{t(stat.label)}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Welcome card */}
       <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <h3 className="text-base font-bold text-foreground">{t("account.welcome")}</h3>
         <p className="mt-1.5 text-sm text-muted-foreground">
@@ -82,7 +103,6 @@ export default function AccountPage() {
         </div>
       </div>
 
-      {/* Recent Orders (empty state) */}
       <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-bold text-foreground">{t("account.recentOrders")}</h3>

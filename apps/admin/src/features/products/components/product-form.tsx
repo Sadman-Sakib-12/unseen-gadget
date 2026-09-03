@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { useState } from 'react';
-import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -16,6 +15,9 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type { Product, ProductVariant, Category } from '../types';
+import { ProductShippingSection } from './product-shipping-section';
+import { ProductSpecsSection } from './product-specs-section';
+import { ProductVariantsSection } from './product-variants-section';
 
 interface ProductFormProps {
   isOpen: boolean;
@@ -53,6 +55,8 @@ export function ProductForm({
     stock: product?.stock ?? 0,
     warranty: product?.warranty ?? '',
     status: (product?.status ?? 'ACTIVE') as Product['status'],
+    shippingType: (product?.shippingType ?? 'FREE') as 'FREE' | 'PAID',
+    shippingCost: product?.shippingCost ?? 0,
   });
 
   const [specifications, setSpecifications] = useState<Record<string, string | undefined>>(
@@ -65,6 +69,7 @@ export function ProductForm({
   const [variantPrice, setVariantPrice] = useState('');
   const [variantStock, setVariantStock] = useState('');
   const [variantSku, setVariantSku] = useState('');
+  const [variantImage, setVariantImage] = useState('');
 
   const update = (patch: Partial<typeof formData>) =>
     setFormData((prev) => ({ ...prev, ...patch }));
@@ -100,17 +105,33 @@ export function ProductForm({
     if (name && price > 0 && stock >= 0 && sku) {
       setVariants((prev) => [
         ...prev,
-        { id: `v-${prev.length + 1}-${Date.now()}`, name, price, stock, sku },
+        {
+          id: `v-${prev.length + 1}-${Date.now()}`,
+          name,
+          price,
+          stock,
+          sku,
+          images: variantImage.trim() ? [variantImage.trim()] : [],
+        },
       ]);
       setVariantName('');
       setVariantPrice('');
       setVariantStock('');
       setVariantSku('');
+      setVariantImage('');
     }
   };
 
   const removeVariant = (id: string) => {
     setVariants((prev) => prev.filter((v) => v.id !== id));
+  };
+
+  const formatVariantPrice = (price: number): string => {
+    return new Intl.NumberFormat('en-BD', {
+      style: 'currency',
+      currency: 'BDT',
+      maximumFractionDigits: 0,
+    }).format(price);
   };
 
   return (
@@ -124,35 +145,29 @@ export function ProductForm({
         </DialogDescription>
       </DialogHeader>
       <DialogContent>
-        <form id="product-form" onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
+        <form id="product-form" onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Product name">
               <Input
                 type="text"
+                required
                 value={formData.name}
                 onChange={(e) => update({ name: e.target.value })}
-                placeholder="e.g. iPhone 16 Pro Max"
-                required
               />
             </Field>
             <Field label="Brand">
               <Input
                 type="text"
+                required
                 value={formData.brand}
                 onChange={(e) => update({ brand: e.target.value })}
-                placeholder="e.g. Apple"
-                required
               />
             </Field>
             <Field label="Category">
               <Select
                 value={formData.category}
                 onChange={(e) => update({ category: e.target.value })}
-                options={[
-                  { value: '', label: 'Select a category' },
-                  ...categories.map((cat) => ({ value: cat.name, label: cat.name })),
-                ]}
-                required
+                options={categories.map((c) => ({ value: c.name, label: c.name }))}
               />
             </Field>
             <Field label="Status">
@@ -162,17 +177,17 @@ export function ProductForm({
                 options={[
                   { value: 'ACTIVE', label: 'Active' },
                   { value: 'INACTIVE', label: 'Inactive' },
-                  { value: 'OUT_OF_STOCK', label: 'Out of stock' },
+                  { value: 'OUT_OF_STOCK', label: 'Out of Stock' },
                 ]}
               />
             </Field>
             <Field label="Price (BDT)">
               <Input
                 type="number"
+                required
                 min="0"
                 value={formData.price}
                 onChange={(e) => update({ price: Number(e.target.value) })}
-                required
               />
             </Field>
             <Field label="Discount (%)">
@@ -187,10 +202,9 @@ export function ProductForm({
             <Field label="SKU">
               <Input
                 type="text"
+                required
                 value={formData.sku}
                 onChange={(e) => update({ sku: e.target.value })}
-                placeholder="e.g. SP-001"
-                required
               />
             </Field>
             <Field label="Barcode">
@@ -198,17 +212,15 @@ export function ProductForm({
                 type="text"
                 value={formData.barcode}
                 onChange={(e) => update({ barcode: e.target.value })}
-                placeholder="e.g. 8901234567890"
-                required
               />
             </Field>
             <Field label="Stock">
               <Input
                 type="number"
+                required
                 min="0"
                 value={formData.stock}
                 onChange={(e) => update({ stock: Number(e.target.value) })}
-                required
               />
             </Field>
             <Field label="Warranty">
@@ -216,156 +228,58 @@ export function ProductForm({
                 type="text"
                 value={formData.warranty}
                 onChange={(e) => update({ warranty: e.target.value })}
-                placeholder="e.g. 1 Year"
               />
             </Field>
           </div>
+
+          {/* Shipping Configuration */}
+          <ProductShippingSection
+            shippingType={formData.shippingType}
+            shippingCost={formData.shippingCost}
+            onShippingTypeChange={(type) => {
+              update({
+                shippingType: type,
+                shippingCost: type === 'FREE' ? 0 : (formData.shippingCost > 0 ? formData.shippingCost : 100),
+              });
+            }}
+            onShippingCostChange={(cost) => update({ shippingCost: cost })}
+          />
 
           <Field label="Description">
             <Textarea
               value={formData.description}
               onChange={(e) => update({ description: e.target.value })}
-              rows={3}
-              placeholder="Short product description"
             />
           </Field>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-gray-900">Specifications</h4>
-            </div>
-            {Object.keys(specifications).length === 0 ? (
-              <p className="text-sm text-gray-500">No specifications added yet.</p>
-            ) : (
-              <div className="space-y-2">
-                {Object.entries(specifications).map(([key, value]) => (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-gray-50/50 px-3 py-2"
-                  >
-                    <p className="text-sm text-gray-700">
-                      <span className="font-medium">{key}:</span> {value}
-                    </p>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-red-600 hover:bg-red-50 hover:text-red-700"
-                      onClick={() => removeSpecification(key)}
-                      aria-label={`Remove specification ${key}`}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2">
-              <Input
-                type="text"
-                placeholder="Key (e.g. Display)"
-                className="min-w-0"
-                value={specKey}
-                onChange={(e) => setSpecKey(e.target.value)}
-              />
-              <Input
-                type="text"
-                placeholder="Value (e.g. 6.1 inch)"
-                className="min-w-0"
-                value={specValue}
-                onChange={(e) => setSpecValue(e.target.value)}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={addSpecification}
-                aria-label="Add specification"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          {/* Specifications */}
+          <ProductSpecsSection
+            specifications={specifications}
+            specKey={specKey}
+            setSpecKey={setSpecKey}
+            specValue={specValue}
+            setSpecValue={setSpecValue}
+            onAdd={addSpecification}
+            onRemove={removeSpecification}
+          />
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-gray-900">Variants</h4>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addVariant}
-                disabled={!variantName || !variantPrice || !variantSku}
-              >
-                <Plus className="h-4 w-4" />
-                Add variant
-              </Button>
-            </div>
-            {variants.length === 0 ? (
-              <p className="text-sm text-gray-500">
-                No variants. Add options like size or storage to this product.
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {variants.map((variant) => (
-                  <div
-                    key={variant.id}
-                    className="flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-gray-50/50 px-3 py-2"
-                  >
-                    <div className="min-w-0 text-sm text-gray-700">
-                      <p className="truncate">
-                        <span className="font-medium">{variant.name}</span>
-                        <span className="text-gray-500">
-                          {' '}
-                          · {formatVariantPrice(variant.price)} · Stock: {variant.stock} · SKU:{' '}
-                          {variant.sku}
-                        </span>
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 shrink-0 text-red-600 hover:bg-red-50 hover:text-red-700"
-                      onClick={() => removeVariant(variant.id)}
-                      aria-label={`Remove variant ${variant.name}`}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-5">
-              <Input
-                type="text"
-                placeholder="Variant name"
-                value={variantName}
-                onChange={(e) => setVariantName(e.target.value)}
-                className="sm:col-span-2 xl:col-span-1"
-              />
-              <Input
-                type="number"
-                placeholder="Price"
-                min="0"
-                value={variantPrice}
-                onChange={(e) => setVariantPrice(e.target.value)}
-              />
-              <Input
-                type="number"
-                placeholder="Stock"
-                min="0"
-                value={variantStock}
-                onChange={(e) => setVariantStock(e.target.value)}
-              />
-              <Input
-                type="text"
-                placeholder="SKU"
-                value={variantSku}
-                onChange={(e) => setVariantSku(e.target.value)}
-              />
-            </div>
-          </div>
+          {/* Variants */}
+          <ProductVariantsSection
+            variants={variants}
+            variantName={variantName}
+            setVariantName={setVariantName}
+            variantPrice={variantPrice}
+            setVariantPrice={setVariantPrice}
+            variantStock={variantStock}
+            setVariantStock={setVariantStock}
+            variantSku={variantSku}
+            setVariantSku={setVariantSku}
+            variantImage={variantImage}
+            setVariantImage={setVariantImage}
+            onAddVariant={addVariant}
+            onRemoveVariant={removeVariant}
+            formatPrice={formatVariantPrice}
+          />
         </form>
       </DialogContent>
       <DialogFooter>
@@ -378,12 +292,4 @@ export function ProductForm({
       </DialogFooter>
     </Dialog>
   );
-}
-
-function formatVariantPrice(price: number): string {
-  return new Intl.NumberFormat('en-BD', {
-    style: 'currency',
-    currency: 'BDT',
-    maximumFractionDigits: 0,
-  }).format(price);
 }

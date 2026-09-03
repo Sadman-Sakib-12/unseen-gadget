@@ -5,15 +5,16 @@ import { ArrowRight, ClipboardList } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { recentOrders } from '@/features/dashboard/data';
 import { formatBDT, formatShortDate } from '@/lib/format';
+import type { RecentOrder } from '@/features/dashboard/types';
 
 interface RecentOrdersProps {
   className?: string;
+  data: RecentOrder[];
 }
 
-export function RecentOrders({ className }: RecentOrdersProps) {
-  const latest = recentOrders.slice(0, 5);
+export function RecentOrders({ className, data }: RecentOrdersProps) {
+  const latest = data.slice(0, 5);
 
   return (
     <Card className={className}>
@@ -36,9 +37,9 @@ export function RecentOrders({ className }: RecentOrdersProps) {
           />
         ) : (
           <div className="divide-y divide-gray-100">
-            {latest.map((order) => (
+            {latest.map((order, index) => (
               <div
-                key={order.id}
+                key={`${order.id}-${index}`}
                 className="flex items-center justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-gray-50"
               >
                 <div className="min-w-0">

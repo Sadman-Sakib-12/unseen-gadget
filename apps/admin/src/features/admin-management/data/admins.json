@@ -1,8 +1,0 @@
-[
-  {"id":"ADMIN-001","name":"Md. Rahman","email":"rahman@unseengadget.com","role":"SUPER_ADMIN","permissions":["read","write","delete","manage_users","manage_settings"],"status":"active","lastLogin":"2024-01-16 09:30"},
-  {"id":"ADMIN-002","name":"Sarah Khan","email":"sarah@unseengadget.com","role":"MANAGER","permissions":["read","write","manage_orders","manage_products"],"status":"active","lastLogin":"2024-01-15 14:20"},
-  {"id":"ADMIN-003","name":"Tanvir Ahmed","email":"tanvir@unseengadget.com","role":"STAFF","permissions":["read","manage_orders"],"status":"active","lastLogin":"2024-01-14 11:15"},
-  {"id":"ADMIN-004","name":"Nusrat Jahan","email":"nusrat@unseengadget.com","role":"STAFF","permissions":["read"],"status":"inactive","lastLogin":"2023-12-20 08:45"},
-  {"id":"ADMIN-005","name":"Fahim Hassan","email":"fahim@unseengadget.com","role":"MANAGER","permissions":["read","write","manage_products","manage_reports"],"status":"active","lastLogin":"2024-01-16 10:05"}
-]
-

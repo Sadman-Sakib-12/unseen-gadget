@@ -1,6 +1,0 @@
-[
-  {"id":"ROLE-001","name":"SUPER_ADMIN","permissions":["read","write","delete","manage_users","manage_settings","manage_orders","manage_products","manage_reports"]},
-  {"id":"ROLE-002","name":"MANAGER","permissions":["read","write","manage_orders","manage_products","manage_reports"]},
-  {"id":"ROLE-003","name":"STAFF","permissions":["read","manage_orders"]}
-]
-

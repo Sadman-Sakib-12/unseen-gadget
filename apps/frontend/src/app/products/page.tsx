@@ -1,6 +1,9 @@
-import products from "@/data/products.json";
+"use client";
+
+import { useMemo } from "react";
 import type { MockProduct } from "@/components/product-types";
 import { CategoryPageClient } from "@/app/category/[...slug]/CategoryPageClient";
+import { useProducts } from "@/hooks/use-queries";
 
 const shopCategory = {
   id: "shop",
@@ -9,12 +12,19 @@ const shopCategory = {
 };
 
 export default function ShopPage() {
+  const { data: prodRes } = useProducts();
+
+  const products: MockProduct[] = useMemo(() => {
+    const raw = prodRes as any;
+    return Array.isArray(raw?.data) ? raw.data : (raw?.data?.items || []);
+  }, [prodRes]);
+
   return (
     <CategoryPageClient
       key="shop"
       category={shopCategory}
       parentChain={[]}
-      allProducts={products as MockProduct[]}
+      allProducts={products}
     />
   );
 }

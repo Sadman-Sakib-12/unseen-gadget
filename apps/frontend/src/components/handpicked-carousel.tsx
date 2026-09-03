@@ -1,21 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { MockProduct } from "@/components/product-types";
 import { ProductCarousel } from "@/components/product-carousel";
+import { useTranslation } from "@/hooks/use-translation";
 
-const categories = [
-  { id: "all", label: "All" },
-  { id: "wireless", label: "Wireless Microphone" },
-  { id: "tablet", label: "Mobile And Tablet" },
-  { id: "camera", label: "Camera Networking" },
-  { id: "gadgets", label: "Smart Gadgets" },
-  { id: "accessories", label: "Mobile Accessories" },
-  { id: "peripherals", label: "Computer Peripherals" },
-];
-
-export function HandpickedCarousel({ products }: { products: MockProduct[] }) {
+export function HandpickedCarousel({ products = [] }: { products: MockProduct[] }) {
+  const { language } = useTranslation();
   const [activeCategory, setActiveCategory] = useState("all");
+
+  // Dynamically extract categories from available products, plus standard defaults
+  const categories = useMemo(() => {
+    const foundCategories = new Set<string>();
+    products.forEach((p) => {
+      if (p.category && typeof p.category === "string" && p.category.trim()) {
+        foundCategories.add(p.category.trim());
+      }
+    });
+
+    const categoryList = Array.from(foundCategories);
+
+    if (categoryList.length === 0) {
+      return [{ id: "all", label: "All" }];
+    }
+
+    return [
+      { id: "all", label: "All" },
+      ...categoryList.map((cat) => ({
+        id: cat.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        label: cat,
+      })),
+    ];
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    if (activeCategory === "all") return products;
+
+    const matched = products.filter((p) => {
+      const pCat = (p.category || "").toLowerCase();
+      const pName = (p.name || "").toLowerCase();
+      const target = activeCategory.toLowerCase();
+      const normalizedTarget = target.replace(/-/g, " ");
+
+      return (
+        pCat.includes(normalizedTarget) ||
+        normalizedTarget.includes(pCat) ||
+        pName.includes(normalizedTarget) ||
+        pCat.replace(/[^a-z0-9]+/g, "-") === target
+      );
+    });
+
+    return matched.length > 0 ? matched : products;
+  }, [products, activeCategory]);
 
   return (
     <div className="w-full">
@@ -30,12 +66,12 @@ export function HandpickedCarousel({ products }: { products: MockProduct[] }) {
                 : "border border-border bg-card text-muted-foreground hover:bg-accent hover:text-foreground"
             }`}
           >
-            {category.label}
+            {category.id === "all" ? (language === "bn" ? "সব" : "All") : category.label}
           </button>
         ))}
       </div>
 
-      <ProductCarousel products={products} />
+      <ProductCarousel key={activeCategory} products={filteredProducts} />
     </div>
   );
 }

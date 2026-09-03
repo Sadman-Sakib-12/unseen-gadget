@@ -1,7 +1,6 @@
 ﻿'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { salesData } from '@/features/dashboard/data';
 import { chartAxis, chartColors, chartTooltip } from '@/lib/chart-theme';
 import {
   Area,
@@ -13,12 +12,14 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import type { SalesOverview } from '@/features/dashboard/types';
 
 interface BusinessOverviewProps {
   className?: string;
+  data: SalesOverview[];
 }
 
-export function BusinessOverview({ className }: BusinessOverviewProps) {
+export function BusinessOverview({ className, data }: BusinessOverviewProps) {
   return (
     <Card className={className}>
       <CardHeader className="pb-2">
@@ -33,7 +34,7 @@ export function BusinessOverview({ className }: BusinessOverviewProps) {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={salesData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+          <AreaChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={chartColors.primary} stopOpacity={0.28} />

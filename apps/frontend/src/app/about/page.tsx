@@ -1,161 +1,234 @@
 "use client";
 
-import { Shield, Users, Zap, Star, MapPin, Phone, Mail, CheckCircle2 } from "lucide-react";
-import type { TranslationKey } from "@/lib/i18n";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  ChevronRight,
+  Sparkles,
+  Apple,
+  Truck,
+  Eye,
+  Target,
+  Phone,
+  MapPin,
+} from "lucide-react";
+import { apiRequest } from "@/lib/api";
 import { useTranslation } from "@/hooks/use-translation";
 
-const values = [
-  {
-    icon: Shield,
-    title: "Authenticity Guaranteed",
-    desc: "Every product we sell is 100% genuine, sourced directly from authorized distributors.",
-    color: "bg-primary/10 text-primary",
-  },
-  {
-    icon: Users,
-    title: "Customer First",
-    desc: "Your satisfaction is our top priority. We go above and beyond to exceed expectations.",
-    color: "bg-success/10 text-success",
-  },
-  {
-    icon: Zap,
-    title: "Fast & Reliable",
-    desc: "Same-day delivery in Dhaka. Nationwide delivery in 1–3 business days.",
-    color: "bg-violet-500/10 text-violet-500",
-  },
-  {
-    icon: Star,
-    title: "Best Prices",
-    desc: "Competitive pricing without compromising quality. We match the best deals.",
-    color: "bg-warning/10 text-warning",
-  },
-];
-
-const stats: { value: string; label: TranslationKey }[] = [
-  { value: "10,000+", label: "about.stats.happy" },
-  { value: "5,000+", label: "about.stats.products" },
-  { value: "2024", label: "about.stats.founded" },
-  { value: "64+", label: "about.stats.districts" },
-];
-
-const contactInfo: { icon: typeof MapPin; title: TranslationKey; value: string }[] = [
-  { icon: MapPin, title: "about.location", value: "Shop #84, Block C, Level 05, Bashundhara City, Dhaka 1229" },
-  { icon: Phone, title: "about.phone", value: "+8801714039409" },
-  { icon: Mail, title: "about.email", value: "support@unseengadget.com" },
-];
+interface AboutData {
+  title: string;
+  subtitle: string;
+  coverImage?: string | null;
+  story: string;
+  appleStory?: string;
+  deliveryStory?: string;
+  vision: string;
+  mission: string;
+}
 
 export default function AboutPage() {
   const { t } = useTranslation();
+  const [data, setData] = useState<AboutData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [supportPhone, setSupportPhone] = useState<string>("");
+  const [showrooms, setShowrooms] = useState<{ name: string; addr?: string }[]>([]);
+
+  useEffect(() => {
+    Promise.all([
+      apiRequest("/cms/about").catch(() => null),
+      apiRequest("/cms/general").catch(() => null),
+      apiRequest("/cms/footer").catch(() => null),
+    ])
+      .then(([aboutRes, genRes, footerRes]) => {
+        if (aboutRes?.data && typeof aboutRes.data === "object") {
+          setData(aboutRes.data as AboutData);
+        }
+        if (genRes?.data?.supportPhone || genRes?.data?.storePhone) {
+          setSupportPhone(genRes.data.supportPhone || genRes.data.storePhone);
+        }
+        if (footerRes?.data?.showrooms && Array.isArray(footerRes.data.showrooms)) {
+          setShowrooms(footerRes.data.showrooms);
+        }
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[450px] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="flex min-h-[400px] flex-col items-center justify-center px-4 text-center">
+        <h1 className="text-xl font-bold text-foreground">About Us</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Content is currently being configured in the admin panel.
+        </p>
+        <Link href="/" className="btn-primary mt-4 text-xs">
+          Return Home
+        </Link>
+      </div>
+    );
+  }
+
+  const title = data.title || "About Unseen Gadget";
+  const subtitle = data.subtitle || "";
+  const story = data.story || "";
+  const appleStory = data.appleStory || "";
+  const deliveryStory = data.deliveryStory || "";
+  const vision = data.vision || "";
+  const mission = data.mission || "";
 
   return (
-    <>
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-primary-800 via-primary to-primary-600 py-16">
-        <div className="mx-auto w-full max-w-4xl px-4 text-center">
-          <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white">
-            {t("about.kicker")}
-          </span>
-          <h1 className="mt-4 text-3xl font-bold text-white sm:text-4xl">
-            {t("about.title")}
+    <div className="space-y-8 pb-16">
+      {/* ── Breadcrumb ── */}
+      <div className="border-b border-border">
+        <div className="container-gadget">
+          <nav className="flex items-center gap-1.5 py-3 text-xs text-muted-foreground">
+            <Link href="/" className="transition-colors hover:text-primary">
+              {t("shop.breadcrumbHome")}
+            </Link>
+            <ChevronRight className="h-3 w-3 opacity-50" />
+            <span className="text-foreground">{title}</span>
+          </nav>
+        </div>
+      </div>
+
+      {/* ── Hero Banner ── */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary-900 via-primary to-primary-700 py-16 text-white sm:py-20">
+        {data?.coverImage && (
+          <img
+            src={data.coverImage}
+            alt={title}
+            className="absolute inset-0 h-full w-full object-cover opacity-20"
+          />
+        )}
+        <div className="container-gadget relative text-center">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1 text-xs font-semibold backdrop-blur-sm">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Unseen Gadget</span>
+          </div>
+          <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
+            {title}
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/70">
-            {t("about.subtitle")}
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-white/80 sm:text-base">
+            {subtitle}
           </p>
         </div>
-      </section>
+      </div>
 
-      {/* Stats */}
-      <section className="border-b border-border bg-card">
-        <div className="mx-auto w-full max-w-4xl px-4">
-          <div className="grid grid-cols-2 divide-x divide-y divide-border sm:grid-cols-4 sm:divide-y-0">
-            {stats.map((stat) => (
-              <div key={stat.label} className="flex flex-col items-center py-8">
-                <span className="text-2xl font-bold text-foreground">{stat.value}</span>
-                <span className="mt-1 text-xs text-muted-foreground">{t(stat.label)}</span>
+      {/* ── 3-Column Core Stories ── */}
+      <div className="container-gadget">
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* Welcome Story */}
+          {story && (
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-xs">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Sparkles className="h-5 w-5" />
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Story */}
-      <section className="bg-muted/50 py-12">
-        <div className="mx-auto w-full max-w-4xl px-4">
-          <div className="grid gap-8 lg:grid-cols-2">
-            <div>
-              <h2 className="text-xl font-bold text-foreground">{t("about.story")}</h2>
-              <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted-foreground">
-                <p>
-                  Our journey began with a simple mission: to provide Bangladeshi customers with genuine,
-                  high-quality gadgets at competitive prices. We saw a gap in the market — customers
-                  struggling to find authentic products with proper warranty support.
-                </p>
-                <p>
-                  Today, we serve customers across Dhaka and all 64 districts nationwide with fast delivery,
-                  authentic products, and exceptional customer service — whether you shop online or visit us
-                  in person at Bashundhara City.
-                </p>
-                <p>
-                  At Unseen Gadget, quality is our hallmark. Our team meticulously evaluates each product
-                  to ensure excellence, partnering exclusively with dependable suppliers.
-                </p>
+              <h2 className="mt-4 text-base font-bold text-foreground">Welcome to Unseen Gadget</h2>
+              <div className="mt-2.5 whitespace-pre-line text-xs leading-relaxed text-muted-foreground">
+                {story}
               </div>
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-foreground">{t("about.mission")}</h2>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                To become Bangladesh&rsquo;s most trusted online gadget store by providing authentic products,
-                competitive pricing, and outstanding customer service. We aim to make premium technology
-                accessible to everyone across the country.
-              </p>
-              <div className="mt-6 space-y-3">
-                {contactInfo.map((item) => (
-                  <div key={item.title} className="flex items-start gap-3 rounded-lg border border-border bg-card p-3">
-                    <item.icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <div>
-                      <p className="text-xs font-semibold text-foreground">{t(item.title)}</p>
-                      <p className="text-xs text-muted-foreground">{item.value}</p>
-                    </div>
+          )}
+
+          {/* Apple Ecosystem */}
+          {appleStory && (
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-xs">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
+                <Apple className="h-5 w-5" />
+              </div>
+              <h2 className="mt-4 text-base font-bold text-foreground">Genuine Apple Products</h2>
+              <div className="mt-2.5 whitespace-pre-line text-xs leading-relaxed text-muted-foreground">
+                {appleStory}
+              </div>
+            </div>
+          )}
+
+          {/* Delivery & Trust */}
+          {deliveryStory && (
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-xs">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
+                <Truck className="h-5 w-5" />
+              </div>
+              <h2 className="mt-4 text-base font-bold text-foreground">Nationwide Express Delivery</h2>
+              <div className="mt-2.5 whitespace-pre-line text-xs leading-relaxed text-muted-foreground">
+                {deliveryStory}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Vision & Mission ── */}
+      {(vision || mission) && (
+        <div className="container-gadget">
+          <div className="grid gap-6 sm:grid-cols-2">
+            {vision && (
+              <div className="rounded-2xl border border-border bg-muted/30 p-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Eye className="h-4 w-4" />
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Values */}
-      <section className="bg-background py-12">
-        <div className="mx-auto w-full max-w-4xl px-4">
-          <h2 className="text-xl font-bold text-foreground">{t("about.values")}</h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {values.map((v) => (
-              <div key={v.title} className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${v.color}`}>
-                  <v.icon className="h-5 w-5" />
+                  <h3 className="text-sm font-bold text-foreground">Our Vision</h3>
                 </div>
-                <h3 className="mt-3 text-sm font-semibold text-foreground">{v.title}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{v.desc}</p>
+                <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{vision}</p>
               </div>
-            ))}
-          </div>
-
-          {/* Trust checklist */}
-          <div className="mt-8 grid gap-3 rounded-2xl border border-border bg-card p-6 sm:grid-cols-2">
-            {[
-              "100% Original Products",
-              "Official Warranty Support",
-              "Same-Day Delivery in Dhaka",
-              "7-Day Easy Returns",
-            ].map((item) => (
-              <div key={item} className="flex items-center gap-2 text-sm text-foreground">
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
-                {item}
+            )}
+            {mission && (
+              <div className="rounded-2xl border border-border bg-muted/30 p-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Target className="h-4 w-4" />
+                  </div>
+                  <h3 className="text-sm font-bold text-foreground">Our Mission</h3>
+                </div>
+                <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{mission}</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
-      </section>
-    </>
+      )}
+
+      {/* ── Showrooms & Help Hotline ── */}
+      {showrooms.length > 0 && (
+        <div className="container-gadget">
+          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+            <h3 className="text-base font-bold text-foreground">Visit Our Showrooms</h3>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {showrooms.map((s, i) => (
+                <div key={i} className="rounded-xl border border-border/70 p-4">
+                  <div className="flex items-center gap-2 text-xs font-bold text-primary">
+                    <MapPin className="h-3.5 w-3.5" />
+                    <span>{s.name}</span>
+                  </div>
+                  {s.addr && <p className="mt-1 text-xs text-muted-foreground">{s.addr}</p>}
+                </div>
+              ))}
+            </div>
+
+            {supportPhone && (
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-xl bg-primary/5 p-4 border border-primary/20">
+                <div>
+                  <p className="text-xs font-bold text-foreground">Need Assistance?</p>
+                  <p className="text-xs text-muted-foreground">Our customer support is always ready to assist you.</p>
+                </div>
+                <a
+                  href={`tel:${supportPhone}`}
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground transition hover:opacity-90"
+                >
+                  <Phone className="h-3.5 w-3.5" /> Call Hotline: {supportPhone}
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

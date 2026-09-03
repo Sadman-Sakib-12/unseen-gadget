@@ -24,6 +24,9 @@ interface ReceiptModalProps {
   tax: number;
   total: number;
   orderId: string;
+  customerName?: string;
+  customerPhone?: string;
+  customerAddress?: string;
 }
 
 export function ReceiptModal({
@@ -36,6 +39,9 @@ export function ReceiptModal({
   tax,
   total,
   orderId,
+  customerName,
+  customerPhone,
+  customerAddress,
 }: ReceiptModalProps) {
   const handlePrint = () => {
     window.print();
@@ -51,26 +57,34 @@ export function ReceiptModal({
         <div className="space-y-4">
           <div className="border-b pb-4 text-center">
             <h2 className="text-xl font-bold text-gray-900">Unseen Gadget</h2>
-            <p className="text-sm text-gray-500">123 Tech Street, Dhaka, Bangladesh</p>
-            <p className="text-sm text-gray-500">+880 1234-567890</p>
+            <p className="text-sm text-gray-500">{customerAddress || "Main Outlet, Dhaka, Bangladesh"}</p>
+            <p className="text-sm text-gray-500">+880 1823-388272</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="grid grid-cols-2 gap-2 text-xs">
             <div>
               <p className="text-gray-500">Receipt No</p>
-              <p className="font-medium text-gray-900">{orderId}</p>
+              <p className="font-semibold text-gray-900">{orderId}</p>
             </div>
             <div>
               <p className="text-gray-500">Date</p>
-              <p className="font-medium text-gray-900">{new Date().toLocaleDateString()}</p>
+              <p className="font-semibold text-gray-900">{new Date().toLocaleDateString()}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Customer</p>
+              <p className="font-semibold text-gray-900">{customerName || "Walk-in Customer"}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Phone</p>
+              <p className="font-semibold text-gray-900">{customerPhone || "N/A"}</p>
             </div>
             <div>
               <p className="text-gray-500">Cashier</p>
-              <p className="font-medium text-gray-900">Admin</p>
+              <p className="font-semibold text-gray-900">Admin</p>
             </div>
             <div>
               <p className="text-gray-500">Payment</p>
-              <Badge variant="success" className="capitalize">
+              <Badge variant="success" className="capitalize text-[10px]">
                 {paymentMethod}
               </Badge>
             </div>

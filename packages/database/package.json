@@ -8,13 +8,14 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:push": "prisma db push"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^22.10.0",
     "bcrypt": "^5.1.0",
     "prisma": "^5.22.0",
     "typescript": "^5.5.0",

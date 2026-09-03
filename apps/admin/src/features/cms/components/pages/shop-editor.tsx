@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/ui/form-field";
 import { SectionCard } from "./section-card";
 import { Repeater } from "./repeater";
-import type { ShopPageContent } from "@unseen-gadget/cms-data";
+import type { ShopPageContent } from "@unseen-gadget/types";
 
 interface ShopEditorProps {
   content: ShopPageContent;

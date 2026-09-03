@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { PageHeader } from '@/components/layout/page-header';
-import { Image, AlignLeft, LayoutTemplate, Info, FileText } from 'lucide-react';
+import { Image, AlignLeft, LayoutTemplate, FileText, Sparkles } from 'lucide-react';
 
 const cmsSections = [
   {
@@ -29,12 +29,12 @@ const cmsSections = [
     bg: 'bg-emerald-50',
   },
   {
-    title: 'About Us',
-    description: 'Update the company story, mission, and vision',
-    icon: Info,
-    href: '/blog/about',
-    color: 'text-orange-500',
-    bg: 'bg-orange-50',
+    title: 'Story Pages',
+    description: 'Manage the 2 homepage brand stories and their dedicated details pages',
+    icon: Sparkles,
+    href: '/blog/stories',
+    color: 'text-amber-500',
+    bg: 'bg-amber-50',
   },
   {
     title: 'Blog Posts',
@@ -43,6 +43,14 @@ const cmsSections = [
     href: '/blog/posts',
     color: 'text-pink-500',
     bg: 'bg-pink-50',
+  },
+  {
+    title: 'Footer',
+    description: 'Manage showroom addresses, social links, payments & link columns',
+    icon: LayoutTemplate,
+    href: '/cms/footer',
+    color: 'text-indigo-500',
+    bg: 'bg-indigo-50',
   },
 ];
 

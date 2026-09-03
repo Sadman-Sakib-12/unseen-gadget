@@ -74,4 +74,18 @@ function StatCard({
   );
 }
 
+export function StatCardSkeleton({ className }: { className?: string }) {
+  return (
+    <Card className={cn("overflow-hidden animate-pulse", className)}>
+      <CardContent className="p-5">
+        <div className="h-11 w-11 rounded-xl bg-slate-100" />
+        <div className="mt-3 space-y-2">
+          <div className="h-4 w-24 rounded bg-slate-100" />
+          <div className="h-7 w-32 rounded bg-slate-100" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export { StatCard };

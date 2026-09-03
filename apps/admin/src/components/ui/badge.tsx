@@ -2,11 +2,13 @@ import { cn } from "./utils";
 
 const badgeVariants = {
   default: "border-transparent bg-primary text-primary-foreground",
-  secondary: "border-transparent bg-gray-100 text-gray-700",
-  destructive: "border-transparent bg-red-50 text-red-700",
-  outline: "text-gray-700 border-gray-300",
-  success: "border-transparent bg-emerald-50 text-emerald-700",
-  warning: "border-transparent bg-amber-50 text-amber-700",
+  secondary: "border-slate-200/80 bg-slate-100/80 text-slate-700",
+  destructive: "border-red-200/60 bg-red-50 text-red-700",
+  outline: "text-slate-700 border-slate-300",
+  success: "border-emerald-200/60 bg-emerald-50 text-emerald-700",
+  warning: "border-amber-200/60 bg-amber-50 text-amber-700",
+  info: "border-blue-200/60 bg-blue-50 text-blue-700",
+  purple: "border-purple-200/60 bg-purple-50 text-purple-700",
 };
 
 interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {

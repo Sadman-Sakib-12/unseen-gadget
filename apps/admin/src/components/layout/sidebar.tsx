@@ -3,29 +3,7 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import type { LucideIcon } from 'lucide-react';
 import {
-  LayoutDashboard,
-  ShoppingCart,
-  ClipboardList,
-  Package,
-  Warehouse,
-  Truck,
-  ShoppingBag,
-  Users,
-  Ticket,
-  Megaphone,
-  TruckIcon,
-  CreditCard,
-  RotateCcw,
-  Star,
-  Receipt,
-  BarChart3,
-  FileText,
-  Settings,
-  Shield,
-  Bell,
-  Tags,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -34,67 +12,9 @@ import {
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/components/ui/utils';
 import { Button } from '@/components/ui/button';
-import navigationConfig from '@/data/navigation.json';
+import { NAV_ITEMS, type NavItem } from '@/config/navigation';
 
-interface SubNavItem {
-  title: string;
-  href: string;
-  subItems?: { title: string; href: string }[];
-}
-
-interface NavItem {
-  title: string;
-  href: string;
-  icon: LucideIcon;
-  badge?: { text: string; variant: 'default' | 'success' | 'destructive' };
-  subItems?: SubNavItem[];
-  collapseOnly?: boolean;
-  allowedRoles?: string[];
-}
-
-interface NavConfigBadge {
-  text: string;
-  variant: 'default' | 'success' | 'destructive';
-}
-
-interface NavConfigItem {
-  title: string;
-  href: string;
-  icon: string;
-  badge?: NavConfigBadge;
-  subItems?: SubNavItem[];
-  collapseOnly?: boolean;
-  allowedRoles?: string[];
-}
-
-const navIconMap: Record<string, LucideIcon> = {
-  dashboard: LayoutDashboard,
-  pos: ShoppingCart,
-  orders: ClipboardList,
-  products: Package,
-  inventory: Warehouse,
-  suppliers: Truck,
-  purchases: ShoppingBag,
-  customers: Users,
-  categories: Tags,
-  coupons: Ticket,
-  promotions: Megaphone,
-  delivery: TruckIcon,
-  payments: CreditCard,
-  returns: RotateCcw,
-  reviews: Star,
-  expenses: Receipt,
-  reports: BarChart3,
-  notifications: Bell,
-  cms: FileText,
-  settings: Settings,
-  admin: Shield,
-};
-
-const navItems: NavItem[] = (navigationConfig as unknown as NavConfigItem[]).map((item) => ({
-  ...item,
-  icon: navIconMap[item.icon] ?? LayoutDashboard,
-}));
+const navItems: NavItem[] = NAV_ITEMS;
 
 interface SidebarProps {
   mobileOpen: boolean;
@@ -106,6 +26,7 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
     '/cms': true,
+    '/cms/pages': true,
   });
   const pathname = usePathname();
 
@@ -129,28 +50,79 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
       item.badge?.variant === 'destructive' && 'bg-red-100 text-red-700',
       (item.badge?.variant === 'default' || !item.badge) && 'bg-primary/10 text-primary',
       isActive &&
-        (item.badge?.variant === 'default' || item.badge?.variant === 'success') &&
-        'bg-white/20 text-white',
+      (item.badge?.variant === 'default' || item.badge?.variant === 'success') &&
+      'bg-white/20 text-white',
       isActive && item.badge?.variant === 'destructive' && 'bg-white/20 text-white'
     );
 
-  const renderNav = (collapse: boolean, onNavigate?: () => void) => (
-    <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 custom-scrollbar">
-      <ul className="space-y-1">
-        {navItems
-          .filter((item) => !item.allowedRoles || (user && item.allowedRoles.includes(user.role)))
-          .map((item) => {
+  const renderNav = (collapse: boolean, onNavigate?: () => void) => {
+    const userRole = (typeof user?.role === 'object' && user?.role !== null ? (user.role as { name?: string }).name : user?.role)?.toUpperCase();
+    const userPermissions = (user?.permissions || user?.roleObject?.permissions || []).map((p: string) => String(p).toLowerCase());
+
+    const visibleItems = navItems.filter((item) => {
+      if (!user) return false;
+      if (userRole === 'SUPER_ADMIN') return true;
+
+      if (item.allowedRoles && item.allowedRoles.length > 0) {
+        const allowedUpper = item.allowedRoles.map((r) => r.toUpperCase());
+        if (!userRole || !allowedUpper.includes(userRole)) return false;
+      }
+
+      if (item.requiredPermission) {
+        const req = item.requiredPermission.toLowerCase();
+        const legacyMap: Record<string, string[]> = {
+          orders: ['orders', 'manage_orders'],
+          products: ['products', 'manage_products'],
+          inventory: ['inventory', 'manage_inventory', 'manage_products'],
+          categories: ['categories', 'manage_products'],
+          pos: ['pos', 'manage_pos', 'manage_orders'],
+          cms: ['cms', 'manage_cms'],
+          reports: ['reports', 'manage_reports'],
+          settings: ['settings', 'manage_settings'],
+          admin_management: ['admin_management', 'manage_users'],
+          customers: ['customers', 'manage_users'],
+          expenses: ['expenses', 'manage_settings'],
+          suppliers: ['suppliers', 'manage_products'],
+          purchases: ['purchases', 'manage_products'],
+          coupons: ['coupons', 'manage_products'],
+          promotions: ['promotions', 'manage_products', 'manage_cms'],
+          delivery: ['delivery', 'manage_orders'],
+          payments: ['payments', 'manage_orders'],
+          returns: ['returns', 'manage_orders'],
+          reviews: ['reviews', 'manage_products'],
+          notifications: ['notifications', 'dashboard'],
+          dashboard: ['dashboard'],
+        };
+
+        const allowedKeys = legacyMap[req] || [req];
+        const isPermitted =
+          userPermissions.includes('all') ||
+          userPermissions.includes('*') ||
+          allowedKeys.some((k) => userPermissions.includes(k));
+
+        if (!isPermitted && userPermissions.length > 0) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    return (
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 custom-scrollbar">
+        <ul className="space-y-1">
+          {visibleItems.map((item) => {
             const isActive = isItemActive(item);
             const subActive = isSubmenuActive(item);
             const isExpanded = expandedMenus[item.href] ?? subActive;
             const headerActive = subActive || pathname === item.href;
             const activeSubHref = item.subItems
               ? item.subItems.reduce<string | null>((best, sub) => {
-                  const matches = pathname === sub.href || pathname.startsWith(sub.href + "/");
-                  if (!matches) return best;
-                  if (best === null || sub.href.length > best.length) return sub.href;
-                  return best;
-                }, null)
+                const matches = pathname === sub.href || pathname.startsWith(sub.href + "/");
+                if (!matches) return best;
+                if (best === null || sub.href.length > best.length) return sub.href;
+                return best;
+              }, null)
               : null;
             const Icon = item.icon;
 
@@ -347,9 +319,10 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
               </li>
             );
           })}
-      </ul>
-    </nav>
-  );
+        </ul>
+      </nav>
+    );
+  };
 
   const brandMark = (withClose?: () => void) => (
     <div className="flex h-16 items-center justify-between border-b border-gray-100 px-4">

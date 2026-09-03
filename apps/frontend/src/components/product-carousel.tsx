@@ -36,8 +36,8 @@ export function ProductCarousel({
         className={overlay ? "product-carousel px-1 py-2" : "product-carousel"}
         breakpoints={breakpoints}
       >
-        {products.map((p) => (
-          <SwiperSlide key={p.id}>
+        {products.map((p, idx) => (
+          <SwiperSlide key={`${p.id}-${idx}`}>
             <div className="h-full">
               <ProductCard product={p} />
             </div>

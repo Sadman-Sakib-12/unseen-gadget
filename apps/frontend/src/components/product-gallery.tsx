@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
-import { ImageWithFallback } from "./image-with-fallback";
 import { useTranslation } from "@/hooks/use-translation";
 
 export function ProductGallery({
@@ -30,17 +29,18 @@ export function ProductGallery({
     <div>
       {/* Main image */}
       <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-border bg-card">
-        {images.length > 0 ? (
-          <ImageWithFallback
+        {images.length > 0 && images[currentIndex] ? (
+          <img
             key={currentIndex}
             src={images[currentIndex]}
             alt={alt}
-            label={alt}
             className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
-            iconSize="h-16 w-16"
+            loading="lazy"
           />
         ) : (
-          <ImageWithFallback src={undefined} alt={alt} label={alt} iconSize="h-16 w-16" />
+          <div className="flex h-full w-full items-center justify-center bg-muted/40 text-xs font-semibold text-muted-foreground">
+            {alt}
+          </div>
         )}
 
         {discount != null && discount > 0 && (
@@ -55,11 +55,10 @@ export function ProductGallery({
         <button
           onClick={onToggleWishlist}
           aria-label={wishlisted ? t("product.wishlist.removed") : t("product.wishlist.added")}
-          className={`absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border bg-card shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
-            wishlisted
-              ? "border-primary/40 text-primary"
-              : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary"
-          }`}
+          className={`absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border bg-card shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${wishlisted
+            ? "border-primary/40 text-primary"
+            : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary"
+            }`}
         >
           <Heart className={`h-4 w-4 ${wishlisted ? "fill-primary" : ""}`} />
         </button>
@@ -93,19 +92,20 @@ export function ProductGallery({
               key={index}
               onClick={() => setActive(index)}
               aria-label={`View image ${index + 1}`}
-              className={`rounded-lg border-2 p-1.5 transition-colors ${
-                currentIndex === index
-                  ? "border-primary"
-                  : "border-border hover:border-primary/50"
-              }`}
+              className={`rounded-lg border-2 p-1.5 transition-colors ${currentIndex === index
+                ? "border-primary"
+                : "border-border hover:border-primary/50"
+                }`}
             >
               <div className="flex h-16 items-center justify-center">
-                <ImageWithFallback
-                  src={img}
-                  alt=""
-                  className="h-full w-full object-contain"
-                  iconSize="h-6 w-6"
-                />
+                {img ? (
+                  <img
+                    src={img}
+                    alt=""
+                    className="h-full w-full object-contain"
+                    loading="lazy"
+                  />
+                ) : null}
               </div>
             </button>
           ))}

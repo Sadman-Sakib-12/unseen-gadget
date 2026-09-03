@@ -18,7 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCmsResource } from "@/features/cms/hooks/use-cms-resource";
-import type { Promotion } from "@unseen-gadget/cms-data";
+import type { Promotion } from "@unseen-gadget/types";
 
 const ICON_OPTIONS = [
   { value: "zap", label: "Zap" },
@@ -57,7 +57,7 @@ const emptyPromotion = (): Promotion => ({
 });
 
 export function PromotionsManager() {
-  const { items, loading, create, update, remove } = useCmsResource<Promotion>("/api/cms/promotions");
+  const { items, loading, create, update, remove } = useCmsResource<Promotion>("/cms/promotions");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Promotion | null>(null);
   const [draft, setDraft] = useState<Promotion>(emptyPromotion());

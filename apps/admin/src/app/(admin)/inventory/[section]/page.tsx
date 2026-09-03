@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { InventorySectionPage } from "@/features/inventory/components/inventory-section-page";
 
 const VALID_SECTIONS = [
@@ -6,11 +6,8 @@ const VALID_SECTIONS = [
   "stock-in",
   "stock-out",
   "stock-adjustment",
-  "stock-transfer",
   "low-stock",
   "out-of-stock",
-  "damaged-stock",
-  "warehouse",
   "stock-history",
 ];
 
@@ -22,7 +19,7 @@ export default async function InventorySectionRoute({
   const { section } = await params;
 
   if (!VALID_SECTIONS.includes(section)) {
-    notFound();
+    redirect("/inventory");
   }
 
   return <InventorySectionPage section={section} />;

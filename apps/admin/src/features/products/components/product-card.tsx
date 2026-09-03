@@ -6,14 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { formatBDT } from '@/lib/load-dashboard-data';
-import { PRODUCT_IMAGE_FALLBACK } from '@/lib/images';
 import { cn } from '@/components/ui/utils';
 import type { Product } from '../types';
 
 interface ProductCardProps {
   product: Product;
   onEdit: (product: Product) => void;
-  onDelete: (productId: number) => void;
+  onDelete: (productId: string | number) => void;
   onView: (product: Product) => void;
 }
 
@@ -41,7 +40,7 @@ export function ProductCard({ product, onEdit, onDelete, onView }: ProductCardPr
           alt={product.name}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           onError={(e) => {
-            e.currentTarget.src = PRODUCT_IMAGE_FALLBACK;
+            e.currentTarget.style.display = 'none';
           }}
         />
         {product.discount > 0 ? (

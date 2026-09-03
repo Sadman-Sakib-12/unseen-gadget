@@ -1,9 +1,0 @@
-[
-  {"id":"PROMO-001","name":"Summer Sale","type":"sale","discountType":"percentage","discountValue":20,"applicableTo":"all","startDate":"2024-06-01","endDate":"2024-08-31","status":"active","description":"Flat 20% off on all products during summer season."},
-  {"id":"PROMO-002","name":"Free Shipping Weekend","type":"free_shipping","discountType":"fixed","discountValue":0,"applicableTo":"all","startDate":"2024-07-15","endDate":"2024-07-16","status":"active","description":"Free shipping on all orders this weekend only."},
-  {"id":"PROMO-003","name":"Buy One Get One","type":"bogo","discountType":"percentage","discountValue":50,"applicableTo":"category","startDate":"2024-05-01","endDate":"2024-05-15","status":"ended","description":"Buy one get one 50% off on electronics category."},
-  {"id":"PROMO-004","name":"Bundle Deal","type":"bundle","discountType":"fixed","discountValue":500,"applicableTo":"product","startDate":"2024-08-01","endDate":"2024-08-15","status":"scheduled","description":"Bundle deal saving 500 BDT on selected products."},
-  {"id":"PROMO-005","name":"Eid Special","type":"sale","discountType":"percentage","discountValue":25,"applicableTo":"all","startDate":"2024-04-01","endDate":"2024-04-10","status":"ended","description":"Eid special sale with 25% discount on everything."},
-  {"id":"PROMO-006","name":"New Customer Offer","type":"sale","discountType":"percentage","discountValue":15,"applicableTo":"all","startDate":"2024-09-01","endDate":"2024-12-31","status":"scheduled","description":"Exclusive 15% discount for new customers."}
-]
-

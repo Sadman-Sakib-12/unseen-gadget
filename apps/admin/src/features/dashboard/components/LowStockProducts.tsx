@@ -5,22 +5,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { lowStockProducts } from '@/features/dashboard/data';
 import { cn } from '@/components/ui/utils';
+import type { LowStockProduct } from '@/features/dashboard/types';
 
 interface LowStockProductsProps {
   className?: string;
+  data: LowStockProduct[];
 }
 
-export function LowStockProducts({ className }: LowStockProductsProps) {
+export function LowStockProducts({ className, data }: LowStockProductsProps) {
   return (
     <Card className={className}>
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle>Low Stock Products</CardTitle>
-        <Badge variant="warning">{lowStockProducts.length} alerts</Badge>
+        <Badge variant="warning">{data.length} alerts</Badge>
       </CardHeader>
       <CardContent className="p-0">
-        {lowStockProducts.length === 0 ? (
+        {data.length === 0 ? (
           <EmptyState
             icon={PackageSearch}
             title="All stock healthy"
@@ -28,9 +29,9 @@ export function LowStockProducts({ className }: LowStockProductsProps) {
           />
         ) : (
           <div className="divide-y divide-gray-100">
-            {lowStockProducts.map((product) => (
+            {data.map((product, index) => (
               <div
-                key={product.id}
+                key={`${product.id}-${index}`}
                 className="flex items-center justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-gray-50/60"
               >
                 <div className="min-w-0">

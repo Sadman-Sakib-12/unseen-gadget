@@ -1,16 +1,23 @@
 "use client";
 
-import products from "@/data/products.json";
+import { useMemo } from "react";
 import { ChevronRight, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import type { MockProduct } from "@/components/product-types";
 import { ProductGrid } from "@/components/product-grid";
+import { ProductGridSkeleton } from "@/components/product-card-skeleton";
 import { useTranslation } from "@/hooks/use-translation";
-
-const topSelling = (products as MockProduct[]).slice(0, 12);
+import { useTopSelling } from "@/hooks/use-queries";
 
 export default function TopSellingPage() {
   const { t } = useTranslation();
+  const { data: topSellingRes, isLoading } = useTopSelling(12);
+
+  const topSelling: MockProduct[] = useMemo(() => {
+    const raw = topSellingRes as any;
+    const list = Array.isArray(raw?.data) ? raw.data : (raw?.data?.items || []);
+    return list.slice(0, 12);
+  }, [topSellingRes]);
 
   return (
     <>
@@ -38,21 +45,25 @@ export default function TopSellingPage() {
       </div>
 
       <div className="container-gadget py-8">
-        <ProductGrid
-          products={topSelling}
-          wrapItem={(card, product, i) =>
-            i < 3 ? (
-              <div key={product.id} className="relative">
-                <div className="absolute -left-1 -top-1 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white shadow">
-                  #{i + 1}
+        {isLoading ? (
+          <ProductGridSkeleton count={8} />
+        ) : (
+          <ProductGrid
+            products={topSelling}
+            wrapItem={(card, product, i) =>
+              i < 3 ? (
+                <div key={product.id} className="relative">
+                  <div className="absolute -left-1 -top-1 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white shadow">
+                    #{i + 1}
+                  </div>
+                  {card}
                 </div>
-                {card}
-              </div>
-            ) : (
-              card
-            )
-          }
-        />
+              ) : (
+                card
+              )
+            }
+          />
+        )}
       </div>
     </>
   );

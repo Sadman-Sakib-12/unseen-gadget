@@ -26,6 +26,30 @@ interface PaymentsTableProps {
 
 const PAGE_SIZE = 10;
 
+function mapMethod(method: string) {
+  const map: Record<string, string> = {
+    bKash: 'bKash',
+    Nagad: 'Nagad',
+    CARD: 'Card',
+    MOBILE_BANKING: 'Mobile Banking',
+    CASH_ON_DELIVERY: 'COD',
+    BANK_TRANSFER: 'Bank Transfer',
+  };
+  return map[method] || method;
+}
+
+function mapStatus(status: string) {
+  const map: Record<string, string> = {
+    PENDING: 'Pending',
+    APPROVED: 'Approved',
+    REJECTED: 'Rejected',
+    PAID: 'Paid',
+    FAILED: 'Failed',
+    REFUNDED: 'Refunded',
+  };
+  return map[status] || status;
+}
+
 export function PaymentsTable({ data, onView }: PaymentsTableProps) {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,12 +57,12 @@ export function PaymentsTable({ data, onView }: PaymentsTableProps) {
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return data;
-    return data.filter(
+    return (data || []).filter(
       (p) =>
-        p.customerName.toLowerCase().includes(query) ||
-        p.transactionId.toLowerCase().includes(query) ||
-        p.orderId.toLowerCase().includes(query) ||
-        p.paymentGateway.toLowerCase().includes(query)
+        (p?.customerName || '').toLowerCase().includes(query) ||
+        (p?.transactionId || '').toLowerCase().includes(query) ||
+        (p?.orderId || '').toLowerCase().includes(query) ||
+        mapMethod(p?.method || '').toLowerCase().includes(query)
     );
   }, [data, search]);
 
@@ -87,10 +111,9 @@ export function PaymentsTable({ data, onView }: PaymentsTableProps) {
               <TableHead>Customer</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               <TableHead>Method</TableHead>
-              <TableHead>Gateway</TableHead>
-              <TableHead>Date</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -111,14 +134,13 @@ export function PaymentsTable({ data, onView }: PaymentsTableProps) {
                   {formatBDT(payment.amount)}
                 </TableCell>
                 <TableCell className="capitalize text-gray-600">
-                  {payment.method.replace('_', ' ')}
-                </TableCell>
-                <TableCell className="text-gray-600">{payment.paymentGateway}</TableCell>
-                <TableCell className="whitespace-nowrap text-gray-600">
-                  {formatShortDate(payment.date)}
+                  {mapMethod(payment.method)}
                 </TableCell>
                 <TableCell>
-                  <StatusBadge status={payment.status} />
+                  <StatusBadge status={mapStatus(payment.status)} />
+                </TableCell>
+                <TableCell className="whitespace-nowrap text-gray-600">
+                  {formatShortDate(payment.date)}
                 </TableCell>
                 <TableCell className="text-right">
                   <Button variant="ghost" size="sm" onClick={() => onView?.(payment)}>

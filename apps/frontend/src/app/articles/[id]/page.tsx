@@ -1,32 +1,81 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { ChevronRight, Clock, User, BookOpen, Tag, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import articles from "@/data/articles.json";
+import { apiRequest } from "@/lib/api";
 
 interface Article {
-  id: number;
+  id: string;
   title: string;
-  category: string;
-  date: string;
-  image?: string;
+  slug: string;
+  category?: string;
   excerpt?: string;
-  author: string;
+  content?: string;
+  author?: string;
+  featuredImage?: string;
+  createdAt: string;
 }
 
-export default async function ArticlePage({
+export default function ArticlePage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const article = (articles as Article[]).find((a) => a.id === parseInt(id));
-  if (!article) notFound();
+  const [article, setArticle] = useState<Article | null>(null);
+  const [related, setRelated] = useState<Article[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [id, setId] = useState<string>("");
 
-  const related = (articles as Article[]).filter((a) => a.id !== article.id).slice(0, 3);
+  useEffect(() => {
+    params.then((p) => setId(p.id));
+  }, [params]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    apiRequest(`/article/${id}`)
+      .then((res) => {
+        setArticle(res.data);
+      })
+      .catch(() => {
+        setArticle(null);
+      })
+      .finally(() => setIsLoading(false));
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    apiRequest("/article")
+      .then((res) => {
+        const all = res.data || [];
+        setRelated(all.filter((a: Article) => a.id !== id).slice(0, 3));
+      })
+      .catch(() => {});
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!article) {
+    return (
+      <div className="container-gadget py-8 text-center">
+        <p className="text-muted-foreground">Article not found.</p>
+        <Link href="/blog" className="btn-primary mt-4 inline-flex items-center gap-1">
+          Back to Blog <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <>
-      {/* Breadcrumb */}
       <div className="border-b border-border">
         <div className="container-gadget">
           <nav className="flex items-center gap-1.5 py-3 text-xs text-muted-foreground">
@@ -41,18 +90,16 @@ export default async function ArticlePage({
 
       <div className="container-gadget py-8">
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* Main article */}
           <article className="lg:col-span-2">
-            {/* Category + meta */}
             <div className="flex flex-wrap items-center gap-3">
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
-                <Tag className="h-3 w-3" /> {article.category}
+                <Tag className="h-3 w-3" /> {article.category || "Blog"}
               </span>
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" /> {article.date}
+                <Clock className="h-3 w-3" /> {new Date(article.createdAt).toLocaleDateString()}
               </span>
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <User className="h-3 w-3" /> {article.author}
+                <User className="h-3 w-3" /> {article.author || "Admin"}
               </span>
             </div>
 
@@ -60,10 +107,9 @@ export default async function ArticlePage({
               {article.title}
             </h1>
 
-            {/* Cover image */}
             <div className="mt-5 overflow-hidden rounded-2xl bg-muted">
-              {article.image ? (
-                <img src={article.image} alt={article.title} className="h-auto w-full object-cover" />
+              {article.featuredImage ? (
+                <img src={article.featuredImage} alt={article.title} className="h-auto w-full object-cover" />
               ) : (
                 <div className="flex aspect-video items-center justify-center">
                   <BookOpen className="h-16 w-16 text-muted-foreground" strokeWidth={1.2} />
@@ -71,23 +117,27 @@ export default async function ArticlePage({
               )}
             </div>
 
-            {/* Content */}
             <div className="mt-6 space-y-4 text-sm leading-relaxed text-muted-foreground">
-              <p className="font-medium text-foreground">{article.excerpt}</p>
-              <p>
-                This is a detailed article about {article.title.toLowerCase()}.
-                In this article, we cover all the important aspects you need to know before making a
-                purchase decision. Our team at Unseen Gadget has researched thoroughly to bring you
-                the most accurate and up-to-date information.
-              </p>
-              <p>
-                We hope this guide helps you make an informed decision. If you have any questions or
-                need further clarification, feel free to contact our support team. We&rsquo;re always
-                here to help you find the best products that fit your needs and budget.
-              </p>
+              {article.excerpt && <p className="font-medium text-foreground">{article.excerpt}</p>}
+              {article.content ? (
+                <div dangerouslySetInnerHTML={{ __html: article.content }} />
+              ) : (
+                <>
+                  <p>
+                    This is a detailed article about {article.title.toLowerCase()}.
+                    In this article, we cover all the important aspects you need to know before making a
+                    purchase decision. Our team at Unseen Gadget has researched thoroughly to bring you
+                    the most accurate and up-to-date information.
+                  </p>
+                  <p>
+                    We hope this guide helps you make an informed decision. If you have any questions or
+                    need further clarification, feel free to contact our support team. We&rsquo;re always
+                    here to help you find the best products that fit your needs and budget.
+                  </p>
+                </>
+              )}
             </div>
 
-            {/* Share */}
             <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-border pt-6">
               <span className="text-xs font-semibold text-foreground">Share this article:</span>
               {["Facebook", "Twitter", "Copy Link"].map((s) => (
@@ -101,7 +151,6 @@ export default async function ArticlePage({
             </div>
           </article>
 
-          {/* Sidebar */}
           <aside className="space-y-6">
             <div className="rounded-2xl border border-border bg-card p-5">
               <h3 className="mb-4 text-sm font-bold text-foreground">Related Articles</h3>
@@ -113,22 +162,21 @@ export default async function ArticlePage({
                     className="group flex gap-3"
                   >
                     <div className="h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
-                      {rel.image && (
-                        <img src={rel.image} alt={rel.title} className="h-full w-full object-cover" />
+                      {rel.featuredImage && (
+                        <img src={rel.featuredImage} alt={rel.title} className="h-full w-full object-cover" />
                       )}
                     </div>
                     <div className="flex-1">
                       <p className="line-clamp-2 text-xs font-medium text-foreground transition-colors group-hover:text-primary">
                         {rel.title}
                       </p>
-                      <p className="mt-0.5 text-[10px] text-muted-foreground">{rel.date}</p>
+                      <p className="mt-0.5 text-[10px] text-muted-foreground">{new Date(rel.createdAt).toLocaleDateString()}</p>
                     </div>
                   </Link>
                 ))}
               </div>
             </div>
 
-            {/* CTA */}
             <div className="rounded-2xl bg-gradient-to-br from-primary to-primary-800 p-5 text-center text-white">
               <BookOpen className="mx-auto h-8 w-8 text-white/60" />
               <p className="mt-2 text-sm font-bold">Looking for a product?</p>

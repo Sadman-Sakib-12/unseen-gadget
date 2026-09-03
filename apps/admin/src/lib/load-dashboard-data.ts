@@ -1,30 +1,4 @@
-﻿import {
-  dashboardStats,
-  salesData,
-  salesTrendData,
-  salesByChannelData,
-  recentOrders,
-  lowStockProducts,
-  topSellingProducts,
-  supplierDues,
-  notifications,
-  quickActions,
-} from "@/features/dashboard/data";
-
-export {
-  dashboardStats,
-  salesData,
-  salesTrendData,
-  salesByChannelData,
-  recentOrders,
-  lowStockProducts,
-  topSellingProducts,
-  supplierDues,
-  notifications,
-  quickActions,
-};
-
-// Kept for backward compatibility — canonical helpers now live in @/lib/format.
+﻿// Re-export formatBDT from the canonical location.
 export { formatBDT } from "./format";
 
 export const getStatusBadgeVariant = (status: string) => {

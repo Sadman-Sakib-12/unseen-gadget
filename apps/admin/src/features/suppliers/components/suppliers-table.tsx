@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Truck } from "lucide-react";
+import { Pencil, Trash2, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SearchInput } from "@/components/ui/search-input";
@@ -22,11 +22,12 @@ import { Supplier } from "@/features/suppliers/types";
 interface SuppliersTableProps {
   suppliers: Supplier[];
   onEdit: (supplier: Supplier) => void;
+  onDelete?: (supplier: Supplier) => void;
 }
 
 const PAGE_SIZE = 10;
 
-export function SuppliersTable({ suppliers, onEdit }: SuppliersTableProps) {
+export function SuppliersTable({ suppliers, onEdit, onDelete }: SuppliersTableProps) {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -118,9 +119,27 @@ export function SuppliersTable({ suppliers, onEdit }: SuppliersTableProps) {
                   <StatusBadge status={supplier.status} />
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" onClick={() => onEdit(supplier)}>
-                    Edit
-                  </Button>
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEdit(supplier)}
+                      aria-label={`Edit ${supplier.name}`}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    {onDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-500 hover:bg-red-50 hover:text-red-700"
+                        onClick={() => onDelete(supplier)}
+                        aria-label={`Delete ${supplier.name}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

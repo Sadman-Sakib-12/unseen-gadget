@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { salesData } from '@/features/dashboard/data';
 import { chartAxis, chartColors, chartGridStroke, chartTooltip } from '@/lib/chart-theme';
 import {
   Bar,
@@ -12,12 +11,14 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import type { SalesOverview } from '@/features/dashboard/types';
 
 interface SalesOverviewProps {
   className?: string;
+  data: SalesOverview[];
 }
 
-export function SalesOverview({ className }: SalesOverviewProps) {
+export function SalesOverview({ className, data }: SalesOverviewProps) {
   return (
     <Card className={className}>
       <CardHeader className="pb-2">
@@ -30,7 +31,7 @@ export function SalesOverview({ className }: SalesOverviewProps) {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={salesData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+          <BarChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={chartGridStroke} vertical={false} />
             <XAxis
               dataKey="month"

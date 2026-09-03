@@ -1,40 +1,71 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Heart, Lock, ShoppingCart } from "lucide-react";
 import type { MockProduct } from "./product-types";
 import { formatBDT } from "./price";
 import { ColorSwatches } from "./color-swatches";
-import { ImageWithFallback } from "./image-with-fallback";
-import { useCartStore } from "@/features/cart-store";
-import { useWishlistStore } from "@/features/wishlist-store";
-import { useHydrated } from "@/hooks/use-hydrated";
+import { apiRequest } from "@/lib/api";
 import { useTranslation } from "@/hooks/use-translation";
 
 function WishlistButton({ product }: { product: MockProduct }) {
-  const hydrated = useHydrated();
-  const ids = useWishlistStore((s) => s.ids);
-  const toggle = useWishlistStore((s) => s.toggle);
-  const { t } = useTranslation();
-  const wishlisted = hydrated && ids.includes(product.id);
+  const [wishlisted, setWishlisted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { t, language } = useTranslation();
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const handleToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!session?.user) {
+      toast.error(
+        language === "bn"
+          ? "উইশলিস্টে যুক্ত করতে অনুগ্রহ করে প্রথমে লগইন করুন।"
+          : "Please log in to add items to your wishlist."
+      );
+      const returnUrl = typeof window !== "undefined" ? window.location.pathname : "/";
+      router.push(`/login?callbackUrl=${encodeURIComponent(returnUrl)}`);
+      return;
+    }
+
+    if (loading) return;
+    setLoading(true);
+    try {
+      if (wishlisted) {
+        await apiRequest(`/wishlist/${product.id}`, { method: "DELETE" });
+        setWishlisted(false);
+        toast.success(t("product.wishlist.removed"));
+      } else {
+        await apiRequest("/wishlist", {
+          method: "POST",
+          body: JSON.stringify({ productId: product.id }),
+        });
+        setWishlisted(true);
+        toast.success(t("product.wishlist.added"));
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update wishlist");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <button
       type="button"
       aria-label={wishlisted ? t("product.wishlist.removed") : t("product.wishlist.added")}
       title={wishlisted ? t("product.wishlist.removed") : t("product.wishlist.added")}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        toggle(product.id);
-        toast.success(wishlisted ? t("product.wishlist.removed") : t("product.wishlist.added"));
-      }}
-      className={`flex h-9 w-9 items-center justify-center rounded-full border bg-card shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
-        wishlisted
+      onClick={handleToggle}
+      className={`flex h-9 w-9 items-center justify-center rounded-full border bg-card shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${wishlisted
           ? "border-primary/40 text-primary"
           : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary"
-      }`}
+        }`}
     >
       <Heart className={`h-4 w-4 ${wishlisted ? "fill-primary" : ""}`} />
     </button>
@@ -43,8 +74,28 @@ function WishlistButton({ product }: { product: MockProduct }) {
 
 export function ProductCard({ product }: { product: MockProduct }) {
   const outOfStock = product.inStock === false;
-  const addItem = useCartStore((s) => s.addItem);
+  const [addingToCart, setAddingToCart] = useState(false);
   const { t } = useTranslation();
+
+  const handleAddToCart = async () => {
+    if (outOfStock || addingToCart) return;
+    setAddingToCart(true);
+    try {
+      await apiRequest("/cart/current/items", {
+        method: "POST",
+        body: JSON.stringify({
+          productId: product.id,
+          quantity: 1,
+          color: product.colors?.[0],
+        }),
+      });
+      toast.success(`${product.name} ${t("product.addedToCart")}`);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to add to cart");
+    } finally {
+      setAddingToCart(false);
+    }
+  };
 
   return (
     <div className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
@@ -77,14 +128,19 @@ export function ProductCard({ product }: { product: MockProduct }) {
           <WishlistButton product={product} />
         </div>
 
-        <div className="relative mx-auto aspect-square w-full">
-          <ImageWithFallback
-            src={product.image}
-            alt={product.name}
-            label={product.name}
-            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
-            iconSize="h-12 w-12"
-          />
+        <div className="relative mx-auto aspect-square w-full flex items-center justify-center">
+          {product.image ? (
+            <img
+              src={product.image}
+              alt={product.name}
+              className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-muted/40 text-xs font-semibold text-muted-foreground p-2 text-center">
+              {product.name}
+            </div>
+          )}
         </div>
 
         {outOfStock && (
@@ -131,14 +187,12 @@ export function ProductCard({ product }: { product: MockProduct }) {
             </button>
           ) : (
             <button
-              onClick={() => {
-                addItem(product, 1, product.colors?.[0]);
-                toast.success(`${product.name} ${t("product.addedToCart")}`);
-              }}
-              className="flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-[11px] font-semibold text-primary-foreground transition hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+              onClick={handleAddToCart}
+              disabled={addingToCart}
+              className="flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-[11px] font-semibold text-primary-foreground transition hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 disabled:opacity-50"
             >
               <ShoppingCart className="h-3.5 w-3.5" />
-              {t("common.addToCart")}
+              {addingToCart ? "Adding..." : t("common.addToCart")}
             </button>
           )}
         </div>

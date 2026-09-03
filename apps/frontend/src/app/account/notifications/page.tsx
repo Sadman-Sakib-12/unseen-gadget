@@ -1,31 +1,64 @@
 "use client";
 
-import { useState } from "react";
-import { Bell, Package, Tag, Truck, CheckCheck, Circle } from "lucide-react";
-import type { TranslationKey } from "@/lib/i18n";
+import { useEffect, useState } from "react";
+import { apiRequest } from "@/lib/api";
+import { Bell, Package, Tag, Truck, CheckCircle, Circle } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
 
 interface Notification {
   id: number;
   kind: "orderUpdate" | "offer" | "delivery" | "approved";
-  titleKey: TranslationKey;
+  title: string;
   date: string;
   read: boolean;
 }
 
-const initialNotifications: Notification[] = [];
+const KIND_ICONS: Record<Notification["kind"], typeof Package> = {
+  orderUpdate: Package,
+  offer: Tag,
+  delivery: Truck,
+  approved: CheckCircle,
+};
 
-const kindMeta: Record<Notification["kind"], { icon: typeof Package; className: string }> = {
-  orderUpdate: { icon: Package, className: "bg-primary/10 text-primary" },
-  offer: { icon: Tag, className: "bg-warning/10 text-warning" },
-  delivery: { icon: Truck, className: "bg-primary/10 text-primary" },
-  approved: { icon: CheckCheck, className: "bg-success/10 text-success" },
+const KIND_CLASSES: Record<Notification["kind"], string> = {
+  orderUpdate: "bg-primary/10 text-primary",
+  offer: "bg-warning/10 text-warning",
+  delivery: "bg-primary/10 text-primary",
+  approved: "bg-success/10 text-success",
 };
 
 export default function NotificationsPage() {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const { t } = useTranslation();
-  const [notifications, setNotifications] =
-    useState<Notification[]>(initialNotifications);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setLoading(true);
+      try {
+        let res = await apiRequest("/cms/notifications").catch(() => null);
+        if (!res?.data || !Array.isArray(res.data) || res.data.length === 0) {
+          res = await apiRequest("/admin/notifications").catch(() => null);
+        }
+        if (res?.data && Array.isArray(res.data)) {
+          setNotifications(
+            res.data.map((n: any) => ({
+              id: n.id,
+              kind: (n.type?.toLowerCase() || "orderupdate") as Notification["kind"],
+              title: n.title || n.message || "Notification",
+              date: n.time || n.createdAt || new Date().toISOString(),
+              read: n.read ?? false,
+            }))
+          );
+        }
+      } catch {
+        setNotifications([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNotifications();
+  }, []);
 
   const markAllRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
@@ -41,57 +74,70 @@ export default function NotificationsPage() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold text-foreground">{t("notifications.title")}</h1>
+          <h1 className="text-lg font-bold text-foreground">
+            {t("notifications.title")}
+          </h1>
         </div>
-        {notifications.length > 0 && (
-          <button
-            onClick={markAllRead}
-            className="text-xs font-medium text-primary transition-colors hover:underline"
-          >
-            {t("notifications.markAllRead")}
-          </button>
+        {loading ? (
+          <span className="text-sm text-muted-foreground">Loading...</span>
+        ) : (
+          notifications.length > 0 && (
+            <button
+              onClick={markAllRead}
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              Mark all read
+            </button>
+          )
         )}
       </div>
 
-      {notifications.length === 0 ? (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-card py-20">
+          <Bell className="h-12 w-12 text-muted-foreground" strokeWidth={1.2} />
+          <h3 className="mt-3 text-sm font-semibold text-foreground">
+            Loading notifications...
+          </h3>
+        </div>
+      ) : notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-card py-20 text-center">
           <Bell className="h-12 w-12 text-muted-foreground" strokeWidth={1.2} />
-          <h3 className="mt-3 text-sm font-semibold text-foreground">{t("notifications.empty")}</h3>
-          <p className="mt-1 text-xs text-muted-foreground">{t("notifications.emptyHint")}</p>
+          <h3 className="mt-3 text-sm font-semibold text-foreground">
+            {t("notifications.empty")}
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {t("notifications.emptyHint")}
+          </p>
         </div>
       ) : (
         <div className="space-y-2.5">
           {notifications.map((notification) => {
-            const meta = kindMeta[notification.kind];
+            const IconComp = KIND_ICONS[notification.kind] || Package;
+            const kindClass = KIND_CLASSES[notification.kind] || KIND_CLASSES.orderUpdate;
+
             return (
               <button
                 key={notification.id}
                 onClick={() => toggleRead(notification.id)}
-                className={`flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:bg-accent/50 ${
-                  notification.read ? "opacity-60" : ""
-                }`}
+                className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:bg-accent/50"
               >
                 <div
-                  className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.className}`}
+                  className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${kindClass}`}
                 >
-                  <meta.icon className="h-5 w-5" />
+                  <IconComp className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-foreground">
-                    {t(notification.titleKey)}
+                    {notification.title}
                   </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{notification.date}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {notification.date}
+                  </p>
                 </div>
-                <span
-                  className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium ${
-                    notification.read
-                      ? "bg-muted text-muted-foreground"
-                      : "bg-primary/10 text-primary"
-                  }`}
-                >
+                <span className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium">
                   {notification.read ? (
                     <>
-                      <CheckCheck className="h-3 w-3" />
+                      <CheckCircle className="h-3 w-3" />
                       {t("notifications.read")}
                     </>
                   ) : (

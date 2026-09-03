@@ -1,4 +1,0 @@
-[
-  {"id":"PURCHASE-001","period":"January 2024","totalPurchases":680000,"totalSuppliers":12,"totalProductsPurchased":850,"averagePurchaseValue":8000,"topSuppliers":[{"name":"TechWorld Suppliers","amount":220000},{"name":"GadgetHub BD","amount":180000},{"name":"Digital Imports","amount":150000}],"categoryBreakdown":[{"category":"Electronics","amount":350000},{"category":"Accessories","amount":200000},{"category":"Peripherals","amount":130000}],"monthlyData":[{"month":"January","amount":680000},{"month":"December","amount":620000},{"month":"November","amount":590000}]}
-]
-

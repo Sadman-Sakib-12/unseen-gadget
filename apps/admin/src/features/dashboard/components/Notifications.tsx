@@ -6,8 +6,8 @@ import { ArrowRight, Bell } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Badge } from '@/components/ui/badge';
-import { notifications as initialNotifications } from '@/features/dashboard/data';
 import { cn } from '@/components/ui/utils';
+import type { Notification } from '@/features/dashboard/types';
 
 const NOTIFICATION_TYPES: Record<string, { label: string; className: string }> = {
   ORDER: { label: 'Order', className: 'bg-blue-50 text-blue-700' },
@@ -18,8 +18,19 @@ const NOTIFICATION_TYPES: Record<string, { label: string; className: string }> =
   RETURN: { label: 'Return', className: 'bg-gray-100 text-gray-700' },
 };
 
-export function Notifications() {
-  const [items, setItems] = useState(initialNotifications);
+interface NotificationsProps {
+  data: Notification[];
+}
+
+export function Notifications({ data }: NotificationsProps) {
+  const [prevData, setPrevData] = useState(data);
+  const [items, setItems] = useState(data);
+
+  if (data !== prevData) {
+    setPrevData(data);
+    setItems(data);
+  }
+
   const unread = items.filter((n) => !n.read).length;
 
   const markAllRead = () => {
@@ -61,14 +72,14 @@ export function Notifications() {
           />
         ) : (
           <div className="divide-y divide-gray-100">
-            {items.map((notification) => {
+            {items.map((notification, index) => {
               const type = NOTIFICATION_TYPES[notification.type] ?? {
                 label: notification.type,
                 className: 'bg-gray-100 text-gray-700',
               };
               return (
                 <div
-                  key={notification.id}
+                  key={`${notification.id ?? 'notif'}-${index}`}
                   className={cn(
                     'flex items-start justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-gray-50',
                     !notification.read && 'bg-blue-50/40 hover:bg-blue-50/70'

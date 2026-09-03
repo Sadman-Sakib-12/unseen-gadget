@@ -1,4 +1,4 @@
-﻿export interface DashboardStats {
+export interface DashboardStats {
   totalSales: number;
   todaySales: number;
   grossProfit: number;
@@ -53,7 +53,7 @@ export interface RecentOrder {
 }
 
 export interface LowStockProduct {
-  id: number;
+  id: string | number;
   name: string;
   sku: string;
   stock: number;
@@ -62,7 +62,7 @@ export interface LowStockProduct {
 }
 
 export interface TopProduct {
-  id: number;
+  id: string | number;
   name: string;
   category: string;
   price: number;
@@ -72,7 +72,7 @@ export interface TopProduct {
 }
 
 export interface SupplierDue {
-  id: number;
+  id: string | number;
   supplierName: string;
   amount: number;
   dueDate: string;
@@ -80,7 +80,7 @@ export interface SupplierDue {
 }
 
 export interface Notification {
-  id: number;
+  id: string | number;
   title: string;
   message: string;
   type: "ORDER" | "ALERT" | "PAYMENT" | "CUSTOMER" | "SHIPPING" | "RETURN";
@@ -89,7 +89,7 @@ export interface Notification {
 }
 
 export interface QuickAction {
-  id: number;
+  id: string | number;
   title: string;
   description: string;
   icon: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell, LogOut, Menu, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/use-auth';
 import { formatRelativeDay } from '@/lib/format';
-import notifications from '@/features/notifications/data/notifications.json';
+import { api } from '@/lib/api';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -34,10 +34,30 @@ function initialsOf(name: string): string {
     .join('');
 }
 
+interface HeaderNotification {
+  id?: string;
+  title?: string;
+  message?: string;
+  read?: boolean;
+  time?: string;
+  createdAt?: string;
+  type?: string;
+  actionUrl?: string;
+  [key: string]: unknown;
+}
+
 const Header = ({ onMenuClick }: HeaderProps) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [notifications, setNotifications] = useState<HeaderNotification[]>([]);
   const { user, logout } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    api.notifications
+      .list()
+      .then((res) => setNotifications((res.data as HeaderNotification[]) ?? []))
+      .catch(() => {});
+  }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
   const latestNotifications = notifications.slice(0, 4);
@@ -122,7 +142,10 @@ const Header = ({ onMenuClick }: HeaderProps) => {
                   {user?.name ?? 'Admin'}
                 </span>
                 <span className="block text-xs text-gray-500">
-                  {user ? roleLabel[user.role] ?? user.role : ''}
+                  {user
+                    ? roleLabel[typeof user.role === 'object' && user.role !== null ? (user.role as { name?: string }).name ?? '' : user.role] ??
+                      (typeof user.role === 'object' && user.role !== null ? (user.role as { name?: string }).name ?? '' : String(user.role ?? ''))
+                    : ''}
                 </span>
               </span>
             </Button>

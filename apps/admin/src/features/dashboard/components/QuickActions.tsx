@@ -1,18 +1,9 @@
-﻿'use client';
+'use client';
 
 import * as React from 'react';
 import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Package, ShoppingCart, UserPlus, Truck, Receipt, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { quickActions } from '@/features/dashboard/data';
-import {
-  Package,
-  ShoppingCart,
-  UserPlus,
-  Truck,
-  Receipt,
-  BarChart3,
-} from 'lucide-react';
 
 const iconMap: Record<string, React.ElementType> = {
   Package,
@@ -31,6 +22,15 @@ const iconToneMap: Record<string, string> = {
   Receipt: 'bg-gray-100 text-gray-700',
   BarChart3: 'bg-primary/10 text-primary',
 };
+
+const quickActions = [
+  { id: '1', title: 'Add Product', description: 'Create a new product listing', href: '/products/new', icon: 'Package' },
+  { id: '2', title: 'View Orders', description: 'Manage customer orders', href: '/orders', icon: 'ShoppingCart' },
+  { id: '3', title: 'Add Customer', description: 'Register a new customer', href: '/customers', icon: 'UserPlus' },
+  { id: '4', title: 'Deliveries', description: 'Track shipments and deliveries', href: '/delivery', icon: 'Truck' },
+  { id: '5', title: 'Expenses', description: 'Track business expenses', href: '/expenses', icon: 'Receipt' },
+  { id: '6', title: 'Reports', description: 'View sales and profit reports', href: '/reports', icon: 'BarChart3' },
+];
 
 interface QuickActionsProps {
   className?: string;

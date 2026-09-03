@@ -115,13 +115,53 @@ export function PostForm({ isOpen, onClose, post, onSave }: PostFormProps) {
                 onChange={(e) => update({ author: e.target.value })}
               />
             </Field>
-            <Field label="Featured image URL">
-              <Input
-                type="text"
-                value={formData.featuredImage ?? ""}
-                onChange={(e) => update({ featuredImage: e.target.value || null })}
-                placeholder="/images/articles/..."
-              />
+            <Field label="Featured Image">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    value={formData.featuredImage ?? ""}
+                    onChange={(e) => update({ featuredImage: e.target.value || null })}
+                    placeholder="Paste image URL or upload below"
+                    className="flex-1"
+                  />
+                  <label className="flex h-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const data = new FormData();
+                        data.append("file", file);
+                        try {
+                          const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+                          const res = await fetch(`${API_BASE}/api/admin/upload`, {
+                            method: "POST",
+                            credentials: "include",
+                            body: data,
+                          });
+                          const json = await res.json();
+                          if (json.data?.url) {
+                            update({ featuredImage: json.data.url });
+                          }
+                        } catch {}
+                      }}
+                    />
+                    Upload
+                  </label>
+                </div>
+                {formData.featuredImage ? (
+                  <div className="relative h-28 w-44 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                    <img
+                      src={formData.featuredImage}
+                      alt="Preview"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                ) : null}
+              </div>
             </Field>
             <Field label="Published date">
               <Input

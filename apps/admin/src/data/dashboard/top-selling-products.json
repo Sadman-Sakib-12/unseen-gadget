@@ -1,8 +1,0 @@
-[
-  { "id": 1, "name": "iPhone 16 Pro Max", "category": "Smartphones", "price": 185000, "stock": 25, "sold": 142, "image": "/images/iphone-16-pro-max.jpg" },
-  { "id": 2, "name": "MacBook Air M4", "category": "Laptops", "price": 165000, "stock": 18, "sold": 98, "image": "/images/macbook-air-m4.jpg" },
-  { "id": 3, "name": "Samsung S25 Ultra", "category": "Smartphones", "price": 145000, "stock": 32, "sold": 87, "image": "/images/samsung-s25-ultra.jpg" },
-  { "id": 4, "name": "AirPods Pro 2", "category": "Audio", "price": 25000, "stock": 45, "sold": 76, "image": "/images/airpods-pro-2.jpg" },
-  { "id": 5, "name": "iPad Air M3", "category": "Tablets", "price": 95000, "stock": 22, "sold": 64, "image": "/images/ipad-air-m3.jpg" }
-]
-

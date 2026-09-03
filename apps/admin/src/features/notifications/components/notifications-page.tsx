@@ -1,31 +1,59 @@
-﻿"use client";
-import { useState } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import { Bell, BellRing, MessageSquareText, TriangleAlert, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/ui/stat-card";
 import { NotificationsList } from "./notifications-list";
 import { NotificationForm } from "./notification-form";
-import initialNotifications from "@/features/notifications/data/notifications.json";
+import { apiRequest } from "@/lib/api";
 import type { Notification } from "@/features/notifications/types";
 
 export function NotificationsPage() {
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showForm, setShowForm] = useState(false);
 
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await apiRequest("/admin/notifications", {
+          credentials: "include",
+        });
+        if (res.success && res.data) {
+          setNotifications(res.data as Notification[]);
+        }
+      } catch (e: unknown) {
+        // Admin-only endpoint may fail for non-admin users
+        console.error("Failed to fetch notifications:", e);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
   const handleSave = (notification: Notification) => {
-    setNotifications([notification, ...notifications]);
+    setNotifications((prev) => [notification, ...prev]);
     setShowForm(false);
   };
 
-  const markRead = (id: string) => {
+  const markRead = async (id: string) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
+    try {
+      await apiRequest(`/admin/notifications/${id}/read`, { method: "PATCH" });
+    } catch (e) {
+      console.error("Failed to mark notification read:", e);
+    }
   };
 
-  const markAllRead = () => {
+  const markAllRead = async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    try {
+      await apiRequest("/admin/notifications/read-all", { method: "PATCH" });
+    } catch (e) {
+      console.error("Failed to mark all notifications read:", e);
+    }
   };
 
   const unread = notifications.filter((n) => !n.read).length;

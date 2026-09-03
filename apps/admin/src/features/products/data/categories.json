@@ -1,9 +1,0 @@
-[
-  { "id": "cat-1", "name": "Smartphones", "slug": "smartphones", "parentId": null },
-  { "id": "cat-2", "name": "Laptops", "slug": "laptops", "parentId": null },
-  { "id": "cat-3", "name": "Tablets", "slug": "tablets", "parentId": null },
-  { "id": "cat-4", "name": "Accessories", "slug": "accessories", "parentId": null },
-  { "id": "cat-5", "name": "Gaming", "slug": "gaming", "parentId": null },
-  { "id": "cat-6", "name": "Audio", "slug": "audio", "parentId": null }
-]
-

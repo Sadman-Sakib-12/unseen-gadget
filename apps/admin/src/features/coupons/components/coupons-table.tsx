@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Pencil, Ticket } from "lucide-react";
+import { Pencil, Ticket, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SearchInput } from "@/components/ui/search-input";
@@ -22,11 +22,12 @@ import { Coupon } from "@/features/coupons/types";
 interface CouponsTableProps {
   data: Coupon[];
   onEdit?: (coupon: Coupon) => void;
+  onDelete?: (coupon: Coupon) => void;
 }
 
 const PAGE_SIZE = 10;
 
-export function CouponsTable({ data, onEdit }: CouponsTableProps) {
+export function CouponsTable({ data, onEdit, onDelete }: CouponsTableProps) {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -87,7 +88,7 @@ export function CouponsTable({ data, onEdit }: CouponsTableProps) {
               <TableHead>Used</TableHead>
               <TableHead>Expiry</TableHead>
               <TableHead>Status</TableHead>
-              {onEdit ? <TableHead className="text-right">Actions</TableHead> : null}
+              {onEdit || onDelete ? <TableHead className="text-right">Actions</TableHead> : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -118,16 +119,31 @@ export function CouponsTable({ data, onEdit }: CouponsTableProps) {
                 <TableCell>
                   <StatusBadge status={coupon.status} />
                 </TableCell>
-                {onEdit ? (
+                {onEdit || onDelete ? (
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit(coupon)}
-                      aria-label={`Edit coupon ${coupon.code}`}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      {onEdit && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onEdit(coupon)}
+                          aria-label={`Edit coupon ${coupon.code}`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {onDelete && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:bg-red-50 hover:text-red-700"
+                          onClick={() => onDelete(coupon)}
+                          aria-label={`Delete coupon ${coupon.code}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 ) : null}
               </TableRow>

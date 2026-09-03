@@ -1,16 +1,31 @@
-﻿"use client";
-import { useState } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import { CheckCircle2, MessageSquareText, Star, TriangleAlert } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/ui/stat-card";
 import { ReviewsTable } from "./reviews-table";
 import { ReviewDetailsModal } from "./review-details-modal";
-import initialReviews from "@/features/reviews/data/reviews.json";
+import { apiRequest } from "@/lib/api";
 import type { Review } from "@/features/reviews/types";
 
 export function ReviewsPage() {
-  const [reviews] = useState<Review[]>(initialReviews);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await apiRequest("/admin/reviews", { credentials: "include" });
+        if (res.success && res.data) {
+          setReviews(res.data as Review[]);
+        }
+      } catch (e: unknown) {
+        console.error("Failed to fetch reviews:", e);
+      }
+    };
+    fetchReviews();
+  }, []);
 
   const averageRating = (
     reviews.reduce((sum, r) => sum + r.rating, 0) / Math.max(reviews.length, 1)

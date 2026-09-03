@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/dialog';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { formatBDT } from '@/lib/load-dashboard-data';
-import { PRODUCT_IMAGE_FALLBACK } from '@/lib/images';
 import { cn } from '@/components/ui/utils';
 import type { Product } from '../types';
 
@@ -67,7 +66,7 @@ export function ProductDetailsModal({
                   alt={product.name}
                   className="h-full w-full object-cover"
                   onError={(e) => {
-                    e.currentTarget.src = PRODUCT_IMAGE_FALLBACK;
+                    e.currentTarget.style.display = 'none';
                   }}
                 />
               </div>

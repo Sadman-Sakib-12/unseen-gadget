@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import OrdersFeaturePage from "@/features/orders/page";
 import { ReportsPage } from "@/features/reports/components/reports-page";
 
@@ -23,9 +22,10 @@ export default async function OrdersStatusPage({
     return <ReportsPage />;
   }
 
-  if (!VALID_STATUSES.includes(status)) {
-    notFound();
+  if (VALID_STATUSES.includes(status)) {
+    return <OrdersFeaturePage status={status} />;
   }
 
-  return <OrdersFeaturePage status={status} />;
+  // Treat param as order ID (e.g. /orders/cmt1x...)
+  return <OrdersFeaturePage orderId={status} />;
 }

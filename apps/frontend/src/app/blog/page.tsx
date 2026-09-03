@@ -1,27 +1,41 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ChevronRight, BookOpen, Clock, User, ArrowRight } from "lucide-react";
-import articles from "@/data/articles.json";
 import { useTranslation } from "@/hooks/use-translation";
+import { apiRequest } from "@/lib/api";
 
 interface Article {
-  id: number;
+  id: string;
   title: string;
-  category: string;
-  date: string;
-  image?: string;
+  slug: string;
+  category?: string;
   excerpt?: string;
-  author: string;
+  author?: string;
+  featuredImage?: string;
+  publishedAt?: string;
+  createdAt: string;
 }
 
 export default function BlogPage() {
   const { t } = useTranslation();
-  const list = articles as Article[];
+  const [list, setList] = useState<Article[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    apiRequest("/article")
+      .then((res) => {
+        setList(res.data || []);
+      })
+      .catch(() => {
+        setList([]);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
 
   return (
     <>
-      {/* Breadcrumb */}
       <div className="border-b border-border">
         <div className="container-gadget">
           <nav className="flex items-center gap-1.5 py-3 text-xs text-muted-foreground">
@@ -32,7 +46,6 @@ export default function BlogPage() {
         </div>
       </div>
 
-      {/* Hero */}
       <div className="bg-gradient-to-br from-primary-800 via-primary to-primary-600 py-12">
         <div className="container-gadget text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">
@@ -47,17 +60,20 @@ export default function BlogPage() {
       </div>
 
       <div className="container-gadget py-8">
-        {list.length > 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          </div>
+        ) : list.length > 0 ? (
           <>
-            {/* Featured article */}
             <Link
               href={`/articles/${list[0].id}`}
               className="group mb-8 grid overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md sm:grid-cols-2"
             >
               <div className="aspect-video overflow-hidden bg-muted sm:aspect-auto">
-                {list[0].image ? (
+                {list[0].featuredImage ? (
                   <img
-                    src={list[0].image}
+                    src={list[0].featuredImage}
                     alt={list[0].title}
                     className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                   />
@@ -79,16 +95,15 @@ export default function BlogPage() {
                 </p>
                 <div className="mt-4 flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <User className="h-3 w-3" /> {list[0].author}
+                    <User className="h-3 w-3" /> {list[0].author || "Admin"}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" /> {list[0].date}
+                    <Clock className="h-3 w-3" /> {new Date(list[0].createdAt).toLocaleDateString()}
                   </span>
                 </div>
               </div>
             </Link>
 
-            {/* Rest of articles */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {list.slice(1).map((article) => (
                 <Link
@@ -97,9 +112,9 @@ export default function BlogPage() {
                   className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary hover:shadow-md"
                 >
                   <div className="aspect-[16/9] overflow-hidden bg-muted">
-                    {article.image ? (
+                    {article.featuredImage ? (
                       <img
-                        src={article.image}
+                        src={article.featuredImage}
                         alt={article.title}
                         className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                       />
@@ -111,7 +126,7 @@ export default function BlogPage() {
                   </div>
                   <div className="flex flex-1 flex-col p-4">
                     <span className="inline-flex w-fit rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                      {article.category}
+                      {article.category || "Blog"}
                     </span>
                     <h3 className="mt-2 text-sm font-semibold text-foreground line-clamp-2 transition-colors group-hover:text-primary">
                       {article.title}
@@ -121,10 +136,10 @@ export default function BlogPage() {
                     </p>
                     <div className="mt-auto flex items-center justify-between gap-3 pt-3 text-[11px] text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <User className="h-3 w-3" /> {article.author}
+                        <User className="h-3 w-3" /> {article.author || "Admin"}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" /> {article.date}
+                        <Clock className="h-3 w-3" /> {new Date(article.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>

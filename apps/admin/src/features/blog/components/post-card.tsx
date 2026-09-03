@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatShortDate } from "@/lib/format";
-import { PRODUCT_IMAGE_FALLBACK } from "@/lib/images";
 import type { Post } from "@/features/blog/types";
 
 export function PostCard({ post }: { post: Post }) {
@@ -18,7 +17,7 @@ export function PostCard({ post }: { post: Post }) {
             alt={post.title}
             className="h-full w-full object-cover"
             onError={(e) => {
-              e.currentTarget.src = PRODUCT_IMAGE_FALLBACK;
+              e.currentTarget.style.display = 'none';
             }}
           />
         </div>

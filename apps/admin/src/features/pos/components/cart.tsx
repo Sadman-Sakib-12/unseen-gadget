@@ -18,6 +18,12 @@ interface CartProps {
   products: PosProduct[];
   discount: number;
   taxRate: number;
+  customerName: string;
+  customerPhone: string;
+  customerAddress: string;
+  onCustomerNameChange: (val: string) => void;
+  onCustomerPhoneChange: (val: string) => void;
+  onCustomerAddressChange: (val: string) => void;
   onUpdateQuantity: (productId: number, quantity: number) => void;
   onRemoveItem: (productId: number) => void;
   onDiscountChange: (discount: number) => void;
@@ -30,6 +36,12 @@ export function Cart({
   products,
   discount,
   taxRate,
+  customerName,
+  customerPhone,
+  customerAddress,
+  onCustomerNameChange,
+  onCustomerPhoneChange,
+  onCustomerAddressChange,
   onUpdateQuantity,
   onRemoveItem,
   onDiscountChange,
@@ -128,6 +140,42 @@ export function Cart({
 
         {items.length > 0 && (
           <div className="space-y-3 border-t border-gray-100 pt-4">
+            <div className="space-y-2 rounded-lg bg-gray-50 p-3 border border-gray-100 text-xs">
+              <p className="font-semibold text-gray-700">Customer & Store Info</p>
+              <div>
+                <label className="block text-[11px] text-gray-500 mb-0.5">Customer Name</label>
+                <Input
+                  type="text"
+                  placeholder="Walk-in Customer"
+                  value={customerName}
+                  onChange={(e) => onCustomerNameChange(e.target.value)}
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[11px] text-gray-500 mb-0.5">Phone Number</label>
+                  <Input
+                    type="text"
+                    placeholder="01XXXXXXXXX"
+                    value={customerPhone}
+                    onChange={(e) => onCustomerPhoneChange(e.target.value)}
+                    className="h-8 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] text-gray-500 mb-0.5">Store / Location</label>
+                  <Input
+                    type="text"
+                    placeholder="Main Outlet, Dhaka"
+                    value={customerAddress}
+                    onChange={(e) => onCustomerAddressChange(e.target.value)}
+                    className="h-8 text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm text-gray-500">Discount (%)</span>
               <Input

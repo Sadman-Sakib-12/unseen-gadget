@@ -1,19 +1,20 @@
-﻿'use client';
+'use client';
 
 import { HandCoins } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { supplierDues } from '@/features/dashboard/data';
 import { formatBDT, formatDate } from '@/lib/format';
+import type { SupplierDue } from '@/features/dashboard/types';
 
 interface OutstandingSupplierDueProps {
   className?: string;
+  data: SupplierDue[];
 }
 
-export function OutstandingSupplierDue({ className }: OutstandingSupplierDueProps) {
-  const outstanding = supplierDues.filter((due) => due.status !== 'PAID');
+export function OutstandingSupplierDue({ className, data }: OutstandingSupplierDueProps) {
+  const outstanding = data.filter((due) => due.status !== 'PAID');
   const totalDue = outstanding.reduce((sum, due) => sum + due.amount, 0);
 
   return (
@@ -31,9 +32,9 @@ export function OutstandingSupplierDue({ className }: OutstandingSupplierDueProp
           />
         ) : (
           <div className="divide-y divide-gray-100">
-            {outstanding.map((due) => (
+            {outstanding.map((due, index) => (
               <div
-                key={due.id}
+                key={`${due.id}-${index}`}
                 className="flex items-center justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-gray-50"
               >
                 <div className="min-w-0">

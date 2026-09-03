@@ -1,33 +1,65 @@
-﻿"use client";
+'use client';
 
-import { useState } from "react";
-import { CheckCircle2, Pause, Plus, Ticket, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/layout/page-header";
-import { StatCard } from "@/components/ui/stat-card";
-import { CouponsTable } from "@/features/coupons/components/coupons-table";
-import { CouponForm } from "@/features/coupons/components/coupon-form";
-import initialCoupons from "@/features/coupons/data/coupons.json";
-import { Coupon } from "@/features/coupons/types";
+import { useState, useMemo } from 'react';
+import { toast } from 'sonner';
+import { CheckCircle2, Pause, Plus, Ticket, XCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/layout/page-header';
+import { StatCard } from '@/components/ui/stat-card';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { CouponsTable } from '@/features/coupons/components/coupons-table';
+import { CouponForm } from '@/features/coupons/components/coupon-form';
+import type { Coupon } from '@/features/coupons/types';
+import { useAdminCoupons, useSaveAdminCoupon, useDeleteAdminCoupon } from '@/hooks/use-admin-queries';
 
 export function CouponsPage() {
-  const [coupons, setCoupons] = useState<Coupon[]>(initialCoupons);
+  const { data: couponsRes } = useAdminCoupons();
+  const saveCouponMutation = useSaveAdminCoupon();
+  const deleteCouponMutation = useDeleteAdminCoupon();
   const [showForm, setShowForm] = useState(false);
-  const [editingCoupon, setEditingCoupon] = useState<Coupon | undefined>(undefined);
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Coupon | null>(null);
 
-  const handleSave = (coupon: Coupon) => {
-    setCoupons((prev) =>
-      editingCoupon ? prev.map((c) => (c.id === coupon.id ? coupon : c)) : [...prev, coupon]
-    );
-    setShowForm(false);
-    setEditingCoupon(undefined);
+  const coupons = useMemo(() => {
+    const raw = (couponsRes as any)?.data ?? couponsRes;
+    return (Array.isArray(raw) ? raw : []) as Coupon[];
+  }, [couponsRes]);
+
+  const handleSave = async (coupon: Coupon) => {
+    try {
+      await saveCouponMutation.mutateAsync({
+        id: editingCoupon?.id ? String(editingCoupon.id) : undefined,
+        data: coupon as unknown as Record<string, unknown>,
+      });
+      toast.success(editingCoupon ? 'Coupon updated successfully' : 'Coupon created successfully');
+      setShowForm(false);
+      setEditingCoupon(null);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to save coupon');
+    }
+  };
+
+  const handleDelete = (coupon: Coupon) => {
+    setDeleteTarget(coupon);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteTarget) {
+      try {
+        await deleteCouponMutation.mutateAsync(deleteTarget.id);
+        toast.success(`Coupon ${deleteTarget.code} deleted successfully`);
+        setDeleteTarget(null);
+      } catch (err: any) {
+        toast.error(err.message || 'Failed to delete coupon');
+      }
+    }
   };
 
   const stats = {
     total: coupons.length,
-    active: coupons.filter((c) => c.status === "active").length,
-    inactive: coupons.filter((c) => c.status === "inactive").length,
-    expired: coupons.filter((c) => c.status === "expired").length,
+    active: coupons.filter((c) => c.status === 'active').length,
+    inactive: coupons.filter((c) => c.status === 'inactive').length,
+    expired: coupons.filter((c) => c.status === 'expired').length,
   };
 
   return (
@@ -38,7 +70,7 @@ export function CouponsPage() {
         actions={
           <Button
             onClick={() => {
-              setEditingCoupon(undefined);
+              setEditingCoupon(null);
               setShowForm(true);
             }}
           >
@@ -53,7 +85,7 @@ export function CouponsPage() {
           title="Total coupons"
           value={stats.total}
           icon={Ticket}
-          iconClassName="bg-blue-50 text-blue-700"
+          iconClassName="bg-blue-50 text-blue-500"
         />
         <StatCard
           title="Active"
@@ -81,7 +113,7 @@ export function CouponsPage() {
           onSave={handleSave}
           onCancel={() => {
             setShowForm(false);
-            setEditingCoupon(undefined);
+            setEditingCoupon(null);
           }}
         />
       )}
@@ -92,6 +124,17 @@ export function CouponsPage() {
           setEditingCoupon(coupon);
           setShowForm(true);
         }}
+        onDelete={handleDelete}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Delete Coupon"
+        description={`Are you sure you want to permanently delete coupon "${deleteTarget?.code}"? This will invalidate the coupon code immediately.`}
+        confirmLabel="Delete Coupon"
+        destructive
       />
     </div>
   );

@@ -1,18 +1,23 @@
-﻿'use client';
+'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { CheckCircle2, CreditCard, ShieldOff, UserRound } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
 import { StatCard } from '@/components/ui/stat-card';
 import { CustomersTable } from '@/features/customers/components/customers-table';
 import { CustomerDetailsModal } from '@/features/customers/components/customer-details-modal';
-import initialCustomers from '@/features/customers/data/customers.json';
 import type { Customer } from '@/features/customers/types';
 import { formatBDT } from '@/lib/format';
+import { useAdminCustomers } from '@/hooks/use-admin-queries';
 
 export function CustomersPage() {
-  const [customers] = useState<Customer[]>(initialCustomers);
+  const { data: customersRes } = useAdminCustomers();
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  const customers = useMemo(() => {
+    const raw = (customersRes as any)?.data ?? customersRes;
+    return (Array.isArray(raw) ? raw : []) as Customer[];
+  }, [customersRes]);
 
   const active = customers.filter((c) => c.status === 'active').length;
   const blocked = customers.filter((c) => c.status === 'blocked').length;
@@ -53,10 +58,7 @@ export function CustomersPage() {
       </div>
 
       <CustomersTable data={customers} onView={(c) => setSelectedCustomer(c)} />
-      <CustomerDetailsModal
-        customer={selectedCustomer}
-        onClose={() => setSelectedCustomer(null)}
-      />
+      <CustomerDetailsModal customer={selectedCustomer} onClose={() => setSelectedCustomer(null)} />
     </div>
   );
 }

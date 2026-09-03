@@ -12,7 +12,7 @@ import { useCmsResource } from "@/features/cms/hooks/use-cms-resource";
 import type { Post } from "@/features/blog/types";
 
 export function BlogPage() {
-  const { items: posts, loading, create, update, remove } = useCmsResource<Post>("/api/cms/posts");
+  const { items: posts, loading, create, update, remove } = useCmsResource<Post>("/cms/posts");
   const [showForm, setShowForm] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [removingPost, setRemovingPost] = useState<Post | null>(null);

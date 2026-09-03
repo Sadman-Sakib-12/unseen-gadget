@@ -27,6 +27,12 @@ interface StockTableProps {
 
 const PAGE_SIZE = 10;
 
+function getWarehouseName(warehouse: InventoryItem["warehouse"]): string {
+  if (!warehouse) return "Main Warehouse";
+  if (typeof warehouse === "string") return warehouse;
+  return warehouse.name || "Main Warehouse";
+}
+
 export function StockTable({ items, onAdjust }: StockTableProps) {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,12 +40,12 @@ export function StockTable({ items, onAdjust }: StockTableProps) {
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return items;
-    return items.filter(
-      (item) =>
-        item.name.toLowerCase().includes(query) ||
-        item.sku.toLowerCase().includes(query) ||
-        item.warehouse.toLowerCase().includes(query)
-    );
+    return items.filter((item) => {
+      const name = (item.name || item.product?.name || "").toLowerCase();
+      const sku = (item.sku || item.product?.sku || "").toLowerCase();
+      const warehouse = getWarehouseName(item.warehouse).toLowerCase();
+      return name.includes(query) || sku.includes(query) || warehouse.includes(query);
+    });
   }, [items, search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -94,42 +100,49 @@ export function StockTable({ items, onAdjust }: StockTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rows.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium text-gray-900">{item.name}</TableCell>
-                <TableCell>
-                  <span className="font-mono text-xs text-gray-500">{item.sku}</span>
-                </TableCell>
-                <TableCell className="text-gray-600">{item.warehouse}</TableCell>
-                <TableCell className="text-right font-semibold tabular-nums text-gray-900">
-                  <span
-                    className={cn(
-                      item.status === "OUT_OF_STOCK" && "text-red-600",
-                      item.status === "LOW_STOCK" && "text-amber-600"
-                    )}
-                  >
-                    {item.stock}
-                  </span>
-                </TableCell>
-                <TableCell className="text-right tabular-nums text-gray-500">
-                  {item.minStock}
-                </TableCell>
-                <TableCell className="text-right tabular-nums text-gray-500">
-                  {item.maxStock}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={item.status} />
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-right text-sm text-gray-500">
-                  {formatShortDate(item.lastRestocked)}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" onClick={() => onAdjust(item)}>
-                    Adjust
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {rows.map((item) => {
+              const productName = item.name || item.product?.name || "Product";
+              const productSku = item.sku || item.product?.sku || "N/A";
+              const warehouseName = getWarehouseName(item.warehouse);
+              const lastRestockDate = item.lastRestocked || item.updatedAt || item.createdAt;
+
+              return (
+                <TableRow key={item.id || item.productId}>
+                  <TableCell className="font-medium text-gray-900">{productName}</TableCell>
+                  <TableCell>
+                    <span className="font-mono text-xs text-gray-500">{productSku}</span>
+                  </TableCell>
+                  <TableCell className="text-gray-600">{warehouseName}</TableCell>
+                  <TableCell className="text-right font-semibold tabular-nums text-gray-900">
+                    <span
+                      className={cn(
+                        item.status === "OUT_OF_STOCK" && "text-red-600",
+                        item.status === "LOW_STOCK" && "text-amber-600"
+                      )}
+                    >
+                      {item.stock}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums text-gray-500">
+                    {item.minStock}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums text-gray-500">
+                    {item.maxStock}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={item.status} />
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-right text-sm text-gray-500">
+                    {lastRestockDate ? formatShortDate(lastRestockDate) : "—"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm" onClick={() => onAdjust(item)}>
+                      Adjust
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       )}

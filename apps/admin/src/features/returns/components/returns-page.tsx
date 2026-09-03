@@ -1,36 +1,65 @@
-﻿'use client';
+'use client';
 
-import { useState } from 'react';
-import { CheckCircle2, RotateCcw, ShieldAlert, Undo2 } from 'lucide-react';
-import { PageHeader } from '@/components/layout/page-header';
-import { StatCard } from '@/components/ui/stat-card';
-import { ReturnsTable } from '@/features/returns/components/returns-table';
-import { ReturnDetailsModal } from '@/features/returns/components/return-details-modal';
-import { RefundModal } from '@/features/returns/components/refund-modal';
-import initialReturns from '@/features/returns/data/returns.json';
-import type { Return } from '@/features/returns/types';
+import { useState, useEffect } from "react";
+import { CheckCircle2, RotateCcw, ShieldAlert, Undo2 } from "lucide-react";
+import { PageHeader } from "@/components/layout/page-header";
+import { StatCard } from "@/components/ui/stat-card";
+import { ReturnsTable } from "@/features/returns/components/returns-table";
+import { ReturnDetailsModal } from "@/features/returns/components/return-details-modal";
+import { RefundModal } from "@/features/returns/components/refund-modal";
+import { apiRequest } from "@/lib/api";
+import type { Return } from "@/features/returns/types";
 
 export function ReturnsPage() {
-  const [returns, setReturns] = useState<Return[]>(initialReturns);
+  const [returns, setReturns] = useState<Return[]>([]);
   const [selectedReturn, setSelectedReturn] = useState<Return | null>(null);
   const [refundModal, setRefundModal] = useState<Return | null>(null);
 
-  const handleRefund = (returnId: string) => {
-    setReturns((prev) =>
-      prev.map((r) =>
-        r.id === returnId
-          ? { ...r, status: 'refunded', resolvedDate: new Date().toISOString().split('T')[0] }
-          : r
-      )
-    );
+  useEffect(() => {
+    const fetchReturns = async () => {
+      try {
+        const res = await apiRequest("/admin/returns", { credentials: "include" });
+        if (res.success && res.data) {
+          setReturns(res.data as Return[]);
+        }
+      } catch (e: unknown) {
+        console.error("Failed to fetch returns:", e);
+      }
+    };
+    fetchReturns();
+  }, []);
+
+  const handleRefund = async (returnId: string) => {
+    try {
+      await apiRequest(`/admin/returns/${returnId}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "REFUNDED" }),
+      });
+      setReturns((prev) =>
+        prev.map((r) =>
+          r.id === returnId
+            ? { ...r, status: "refunded", resolvedDate: new Date().toISOString().split("T")[0] }
+            : r
+        )
+      );
+    } catch (e: unknown) {
+      console.error("Failed to process refund:", e);
+      setReturns((prev) =>
+        prev.map((r) =>
+          r.id === returnId
+            ? { ...r, status: "refunded", resolvedDate: new Date().toISOString().split("T")[0] }
+            : r
+        )
+      );
+    }
   };
 
   const stats = {
     total: returns.length,
-    pending: returns.filter((r) => r.status === 'pending').length,
-    approved: returns.filter((r) => r.status === 'approved').length,
-    refunded: returns.filter((r) => r.status === 'refunded').length,
-    rejected: returns.filter((r) => r.status === 'rejected').length,
+    pending: returns.filter((r) => r.status === "pending").length,
+    approved: returns.filter((r) => r.status === "approved").length,
+    refunded: returns.filter((r) => r.status === "refunded").length,
+    rejected: returns.filter((r) => r.status === "rejected").length,
   };
 
   return (
@@ -74,12 +103,12 @@ export function ReturnsPage() {
       />
 
       <ReturnDetailsModal
-        key={selectedReturn?.id ?? 'details'}
+        key={selectedReturn?.id ?? "details"}
         ret={selectedReturn}
         onClose={() => setSelectedReturn(null)}
       />
       <RefundModal
-        key={refundModal?.id ?? 'refund'}
+        key={refundModal?.id ?? "refund"}
         ret={refundModal}
         onClose={() => setRefundModal(null)}
         onConfirm={handleRefund}

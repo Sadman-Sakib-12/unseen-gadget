@@ -1,30 +1,45 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { LayoutDashboard } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { ProductSearch } from "./product-search";
 import { Cart } from "./cart";
 import { PaymentModal } from "./payment-modal";
 import { ReceiptModal } from "./receipt-modal";
-import allProducts from "@/features/pos/data/products.json";
-import posSession from "@/features/pos/data/pos-session.json";
+import { apiRequest, api } from "@/lib/api";
 import { formatBDT } from "@/lib/load-dashboard-data";
-import type { PosProduct, PosCartItem } from "../types";
+import type { PosProduct, PosCartItem, PosSession } from "../types";
 
 function getNextCartItemId(items: PosCartItem[]): number {
   return items.reduce((max, item) => Math.max(max, item.id), 0) + 1;
 }
 
 export function PosLayout() {
+  const [allProducts, setAllProducts] = useState<PosProduct[]>([]);
+  const [posSession, setPosSession] = useState<PosSession | null>(null);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [cartItems, setCartItems] = useState<PosCartItem[]>([]);
+  const [customerName, setCustomerName] = useState("Walk-in Customer");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("Main Outlet, Dhaka");
   const [discount, setDiscount] = useState(0);
   const [taxRate, setTaxRate] = useState(5);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [orderId, setOrderId] = useState("");
+
+  useEffect(() => {
+    Promise.all([
+      apiRequest("/products").then((res) => setAllProducts((res.data as PosProduct[]) ?? [])),
+      api.pos.listSessions().then((res) => {
+        const sessions = (res.data as PosSession[]) ?? [];
+        setPosSession(sessions.find((s) => !s.endTime) ?? sessions[0] ?? null);
+      }),
+    ]).finally(() => setLoading(false));
+  }, []);
 
   const filteredProducts = useMemo(() => {
     if (!searchQuery) return allProducts;
@@ -35,7 +50,7 @@ export function PosLayout() {
         p.sku.toLowerCase().includes(query) ||
         p.barcode.includes(query)
     );
-  }, [searchQuery]);
+  }, [searchQuery, allProducts]);
 
   const addToCart = (product: PosProduct) => {
     setCartItems((prev) => {
@@ -85,10 +100,51 @@ export function PosLayout() {
     setIsPaymentOpen(true);
   };
 
-  const handlePaymentConfirm = (method: string) => {
+  const handlePaymentConfirm = async (method: string) => {
     setPaymentMethod(method);
-    const newOrderId = `ORD-${Date.now().toString().slice(-6)}`;
-    setOrderId(newOrderId);
+    let generatedOrderId = `ORD-${Date.now().toString().slice(-6)}`;
+
+    try {
+      const mappedPaymentMethod = method === "cash" ? "COD" : method === "card" ? "SSLCOMMERZ" : "BKASH";
+      const orderRes = await apiRequest("/orders/checkout", {
+        method: "POST",
+        body: JSON.stringify({
+          customerName: customerName.trim() || "Walk-in Customer",
+          customerPhone: customerPhone.trim() || "01700000000",
+          shippingAddress: customerAddress.trim() || "Main Outlet, Dhaka",
+          paymentMethod: mappedPaymentMethod,
+          items: cartItems.map((item) => ({
+            productId: String(item.productId),
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        }),
+      });
+
+      const resData = orderRes?.data as { id?: string } | undefined;
+      if (resData?.id) {
+        generatedOrderId = resData.id;
+        await apiRequest(`/admin/orders/${generatedOrderId}/status`, {
+          method: "PATCH",
+          body: JSON.stringify({ status: "DELIVERED", paymentStatus: "PAID" }),
+        }).catch(() => {});
+      }
+    } catch (orderErr) {
+      console.error("Failed to create POS order in database:", orderErr);
+    }
+
+    setOrderId(generatedOrderId);
+
+    if (posSession?.id) {
+      try {
+        await api.pos.recordSale(String(posSession.id), { amount: total });
+        const updated = await api.pos.getSession(String(posSession.id));
+        if (updated?.data) setPosSession(updated.data as PosSession);
+      } catch (err) {
+        console.error("Failed to record POS sale in session:", err);
+      }
+    }
+
     setIsPaymentOpen(false);
     setIsReceiptOpen(true);
   };
@@ -97,6 +153,9 @@ export function PosLayout() {
     setCartItems([]);
     setDiscount(0);
     setTaxRate(5);
+    setCustomerName("Walk-in Customer");
+    setCustomerPhone("");
+    setCustomerAddress("Main Outlet, Dhaka");
     setPaymentMethod("");
     setOrderId("");
     setIsReceiptOpen(false);
@@ -106,7 +165,7 @@ export function PosLayout() {
     <div className="space-y-6">
       <PageHeader
         title="Point of Sale"
-        description={`Session: ${posSession.id} | Cash in Hand: ${formatBDT(posSession.cashInHand)}`}
+        description={posSession ? `Session: ${posSession.id} | Cash in Hand: ${formatBDT(posSession.cashInHand)}` : "Loading session..."}
         actions={
           <span className="inline-flex items-center gap-2 rounded-lg bg-gray-50 px-4 py-2">
             <LayoutDashboard className="h-5 w-5 text-gray-500" />
@@ -123,31 +182,37 @@ export function PosLayout() {
             onBarcodeScan={() => setSearchQuery("")}
           />
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {filteredProducts.map((product: PosProduct) => (
-              <button
-                key={product.id}
-                type="button"
-                onClick={() => addToCart(product)}
-                className="group rounded-xl border border-gray-200 bg-white p-3 text-left shadow-sm transition-all hover:border-gray-900 hover:shadow-md"
-              >
-                <div className="mb-3 aspect-square overflow-hidden rounded-lg bg-gray-100">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                  />
-                </div>
-                <p className="line-clamp-2 text-sm font-medium text-gray-900">{product.name}</p>
-                <p className="mt-1 text-xs text-gray-500">{product.category}</p>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-sm font-bold text-gray-900">
-                    {formatBDT(product.price)}
-                  </span>
-                  <span className="text-xs text-gray-400">Stock: {product.stock}</span>
-                </div>
-              </button>
-            ))}
+            {loading ? (
+              <div className="col-span-full flex items-center justify-center py-12">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
+              </div>
+            ) : (
+              filteredProducts.map((product: PosProduct) => (
+                <button
+                  key={product.id}
+                  type="button"
+                  onClick={() => addToCart(product)}
+                  className="group rounded-xl border border-gray-200 bg-white p-3 text-left shadow-sm transition-all hover:border-gray-900 hover:shadow-md"
+                >
+                  <div className="mb-3 aspect-square overflow-hidden rounded-lg bg-gray-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    />
+                  </div>
+                  <p className="line-clamp-2 text-sm font-medium text-gray-900">{product.name}</p>
+                  <p className="mt-1 text-xs text-gray-500">{product.category}</p>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-sm font-bold text-gray-900">
+                      {formatBDT(product.price)}
+                    </span>
+                    <span className="text-xs text-gray-400">Stock: {product.stock}</span>
+                  </div>
+                </button>
+              ))
+            )}
           </div>
         </div>
 
@@ -157,6 +222,12 @@ export function PosLayout() {
             products={allProducts}
             discount={discount}
             taxRate={taxRate}
+            customerName={customerName}
+            customerPhone={customerPhone}
+            customerAddress={customerAddress}
+            onCustomerNameChange={setCustomerName}
+            onCustomerPhoneChange={setCustomerPhone}
+            onCustomerAddressChange={setCustomerAddress}
             onUpdateQuantity={updateQuantity}
             onRemoveItem={removeItem}
             onDiscountChange={setDiscount}
@@ -183,6 +254,9 @@ export function PosLayout() {
         tax={taxAmount}
         total={total}
         orderId={orderId}
+        customerName={customerName}
+        customerPhone={customerPhone}
+        customerAddress={customerAddress}
       />
     </div>
   );

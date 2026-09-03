@@ -2,10 +2,11 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
-  description: string;
+  description: string | null;
   image: string | null;
   parentId: string | null;
   status: string;
+  productCount?: number;
 }
 
 export interface Brand {
@@ -13,6 +14,7 @@ export interface Brand {
   name: string;
   slug: string;
   logo: string | null;
-  description: string;
+  description: string | null;
   status: string;
+  productCount?: number;
 }

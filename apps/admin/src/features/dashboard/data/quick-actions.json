@@ -1,9 +1,0 @@
-[
-  { "id": 1, "title": "Add Product", "description": "Create a new product listing", "icon": "Package", "href": "/products" },
-  { "id": 2, "title": "New Order", "description": "Create a manual order", "icon": "ShoppingCart", "href": "/orders" },
-  { "id": 3, "title": "Add Customer", "description": "Register a new customer", "icon": "UserPlus", "href": "/customers" },
-  { "id": 4, "title": "Add Supplier", "description": "Register a new supplier", "icon": "Truck", "href": "/suppliers" },
-  { "id": 5, "title": "Add Expense", "description": "Record a new expense", "icon": "Receipt", "href": "/expenses" },
-  { "id": 6, "title": "Generate Report", "description": "View sales analytics", "icon": "BarChart3", "href": "/reports" }
-]
-

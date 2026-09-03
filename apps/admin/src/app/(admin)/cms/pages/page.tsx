@@ -1,17 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { ScrollText, ShieldCheck, Truck, Phone, Store, Pencil } from "lucide-react";
+import { ScrollText, ShieldCheck, Truck, Phone, Pencil } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/components/ui/utils";
 
 const pages = [
-  { href: "/cms/pages/shop", title: "Shop Landing", desc: "Hero content shown above the shop/product listing.", icon: Store },
-  { href: "/cms/pages/contact", title: "Contact", desc: "Contact info cards shown on the contact page.", icon: Phone },
-  { href: "/cms/pages/delivery-return", title: "Delivery & Return", desc: "Delivery charges, steps and return rules.", icon: Truck },
-  { href: "/cms/pages/terms", title: "Terms & Conditions", desc: "Edit the public terms page content.", icon: ScrollText },
+  { href: "/cms/pages/delivery-return", title: "Delivery & Return", desc: "Delivery charges, steps, return rules and FAQs.", icon: Truck },
+  { href: "/cms/pages/contact", title: "Contact", desc: "Showrooms, map, hotline and contact form.", icon: Phone },
+  { href: "/cms/pages/terms", title: "Terms & Conditions", desc: "Edit the public terms & conditions content.", icon: ScrollText },
   { href: "/cms/pages/privacy", title: "Privacy Policy", desc: "Edit the public privacy policy content.", icon: ShieldCheck },
 ];
 

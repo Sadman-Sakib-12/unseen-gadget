@@ -2,13 +2,48 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { adminUsers, type AdminUser } from '@/features/auth/data';
+
+export interface RoleObject {
+  id: string;
+  name: string;
+  permissions?: string[];
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
+  role: 'SUPER_ADMIN' | 'MANAGER' | 'STAFF' | string;
+  roleObject?: RoleObject;
+  permissions?: string[];
+}
+
+function normalizeAdminUser(raw: unknown): AdminUser | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const rawObj = raw as Record<string, unknown>;
+  const rawRole = rawObj.role;
+  const roleName =
+    typeof rawRole === 'object' && rawRole !== null
+      ? (rawRole as { name?: string }).name
+      : typeof rawRole === 'string'
+      ? rawRole
+      : 'STAFF';
+
+  return {
+    id: String(rawObj.id ?? ''),
+    name: String(rawObj.name ?? 'Admin'),
+    email: String(rawObj.email ?? ''),
+    role: (roleName as 'SUPER_ADMIN' | 'MANAGER' | 'STAFF') || 'STAFF',
+    roleObject: typeof rawRole === 'object' && rawRole !== null ? (rawRole as RoleObject) : undefined,
+    permissions: Array.isArray(rawObj.permissions) ? (rawObj.permissions as string[]) : undefined,
+  };
+}
 
 interface AuthContextType {
   user: AdminUser | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
-  register: (name: string, email: string, password: string, role?: 'SUPER_ADMIN' | 'MANAGER' | 'STAFF') => Promise<boolean>;
+  register: (name: string, email: string, password: string, role?: 'SUPER_ADMIN' | 'MANAGER' | 'STAFF') => Promise<{ success: boolean; error?: string }>;
   isAuthenticated: boolean;
   isAuthLoaded: boolean;
 }
@@ -19,6 +54,8 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
 const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<AdminUser | null>(null);
   const [isAuthLoaded, setIsAuthLoaded] = useState(false);
@@ -26,57 +63,75 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     let active = true;
-    const id = window.setTimeout(() => {
-      if (!active) return;
+    const checkAuth = async () => {
       try {
-        const storedUser = window.localStorage.getItem('admin_user');
-        setUser(storedUser ? (JSON.parse(storedUser) as AdminUser) : null);
-      } catch (e) {
-        console.error('Failed to parse user from localStorage', e);
-        setUser(null);
+        const res = await fetch(`${API_URL}/api/admin/auth/me`, {
+          credentials: 'include',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (active && data.success) {
+            setUser(normalizeAdminUser(data.data));
+          }
+        }
+      } catch {
+        // Not authenticated
+      } finally {
+        if (active) setIsAuthLoaded(true);
       }
-      setIsAuthLoaded(true);
-    }, 0);
-    return () => {
-      active = false;
-      window.clearTimeout(id);
     };
+    checkAuth();
+    return () => { active = false; };
   }, []);
 
-  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    const foundUser = adminUsers.find(
-      (u) => u.email === email && u.password === password
-    );
-    if (foundUser) {
-      setUser(foundUser);
-      localStorage.setItem('admin_user', JSON.stringify(foundUser));
-      return true;
+  const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        setUser(normalizeAdminUser(data.data));
+        return { success: true };
+      }
+      return { success: false, error: data.message || data.error?.message || 'Invalid email or password' };
+    } catch {
+      return { success: false, error: 'Network error or server unavailable' };
     }
-    return false;
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await fetch(`${API_URL}/api/admin/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      // Ignore errors
+    }
     setUser(null);
-    localStorage.removeItem('admin_user');
     router.push('/login');
   }, [router]);
 
-  const register = useCallback(async (name: string, email: string, password: string, role: 'SUPER_ADMIN' | 'MANAGER' | 'STAFF' = 'STAFF'): Promise<boolean> => {
-    const exists = adminUsers.find((u) => u.email === email);
-    if (exists) {
-      return false;
+  const register = useCallback(async (name: string, email: string, password: string, role: 'SUPER_ADMIN' | 'MANAGER' | 'STAFF' = 'STAFF'): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ name, email, password, role }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        return { success: true };
+      }
+      return { success: false, error: data.message || data.error?.message || 'Registration failed' };
+    } catch {
+      return { success: false, error: 'Network error or server unavailable' };
     }
-    const newUser: AdminUser = {
-      id: String(adminUsers.length + 1),
-      email,
-      name,
-      password,
-      role,
-    };
-    adminUsers.push(newUser);
-    setUser(newUser);
-    localStorage.setItem('admin_user', JSON.stringify(newUser));
-    return true;
   }, []);
 
   return (

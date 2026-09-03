@@ -1,4 +1,0 @@
-[
-  {"id":"EXPENSE-001","period":"January 2024","totalExpenses":195300,"categories":[{"category":"Inventory","amount":127000},{"category":"Salary","amount":50000},{"category":"Rent","amount":25000}],"monthlyTrend":[{"month":"January","amount":195300},{"month":"December","amount":178000},{"month":"November","amount":165000}],"topExpenses":[{"description":"Stock purchase from supplier","amount":85000},{"description":"January staff salaries","amount":45000},{"description":"Annual business insurance premium","amount":18000}]}
-]
-

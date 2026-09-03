@@ -1,13 +1,19 @@
 "use client";
-import { useState } from "react";
-import { CheckCircle2 } from "lucide-react";
+
+import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import Image from "next/image";
+import { CheckCircle2, Upload, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/components/ui/utils";
+import { toast } from "sonner";
 import type { GeneralSettings } from "@/features/settings/types";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
 interface GeneralSettingsProps {
   settings: GeneralSettings;
@@ -24,14 +30,85 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export function GeneralSettingsComponent({ settings, onSave }: GeneralSettingsProps) {
-  const [formData, setFormData] = useState(settings);
+  const { register, handleSubmit, reset, setValue, watch, formState: {} } = useForm<GeneralSettings>({
+    defaultValues: settings,
+  });
   const [saved, setSaved] = useState(false);
+  const logo = watch('logo');
+  const favicon = watch('favicon');
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingFavicon, setUploadingFavicon] = useState(false);
+  const logoFileRef = useRef<HTMLInputElement>(null);
+  const faviconFileRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
+
+
+  // Synchronize form values with incoming settings once fetched
+  useEffect(() => {
+    reset(settings);
+  }, [settings, reset]);
+
+  const handleLogoUpload = async (files: FileList | null) => {
+    if (!files || !files[0]) return;
+    setUploadingLogo(true);
+    try {
+      const data = new FormData();
+      data.append("file", files[0]);
+
+      const res = await fetch(`${API_BASE}/api/admin/upload`, {
+        method: "POST",
+        credentials: "include",
+        body: data,
+      });
+      const json = await res.json();
+      if (json.success && json.data?.url) {
+        setValue("logo", json.data.url);
+        toast.success("Logo uploaded successfully");
+      } else {
+        toast.error(json.error || json.message || "Failed to upload logo");
+      }
+    } catch (e: unknown) {
+      const err = e as Error;
+      toast.error(err.message || "Logo upload failed");
+    } finally {
+      setUploadingLogo(false);
+      if (logoFileRef.current) logoFileRef.current.value = "";
+    }
+  };
+
+  const handleFaviconUpload = async (files: FileList | null) => {
+    if (!files || !files[0]) return;
+    setUploadingFavicon(true);
+    try {
+      const data = new FormData();
+      data.append("file", files[0]);
+
+      const res = await fetch(`${API_BASE}/api/admin/upload`, {
+        method: "POST",
+        credentials: "include",
+        body: data,
+      });
+      const json = await res.json();
+      if (json.success && json.data?.url) {
+        setValue("favicon", json.data.url);
+        toast.success("Favicon uploaded successfully");
+      } else {
+        toast.error(json.error || json.message || "Failed to upload favicon");
+      }
+    } catch (e: unknown) {
+      const err = e as Error;
+      toast.error(err.message || "Favicon upload failed");
+    } finally {
+      setUploadingFavicon(false);
+      if (faviconFileRef.current) faviconFileRef.current.value = "";
+    }
+  };
+
+  const onSubmit = (data: GeneralSettings) => {
+    onSave(data);
     setSaved(true);
-    window.setTimeout(() => setSaved(false), 2000);
+    toast.success("General settings saved successfully!");
+    window.setTimeout(() => setSaved(false), 2500);
   };
 
   return (
@@ -40,44 +117,39 @@ export function GeneralSettingsComponent({ settings, onSave }: GeneralSettingsPr
         <CardTitle>General Settings</CardTitle>
       </CardHeader>
       <CardContent>
-        <form id="general-settings" onSubmit={handleSubmit} className="space-y-6">
+        <form id="general-settings" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Store Name">
               <Input
                 type="text"
-                value={formData.storeName}
-                onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
+                {...register('storeName')}
               />
             </Field>
             <Field label="Store Email">
               <Input
                 type="email"
-                value={formData.storeEmail}
-                onChange={(e) => setFormData({ ...formData, storeEmail: e.target.value })}
+                {...register('storeEmail')}
               />
             </Field>
             <Field label="Phone">
               <Input
                 type="text"
-                value={formData.storePhone}
-                onChange={(e) => setFormData({ ...formData, storePhone: e.target.value })}
+                {...register('storePhone')}
               />
             </Field>
             <Field label="Currency">
               <Select
-                value={formData.currency}
-                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                {...register('currency')}
                 options={[
-                  { value: "BDT", label: "BDT" },
-                  { value: "USD", label: "USD" },
-                  { value: "INR", label: "INR" },
+                  { value: "BDT", label: "BDT (৳)" },
+                  { value: "USD", label: "USD ($)" },
+                  { value: "INR", label: "INR (₹)" },
                 ]}
               />
             </Field>
             <Field label="Timezone">
               <Select
-                value={formData.timezone}
-                onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
+                {...register('timezone')}
                 options={[
                   { value: "Asia/Dhaka", label: "Asia/Dhaka" },
                   { value: "Asia/Kolkata", label: "Asia/Kolkata" },
@@ -87,8 +159,7 @@ export function GeneralSettingsComponent({ settings, onSave }: GeneralSettingsPr
             </Field>
             <Field label="Language">
               <Select
-                value={formData.language}
-                onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+                {...register('language')}
                 options={[
                   { value: "en", label: "English" },
                   { value: "bn", label: "Bengali" },
@@ -98,13 +169,115 @@ export function GeneralSettingsComponent({ settings, onSave }: GeneralSettingsPr
             <div className="md:col-span-2">
               <Field label="Address">
                 <Textarea
-                  value={formData.storeAddress}
-                  onChange={(e) => setFormData({ ...formData, storeAddress: e.target.value })}
+                  {...register('storeAddress')}
                   rows={2}
                 />
               </Field>
             </div>
+
+            {/* Logo field */}
+            <div className="space-y-2">
+              <Field label="Store Logo">
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    placeholder="https://... or /logo.png"
+                    {...register('logo')}
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={logoFileRef}
+                    onChange={(e) => handleLogoUpload(e.target.files)}
+                    style={{ display: "none" }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={uploadingLogo}
+                    onClick={() => logoFileRef.current?.click()}
+                    className="shrink-0"
+                  >
+                    {uploadingLogo ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    Upload
+                  </Button>
+                </div>
+                {logo ? (
+                  <div className="mt-2 flex items-center justify-between rounded-lg border border-border p-2 bg-muted/20">
+                    <div className="flex items-center gap-3">
+                      <Image src={logo!} alt="Logo Preview" width={140} height={40} className="h-8 max-w-[140px] object-contain" />
+                      <span className="text-xs text-muted-foreground">Logo Preview</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 h-7"
+                      onClick={() => setValue('logo', null)}
+                    >
+                      <X className="h-3.5 w-3.5 mr-1" /> Remove
+                    </Button>
+                  </div>
+                ) : null}
+              </Field>
+            </div>
+
+            {/* Favicon field */}
+            <div className="space-y-2">
+              <Field label="Favicon">
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    placeholder="https://... or /favicon.ico"
+                    {...register('favicon')}
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={faviconFileRef}
+                    onChange={(e) => handleFaviconUpload(e.target.files)}
+                    style={{ display: "none" }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={uploadingFavicon}
+                    onClick={() => faviconFileRef.current?.click()}
+                    className="shrink-0"
+                  >
+                    {uploadingFavicon ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    Upload
+                  </Button>
+                </div>
+                {favicon ? (
+                  <div className="mt-2 flex items-center justify-between rounded-lg border border-border p-2 bg-muted/20">
+                    <div className="flex items-center gap-3">
+                      <Image src={favicon!} alt="Favicon Preview" width={24} height={24} className="h-6 w-6 object-contain" />
+                      <span className="text-xs text-muted-foreground">Favicon Preview</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 h-7"
+                      onClick={() => setValue('favicon', null)}
+                    >
+                      <X className="h-3.5 w-3.5 mr-1" /> Remove
+                    </Button>
+                  </div>
+                ) : null}
+              </Field>
+            </div>
           </div>
+
           <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-4">
             <span
               className={cn(
@@ -115,7 +288,7 @@ export function GeneralSettingsComponent({ settings, onSave }: GeneralSettingsPr
               <CheckCircle2 className="h-4 w-4" />
               Settings saved
             </span>
-            <Button type="submit">Save Settings</Button>
+            <Button type="submit" className="min-w-[120px]">Save Settings</Button>
           </div>
         </form>
       </CardContent>

@@ -1,91 +1,80 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Facebook, Twitter, Youtube, Linkedin } from "lucide-react";
+import { Facebook, Twitter, Youtube, Linkedin, Instagram } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
+import { translateCategory } from "@/lib/i18n";
+import { apiRequest } from "@/lib/api";
+import type { FooterCms, FooterSection, FooterLink } from "@unseen-gadget/types";
 
 const W = "mx-auto w-full max-w-[1440px] px-4";
 
-const footerCols = [
-  {
-    key: "footer.categories",
-    links: [
-      { label: "iPhones", href: "/category/smartphones/iphones" },
-      { label: "Macbook", href: "/category/computers/macbooks" },
-      { label: "iPhone Cases", href: "/category/cases-protectors/iphone" },
-      { label: "Computer and Laptop", href: "/category/computers/laptops" },
-      { label: "Accessories", href: "/category/accessories" },
-    ],
-  },
-  {
-    key: "footer.help",
-    links: [
-      { label: "Terms & Conditions", href: "/terms" },
-      { label: "Delivery & Return", href: "/shipping" },
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Career", href: "/careers" },
-    ],
-  },
-  {
-    key: "footer.useful",
-    links: [
-      { label: "Our Blogs", href: "/blog" },
-      { label: "Our contacts", href: "/contact" },
-      { label: "Promotions", href: "/promotions" },
-      { label: "The Shop", href: "/about" },
-      { label: "Delivery & Return", href: "/returns" },
-    ],
-  },
-] as const;
-
-const showrooms = [
-  {
-    name: "Showroom 01 (Main Branch)",
-    addr: "Shop # 84, Block: C, Level: 05, Bashundhara City, Panthapath, Dhaka",
-  },
-  {
-    name: "Showroom 02",
-    addr: "Shop # 115, Block: D, Level: 06, Bashundhara City, Panthapath, Dhaka",
-  },
-  {
-    name: "Corporate Office",
-    addr: "House: 01, Main Road, Block: H,  Rampura-Banasree, Dhaka",
-  },
-];
-
-const socials = [
-  { Icon: Facebook, href: "https://facebook.com", label: "Facebook" },
-  { Icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-  { Icon: Youtube, href: "https://youtube.com", label: "YouTube" },
-  { Icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
-];
-
-const payments = ["VISA", "MasterCard", "PayPal", "bKash", "Nagad", "Rocket"];
-
 export function Footer() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const [footerData, setFooterData] = useState<FooterCms | null>(null);
+
+  useEffect(() => {
+    apiRequest("/cms/footer")
+      .then((res) => {
+        if (res?.data && typeof res.data === "object") {
+          setFooterData(res.data as FooterCms);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const showrooms = Array.isArray(footerData?.showrooms) ? footerData.showrooms : [];
+  const sections = Array.isArray(footerData?.sections) ? footerData.sections : [];
+  const payments = Array.isArray(footerData?.paymentMethods) ? footerData.paymentMethods : [];
+
+  const socials = [
+    ...(footerData?.socials?.facebook
+      ? [{ Icon: Facebook, href: footerData.socials.facebook, label: "Facebook" }]
+      : []),
+    ...(footerData?.socials?.twitter
+      ? [{ Icon: Twitter, href: footerData.socials.twitter, label: "Twitter" }]
+      : []),
+    ...(footerData?.socials?.youtube
+      ? [{ Icon: Youtube, href: footerData.socials.youtube, label: "YouTube" }]
+      : []),
+    ...(footerData?.socials?.linkedin
+      ? [{ Icon: Linkedin, href: footerData.socials.linkedin, label: "LinkedIn" }]
+      : []),
+    ...(footerData?.socials?.instagram
+      ? [{ Icon: Instagram, href: footerData.socials.instagram, label: "Instagram" }]
+      : []),
+  ];
+
+  const copyrightText =
+    footerData?.copyright ||
+    `${t("footer.rights")} © 2013–${new Date().getFullYear()}`;
 
   return (
     <footer className="border-t border-border bg-background text-foreground">
-
       {/* ── Showroom row ─────────────────────────────────── */}
-      <div className="border-b border-border">
-        <div className={`${W} py-6`}>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-            {showrooms.map((s) => (
-              <div key={s.name}>
-                <p className="text-[13px] font-semibold text-foreground">{s.name}</p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{s.addr}</p>
-              </div>
-            ))}
+      {showrooms.length > 0 && (
+        <div className="border-b border-border">
+          <div className={`${W} py-6`}>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              {showrooms.map((s, idx) => (
+                <div key={idx}>
+                  <p className="text-[13px] font-semibold text-foreground">
+                    {translateCategory(s.name, language)}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {translateCategory(s.addr, language)}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ── Main footer columns ───────────────────────────── */}
       <div className={`${W} py-8`}>
         <div className="grid grid-cols-2 gap-8 lg:grid-cols-[2fr_1fr_1fr_1fr_1.5fr]">
-
           {/* Brand + social */}
           <div className="col-span-2 lg:col-span-1">
             <Link href="/">
@@ -113,17 +102,19 @@ export function Footer() {
           </div>
 
           {/* Link columns */}
-          {footerCols.map((col) => (
-            <div key={col.key}>
-              <h3 className="text-[13px] font-semibold text-foreground">{t(col.key)}</h3>
+          {sections.map((col: FooterSection, idx: number) => (
+            <div key={col.key || idx}>
+              <h3 className="text-[13px] font-semibold text-foreground">
+                {col.titleKey ? t(col.titleKey as any) : translateCategory(col.title, language)}
+              </h3>
               <ul className="mt-3 space-y-2">
-                {col.links.map((lk) => (
-                  <li key={lk.label}>
+                {col.links.map((lk: FooterLink, lkIdx: number) => (
+                  <li key={lk.key || lk.label || lkIdx}>
                     <Link
                       href={lk.href}
                       className="text-[12.5px] text-muted-foreground transition-colors hover:text-primary"
                     >
-                      {lk.label}
+                      {translateCategory(lk.label, language)}
                     </Link>
                   </li>
                 ))}
@@ -145,7 +136,9 @@ export function Footer() {
                   <path d="M3.609 1.814L13.792 12 3.61 22.186a.75.75 0 01-.61-.74V2.555a.75.75 0 01.609-.741zM14.85 13.06l2.302 2.302-8.937 5.108 6.635-7.41zm3.211-1.06a1.25 1.25 0 010 2l-1.96 1.121L13.584 12l2.517-3.121 1.96 1.121zM8.215 3.53l8.937 5.108-2.302 2.302-6.635-7.41z" />
                 </svg>
                 <div className="flex flex-col leading-none">
-                  <span className="text-[8px] uppercase tracking-wide opacity-80">GET IT ON</span>
+                  <span className="text-[8px] uppercase tracking-wide opacity-80">
+                    {language === "bn" ? "ডাউনলোড করুন" : "GET IT ON"}
+                  </span>
                   <span className="text-[11px] font-semibold">Google Play</span>
                 </div>
               </a>
@@ -158,7 +151,9 @@ export function Footer() {
                   <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
                 </svg>
                 <div className="flex flex-col leading-none">
-                  <span className="text-[8px] uppercase tracking-wide opacity-80">Download on the</span>
+                  <span className="text-[8px] uppercase tracking-wide opacity-80">
+                    {language === "bn" ? "ডাউনলোড করুন" : "Download on the"}
+                  </span>
                   <span className="text-[11px] font-semibold">App Store</span>
                 </div>
               </a>
@@ -170,9 +165,7 @@ export function Footer() {
       {/* ── Bottom bar ────────────────────────────────────── */}
       <div className="border-t border-border">
         <div className={`${W} flex flex-col items-center justify-between gap-3 py-4 sm:flex-row`}>
-          <p className="text-xs text-muted-foreground">
-            {t("footer.rights")} &copy; 2013&ndash;{new Date().getFullYear()}
-          </p>
+          <p className="text-xs text-muted-foreground">{copyrightText}</p>
           <div className="flex items-center gap-1.5">
             {payments.map((m) => (
               <span
@@ -188,3 +181,4 @@ export function Footer() {
     </footer>
   );
 }
+

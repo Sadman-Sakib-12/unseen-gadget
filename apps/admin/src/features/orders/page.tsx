@@ -2,6 +2,12 @@
 
 import { OrdersPage } from "./components/orders-page";
 
-export default function OrdersFeaturePage({ status }: { status?: string }) {
-  return <OrdersPage status={status} />;
+export default function OrdersFeaturePage({
+  status,
+  orderId,
+}: {
+  status?: string;
+  orderId?: string;
+}) {
+  return <OrdersPage status={status} orderId={orderId} />;
 }

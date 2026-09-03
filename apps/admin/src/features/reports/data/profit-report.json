@@ -1,4 +1,0 @@
-[
-  {"id":"PROFIT-001","period":"January 2024","totalRevenue":1250000,"totalCost":875000,"grossProfit":375000,"netProfit":210000,"profitMargin":30,"monthlyBreakdown":[{"month":"January","revenue":1250000,"cost":875000,"profit":375000},{"month":"December","revenue":1120000,"cost":784000,"profit":336000},{"month":"November","revenue":980000,"cost":686000,"profit":294000}],"topCategories":[{"category":"Electronics","profit":142000},{"category":"Accessories","profit":98000},{"category":"Peripherals","profit":65000}]}
-]
-

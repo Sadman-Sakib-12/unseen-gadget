@@ -1,4 +1,4 @@
-export type { Post } from "@unseen-gadget/cms-data";
+export type { Post } from "@unseen-gadget/types";
 
 export interface Page {
   id: string;

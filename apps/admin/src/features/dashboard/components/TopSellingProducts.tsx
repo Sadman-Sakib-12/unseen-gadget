@@ -1,18 +1,18 @@
-﻿'use client';
+'use client';
 
 import { Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
-import { topSellingProducts } from '@/features/dashboard/data';
 import { formatBDT } from '@/lib/load-dashboard-data';
-import { PRODUCT_IMAGE_FALLBACK } from '@/lib/images';
+import type { TopProduct } from '@/features/dashboard/types';
 
 interface TopSellingProductsProps {
   className?: string;
+  data: TopProduct[];
 }
 
-export function TopSellingProducts({ className }: TopSellingProductsProps) {
+export function TopSellingProducts({ className, data }: TopSellingProductsProps) {
   return (
     <Card className={className}>
       <CardHeader className="flex-row items-center justify-between space-y-0">
@@ -20,7 +20,7 @@ export function TopSellingProducts({ className }: TopSellingProductsProps) {
         <Badge variant="secondary">By units sold</Badge>
       </CardHeader>
       <CardContent className="p-0">
-        {topSellingProducts.length === 0 ? (
+        {data.length === 0 ? (
           <EmptyState
             icon={Trophy}
             title="No sales yet"
@@ -28,9 +28,9 @@ export function TopSellingProducts({ className }: TopSellingProductsProps) {
           />
         ) : (
           <div className="divide-y divide-gray-100">
-          {topSellingProducts.map((product) => (
+          {data.map((product, index) => (
             <div
-              key={product.id}
+              key={`${product.id}-${index}`}
               className="flex items-center justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-gray-50/60"
             >
               <div className="flex min-w-0 items-center gap-3">
@@ -41,7 +41,7 @@ export function TopSellingProducts({ className }: TopSellingProductsProps) {
                     alt={product.name}
                     loading="lazy"
                     onError={(e) => {
-                      e.currentTarget.src = PRODUCT_IMAGE_FALLBACK;
+                      e.currentTarget.style.display = 'none';
                     }}
                     className="h-full w-full object-cover"
                   />
