@@ -29,9 +29,6 @@ importers:
       '@unseen-gadget/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@unseen-gadget/database':
-        specifier: workspace:*
-        version: link:../../packages/database
       '@unseen-gadget/lib':
         specifier: workspace:*
         version: link:../../packages/lib
