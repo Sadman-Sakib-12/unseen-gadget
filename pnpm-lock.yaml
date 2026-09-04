@@ -156,9 +156,6 @@ importers:
       express:
         specifier: ^4.21.0
         version: 4.22.2
-      express-rate-limit:
-        specifier: ^7.5.0
-        version: 7.5.1(express@4.22.2)
       helmet:
         specifier: ^7.1.0
         version: 7.2.0
@@ -2012,12 +2009,6 @@ packages:
 
   eventemitter3@4.0.7:
     resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==}
-
-  express-rate-limit@7.5.1:
-    resolution: {integrity: sha512-7iN8iPMDzOMHPUYllBEsQdWVB6fPDMPqwjBaFrgr4Jgr/+okjvzAy+UHlYYL/Vs0OsOrMkwS6PJDkFlJwoxUnw==}
-    engines: {node: '>= 16'}
-    peerDependencies:
-      express: '>= 4.11'
 
   express@4.22.2:
     resolution: {integrity: sha512-IuL+Elrou2ZvCFHs18/CIzy2Nzvo25nZ1/D2eIZlz7c+QUayAcYoiM2BthCjs+EBHVpjYjcuLDAiCWgeIX3X1Q==}
@@ -5159,10 +5150,6 @@ snapshots:
   etag@1.8.1: {}
 
   eventemitter3@4.0.7: {}
-
-  express-rate-limit@7.5.1(express@4.22.2):
-    dependencies:
-      express: 4.22.2
 
   express@4.22.2:
     dependencies:
