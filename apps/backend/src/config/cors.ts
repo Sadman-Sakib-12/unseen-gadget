@@ -9,17 +9,14 @@ const allowedOrigins = [
 export function createCorsOptions(): CorsOptions {
   return {
     origin(origin, callback) {
-      // Allow origin-less requests (curl, server-to-server) only outside production.
+      // Allow requests with no origin (curl, mobile apps, server-to-server, health checks)
       if (!origin) {
-        if (isDev) {
-          callback(null, true);
-        } else {
-          callback(new Error("Origin header is required"));
-        }
-        return;
+        return callback(null, true);
       }
       if (
         allowedOrigins.includes(origin) ||
+        origin.endsWith(".vercel.app") ||
+        /^https?:\/\/([a-z0-9-]+\.)*vercel\.app$/i.test(origin) ||
         (isDev && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin))
       ) {
         callback(null, true);
