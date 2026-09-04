@@ -81,10 +81,24 @@ export async function checkout(userId: string | null | undefined, orderData: {
       uniqueProductShippingMap.set(product.id, product.shippingCost);
     }
   }
-  const shippingCost = Array.from(uniqueProductShippingMap.values()).reduce(
+  const baseShippingCost = Array.from(uniqueProductShippingMap.values()).reduce(
     (sum, cost) => sum + cost,
     0
   );
+
+  const isPaid = items.some(
+    (item) => products.find((p) => p.id === item.productId)?.shippingType === "PAID"
+  );
+
+  let shippingCost = 0;
+  if (baseShippingCost > 0 || isPaid) {
+    const isOutsideDhaka =
+      /outside dhaka/i.test(shippingAddress) ||
+      (orderData as any).deliveryZone === "outside-dhaka";
+
+    const base = baseShippingCost > 0 ? baseShippingCost : 60;
+    shippingCost = isOutsideDhaka ? base + 50 : base;
+  }
 
   // Separate and consolidate demand by inventory target:
   // - If variantId is present, the actual inventory source is the ProductVariant

@@ -32,14 +32,40 @@ export function normalizeCartItem(raw: any): CartItem {
   };
 }
 
+export type DeliveryZone = "inside-dhaka" | "outside-dhaka";
+
 export function calculateOrderShipping(
-  items: Array<{ productId: string; shippingType?: string; shippingCost?: number }>
+  items: Array<{ productId: string; shippingType?: string; shippingCost?: number }>,
+  zone: DeliveryZone = "inside-dhaka"
 ): number {
+  const isPaid = items.some(
+    (item) => item.shippingType === "PAID" || (item.shippingCost ?? 0) > 0
+  );
+  if (!isPaid && items.length > 0 && items.every((i) => i.shippingType === "FREE")) {
+    return 0;
+  }
+
   const uniqueProductShippingMap = new Map<string, number>();
   for (const item of items) {
     if (item.shippingType === "PAID" && (item.shippingCost ?? 0) > 0) {
       uniqueProductShippingMap.set(item.productId, item.shippingCost!);
     }
   }
-  return Array.from(uniqueProductShippingMap.values()).reduce((sum, cost) => sum + cost, 0);
+
+  const baseCost = Array.from(uniqueProductShippingMap.values()).reduce(
+    (sum, cost) => sum + cost,
+    0
+  );
+
+  if (baseCost === 0 && !isPaid) {
+    return 0;
+  }
+
+  // Inside Dhaka: base product cost (or standard 60)
+  // Outside Dhaka: base product cost + 50 (or standard 120)
+  if (zone === "outside-dhaka") {
+    return baseCost > 0 ? baseCost + 50 : 120;
+  }
+
+  return baseCost > 0 ? baseCost : 60;
 }

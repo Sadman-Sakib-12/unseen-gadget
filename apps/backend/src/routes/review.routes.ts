@@ -6,6 +6,7 @@ const router = Router();
 
 router.post("/", optionalAuth, reviewController.createReview);
 router.get("/product/:productId", reviewController.getProductReviews);
+router.get("/:productId", reviewController.getProductReviews);
 router.put("/:reviewId", authenticateCustomer, reviewController.updateReview);
 router.delete("/:reviewId", authenticateCustomer, reviewController.deleteReview);
 

@@ -51,7 +51,7 @@ export function CatBtn({ c }: { c: HomeCategory }) {
 
   return (
     <Link href={c.href} className="group flex flex-col items-center gap-1.5">
-      <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full border border-border bg-card p-3.5 text-muted-foreground transition group-hover:border-primary group-hover:bg-primary/5 group-hover:text-primary group-hover:shadow-sm">
+      <div className="flex h-14 w-14 sm:h-[72px] sm:w-[72px] items-center justify-center rounded-full border border-border bg-card p-2.5 sm:p-3.5 text-muted-foreground transition group-hover:border-primary group-hover:bg-primary/5 group-hover:text-primary group-hover:shadow-sm">
         {c.image ? (
           <img
             src={c.image}

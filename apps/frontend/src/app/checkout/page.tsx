@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent, useEffect, useMemo } from "react";
 import { ChevronRight, Truck, Package } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -148,8 +148,11 @@ export default function CheckoutPage() {
   const [payment, setPayment] = useState(PAYMENT_METHODS[0].id);
   const [placing, setPlacing] = useState(false);
   const [trxId, setTrxId] = useState("");
+  const [deliveryZone, setDeliveryZone] = useState<"inside-dhaka" | "outside-dhaka">("inside-dhaka");
 
-  const shippingCost = calculateOrderShipping(shownItems);
+  const insideCost = useMemo(() => calculateOrderShipping(shownItems, "inside-dhaka"), [shownItems]);
+  const outsideCost = useMemo(() => calculateOrderShipping(shownItems, "outside-dhaka"), [shownItems]);
+  const shippingCost = deliveryZone === "outside-dhaka" ? outsideCost : insideCost;
   const total = subtotal + shippingCost;
 
   const onSubmit = async (e: FormEvent) => {
@@ -163,10 +166,12 @@ export default function CheckoutPage() {
     const customerName = formData.customerName.trim();
     const customerPhone = formData.customerPhone.trim();
     const customerEmail = formData.customerEmail.trim() || session?.user?.email || undefined;
+    const zoneTag = deliveryZone === "inside-dhaka" ? "Inside Dhaka" : "Outside Dhaka";
     const fullShippingAddress = [
       formData.address.trim(),
       formData.city.trim(),
       formData.postalCode.trim(),
+      `[${zoneTag}]`,
     ]
       .filter(Boolean)
       .join(", ");
@@ -286,6 +291,10 @@ export default function CheckoutPage() {
                 <CheckoutCustomerForm
                   formData={formData}
                   onChange={updateFormData}
+                  deliveryZone={deliveryZone}
+                  onDeliveryZoneChange={setDeliveryZone}
+                  insideCost={insideCost}
+                  outsideCost={outsideCost}
                   t={t}
                 />
 
@@ -298,11 +307,17 @@ export default function CheckoutPage() {
                   <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div>
-                        <p className="text-sm font-medium text-foreground">Standard Delivery</p>
+                        <p className="text-sm font-medium text-foreground">
+                          {deliveryZone === "inside-dhaka"
+                            ? "Inside Dhaka Delivery"
+                            : "Outside Dhaka Courier Delivery"}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {shippingCost === 0
                             ? "Free Shipping on your order"
-                            : "Calculated per product"}
+                            : deliveryZone === "inside-dhaka"
+                            ? "Home delivery within 24–48 hours (1–2 Days)"
+                            : "Courier delivery across Bangladesh (2–4 Days)"}
                         </p>
                       </div>
                     </div>

@@ -1,4 +1,6 @@
-import { MapPin, User } from "lucide-react";
+import { MapPin, User, Truck } from "lucide-react";
+import type { DeliveryZone } from "@/types/cart";
+import { formatBDT } from "@/components/price";
 
 interface CheckoutFormData {
   customerName: string;
@@ -12,10 +14,22 @@ interface CheckoutFormData {
 interface CheckoutCustomerFormProps {
   formData: CheckoutFormData;
   onChange: (patch: Partial<CheckoutFormData>) => void;
+  deliveryZone: DeliveryZone;
+  onDeliveryZoneChange: (zone: DeliveryZone) => void;
+  insideCost: number;
+  outsideCost: number;
   t: (key: string) => string;
 }
 
-export function CheckoutCustomerForm({ formData, onChange, t }: CheckoutCustomerFormProps) {
+export function CheckoutCustomerForm({
+  formData,
+  onChange,
+  deliveryZone,
+  onDeliveryZoneChange,
+  insideCost,
+  outsideCost,
+  t,
+}: CheckoutCustomerFormProps) {
   return (
     <>
       {/* Customer info */}
@@ -59,6 +73,81 @@ export function CheckoutCustomerForm({ formData, onChange, t }: CheckoutCustomer
               className="input-field"
               placeholder="you@example.com"
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Delivery Zone (Inside Dhaka vs Outside Dhaka) */}
+      <section className="rounded-2xl border border-border bg-card p-5">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-foreground">
+          <Truck className="h-4 w-4 text-primary" />
+          Select Delivery Area (ডেলিভারি এরিয়া) *
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {/* Inside Dhaka */}
+          <div
+            onClick={() => onDeliveryZoneChange("inside-dhaka")}
+            className={`cursor-pointer rounded-xl border p-4 transition-all ${
+              deliveryZone === "inside-dhaka"
+                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                : "border-border bg-muted/20 hover:border-primary/50"
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <input
+                type="radio"
+                name="deliveryZone"
+                checked={deliveryZone === "inside-dhaka"}
+                onChange={() => onDeliveryZoneChange("inside-dhaka")}
+                className="mt-1 h-4 w-4 text-primary focus:ring-primary cursor-pointer"
+              />
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-foreground">
+                    Inside Dhaka (ঢাকার ভেতরে)
+                  </span>
+                  <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
+                    {insideCost === 0 ? "FREE" : formatBDT(insideCost)}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Home Delivery within 24–48 hours
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Outside Dhaka */}
+          <div
+            onClick={() => onDeliveryZoneChange("outside-dhaka")}
+            className={`cursor-pointer rounded-xl border p-4 transition-all ${
+              deliveryZone === "outside-dhaka"
+                ? "border-primary bg-primary/5 ring-1 ring-primary"
+                : "border-border bg-muted/20 hover:border-primary/50"
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <input
+                type="radio"
+                name="deliveryZone"
+                checked={deliveryZone === "outside-dhaka"}
+                onChange={() => onDeliveryZoneChange("outside-dhaka")}
+                className="mt-1 h-4 w-4 text-primary focus:ring-primary cursor-pointer"
+              />
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-foreground">
+                    Outside Dhaka (ঢাকার বাইরে)
+                  </span>
+                  <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">
+                    {outsideCost === 0 ? "FREE" : formatBDT(outsideCost)}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Courier Delivery within 2–4 days
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

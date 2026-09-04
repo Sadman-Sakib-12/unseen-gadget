@@ -318,11 +318,12 @@ export default function Home() {
       {isSecOn("new-arrival") && (isLoadingNewArrivals || nPs.length > 0) && (
         <section className="border-t border-border py-5">
           <div className={W}>
+            <SectionHeading title={t("home.section.newArrival")} href="/new-arrivals" />
             <div className="grid gap-3 lg:grid-cols-5">
               {nPs[0] ? (
                 <Link
                   href={`/product/${nPs[0].slug}`}
-                  className="group flex flex-col items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-transparent to-primary/15 p-6 text-center transition hover:shadow-md border border-border"
+                  className="group flex flex-col items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-transparent to-primary/15 p-5 text-center transition hover:shadow-md border border-border min-w-0"
                 >
                   <p className="text-[9px] font-bold uppercase tracking-widest text-primary">
                     {nPs[0].badge || "New Arrival"}
@@ -338,15 +339,14 @@ export default function Home() {
                   </span>
                 </Link>
               ) : (
-                <div className="flex flex-col items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-transparent to-primary/15 p-6 text-center border border-border animate-pulse">
+                <div className="flex flex-col items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-transparent to-primary/15 p-6 text-center border border-border animate-pulse min-w-0">
                   <div className="h-3 w-16 rounded bg-muted/60" />
                   <div className="mt-2 h-5 w-32 rounded bg-muted/80" />
                   <div className="mt-2 h-4 w-20 rounded bg-muted/60" />
                 </div>
               )}
 
-              <div className="lg:col-span-4">
-                <SectionHeading title={t("home.section.newArrival")} href="/new-arrivals" />
+              <div className="lg:col-span-4 min-w-0 max-w-full overflow-hidden">
                 {isLoadingNewArrivals ? (
                   <ProductCarouselSkeleton count={4} />
                 ) : (

@@ -41,6 +41,8 @@ export interface ProductDetailsData {
     outsideDhaka?: string;
     shippingCost?: string;
   };
+  shippingType?: "FREE" | "PAID" | string;
+  shippingCost?: number;
   warranty?: string[] | string;
   variants?: any[];
   related?: any[];
@@ -220,13 +222,13 @@ export default function ProductDetails({ product }: { product: ProductDetailsDat
     if (outOfStock) return;
     setAddingToCart(true);
     try {
-      await apiRequest("/cart/items", {
+      await apiRequest("/cart/current/items", {
         method: "POST",
         body: JSON.stringify({
           productId: product.id,
           variantId: selectedVariant?.id,
           quantity,
-          selectedColor: selectedColor || undefined,
+          color: selectedColor || undefined,
         }),
       });
       window.dispatchEvent(new CustomEvent("cart-updated"));
@@ -235,13 +237,8 @@ export default function ProductDetails({ product }: { product: ProductDetailsDat
           ? `"${product.name}" কার্টে যুক্ত হয়েছে!`
           : `Added "${product.name}" to cart!`
       );
-    } catch {
-      window.dispatchEvent(new CustomEvent("cart-updated"));
-      toast.success(
-        language === "bn"
-          ? `"${product.name}" কার্টে যুক্ত হয়েছে!`
-          : `Added "${product.name}" to cart!`
-      );
+    } catch (error: any) {
+      toast.error(error.message || "Failed to add to cart");
     } finally {
       setAddingToCart(false);
     }
@@ -251,20 +248,19 @@ export default function ProductDetails({ product }: { product: ProductDetailsDat
     if (outOfStock) return;
     setAddingToCart(true);
     try {
-      await apiRequest("/cart/items", {
+      await apiRequest("/cart/current/items", {
         method: "POST",
         body: JSON.stringify({
           productId: product.id,
           variantId: selectedVariant?.id,
           quantity,
-          selectedColor: selectedColor || undefined,
+          color: selectedColor || undefined,
         }),
       });
       window.dispatchEvent(new CustomEvent("cart-updated"));
       router.push("/checkout");
-    } catch {
-      window.dispatchEvent(new CustomEvent("cart-updated"));
-      router.push("/checkout");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to proceed to checkout");
     } finally {
       setAddingToCart(false);
     }

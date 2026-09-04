@@ -20,6 +20,12 @@ router.post(
   validateBody(addToCartSchema),
   cartController.addItemToCurrentCart,
 );
+router.post(
+  "/items",
+  optionalAuth,
+  validateBody(addToCartSchema),
+  cartController.addItemToCurrentCart,
+);
 router.put(
   "/current/items/:cartItemId",
   optionalAuth,

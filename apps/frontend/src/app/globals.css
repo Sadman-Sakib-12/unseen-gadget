@@ -174,13 +174,15 @@
 
   /* ── Swiper carousel navigation ───────────────────────── */
   .product-carousel {
-    overflow: visible;
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
   }
 
   .product-carousel .swiper-button-prev,
   .product-carousel .swiper-button-next {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
     border-radius: 50%;
@@ -188,6 +190,13 @@
     box-shadow: 0 4px 12px rgb(15 23 42 / 0.12);
     z-index: 10;
     transition: all 150ms ease;
+  }
+
+  @media (max-width: 639px) {
+    .product-carousel .swiper-button-prev,
+    .product-carousel .swiper-button-next {
+      display: none !important;
+    }
   }
 
   .product-carousel .swiper-button-prev:hover,

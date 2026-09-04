@@ -27,18 +27,18 @@ export function ProductCarousel({
   overlay = false,
 }: ProductCarouselProps) {
   return (
-    <div className="relative">
+    <div className="relative w-full min-w-0 max-w-full overflow-hidden">
       <Swiper
         modules={[Navigation]}
         spaceBetween={spaceBetween}
         navigation
         slidesPerView={slidesPerView}
-        className={overlay ? "product-carousel px-1 py-2" : "product-carousel"}
+        className={overlay ? "product-carousel px-1 py-2 w-full" : "product-carousel w-full"}
         breakpoints={breakpoints}
       >
         {products.map((p, idx) => (
-          <SwiperSlide key={`${p.id}-${idx}`}>
-            <div className="h-full">
+          <SwiperSlide key={`${p.id}-${idx}`} className="!h-auto">
+            <div className="h-full pb-1">
               <ProductCard product={p} />
             </div>
           </SwiperSlide>

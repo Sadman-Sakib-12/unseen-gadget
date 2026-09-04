@@ -160,12 +160,12 @@ export function ProductReviews({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                    {(rev.user?.name || "Customer").charAt(0).toUpperCase()}
+                    {(rev.user?.name || rev.author || rev.reviewerName || "Customer").charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-foreground">
-                        {rev.user?.name || "Verified Customer"}
+                        {rev.user?.name || rev.author || rev.reviewerName || "Verified Customer"}
                       </span>
                       <span className="flex items-center gap-0.5 rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
                         <CheckCircle2 className="h-3 w-3" />

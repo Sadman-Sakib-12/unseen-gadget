@@ -224,19 +224,36 @@ export function ProductBuyBox({
 
       {/* Service info */}
       <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+        {/* Delivery Box */}
         <div className="rounded-xl border border-border bg-muted/40 p-3">
           <Truck className="mx-auto mb-1 h-5 w-5 text-primary" />
-          <div className="text-[12px] font-semibold text-foreground">{t("pdp.freeDelivery")}</div>
-          <div className="text-[11px] text-muted-foreground">{t("pdp.insideDhaka")}</div>
+          <div className="text-[12px] font-semibold text-foreground">
+            {product.shippingType === "PAID" || (product.shippingCost != null && Number(product.shippingCost) > 0)
+              ? `Dhaka: ${formatBDT(Number(product.shippingCost || 60))}`
+              : t("pdp.freeDelivery")}
+          </div>
+          <div className="text-[11px] text-muted-foreground">
+            {product.shippingType === "PAID" || (product.shippingCost != null && Number(product.shippingCost) > 0)
+              ? `Outside: ${formatBDT(Number(product.shippingCost || 60) + 50)}`
+              : product.deliveryInfo?.insideDhaka || t("pdp.insideDhaka")}
+          </div>
         </div>
+
+        {/* Warranty Box */}
         <div className="rounded-xl border border-border bg-muted/40 p-3">
           <Shield className="mx-auto mb-1 h-5 w-5 text-success" />
-          <div className="text-[12px] font-semibold text-foreground">1 Year</div>
+          <div className="text-[12px] font-semibold text-foreground">
+            {(Array.isArray(product.warranty) ? product.warranty[0] : product.warranty) || "1 Year"}
+          </div>
           <div className="text-[11px] text-muted-foreground">{t("pdp.warranty")}</div>
         </div>
+
+        {/* Return Days Box */}
         <div className="rounded-xl border border-border bg-muted/40 p-3">
           <RefreshCw className="mx-auto mb-1 h-5 w-5 text-warning" />
-          <div className="text-[12px] font-semibold text-foreground">7 Days</div>
+          <div className="text-[12px] font-semibold text-foreground">
+            {product.returnPolicy || "7 Days"}
+          </div>
           <div className="text-[11px] text-muted-foreground">{t("pdp.returnDays")}</div>
         </div>
       </div>

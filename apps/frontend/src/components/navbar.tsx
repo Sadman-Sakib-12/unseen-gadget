@@ -190,23 +190,23 @@ export function Navbar() {
       className="sticky top-0 z-50 border-b border-border bg-white dark:bg-card shadow-xs transition-all duration-200"
     >
       {/* ═══ TOP MAIN BAR ════════════════════════════════════ */}
-      <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 sm:h-20 max-w-[1440px] items-center justify-between gap-2 sm:gap-3 px-3 sm:px-6 lg:px-8">
         {/* MOBILE MENU TOGGLE */}
         <button
           type="button"
           onClick={() => setMobileOpen((v) => !v)}
           aria-label={t("nav.menu")}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 text-foreground transition-colors hover:bg-gray-100 dark:border-border dark:hover:bg-accent md:hidden"
+          className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 text-foreground transition-colors hover:bg-gray-100 dark:border-border dark:hover:bg-accent md:hidden"
         >
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
 
         {/* 1. BRAND LOGO (Left: Exact Navy Color) */}
-        <Link href="/" className="shrink-0 flex items-center pr-2">
+        <Link href="/" className="shrink-0 flex items-center pr-1 sm:pr-2">
           {logoUrl ? (
-            <img src={logoUrl} alt={storeName} className="h-9 max-w-[180px] object-contain" />
+            <img src={logoUrl} alt={storeName} className="h-8 sm:h-9 max-w-[140px] sm:max-w-[180px] object-contain" />
           ) : (
-            <span className="text-[26px] font-black tracking-tight text-[#182C61] dark:text-primary flex items-baseline select-none">
+            <span className="text-xl sm:text-[24px] lg:text-[26px] font-black tracking-tight text-[#182C61] dark:text-primary flex items-baseline select-none">
               <span>{storeName}</span>
             </span>
           )}
@@ -233,7 +233,7 @@ export function Navbar() {
         </form>
 
         {/* 3. RIGHT WIDGETS */}
-        <div className="flex shrink-0 items-center gap-3 sm:gap-4 lg:gap-5">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-4 lg:gap-5">
           {/* SUPPORT PHONE (Exact Navy Color Number) */}
           {supportPhone ? (
             <a
@@ -258,13 +258,13 @@ export function Navbar() {
           </div>
 
           {/* DARK / LIGHT THEME TOGGLE (🌙 / ☀️) */}
-          <ThemeSwitcher />
+          <ThemeSwitcher className="h-8 w-8 sm:h-9 sm:w-9" />
 
           {/* USER ACCOUNT ICON */}
           <Link
             href={session?.user ? "/account" : "/login"}
             aria-label={session?.user ? (session.user.name || "My Account") : t("nav.myAccount")}
-            className="flex h-9 w-9 items-center justify-center text-gray-700 dark:text-gray-300 transition-colors hover:text-[#182C61] dark:hover:text-primary"
+            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center text-gray-700 dark:text-gray-300 transition-colors hover:text-[#182C61] dark:hover:text-primary"
           >
             {session?.user?.avatar ? (
               <img
@@ -277,7 +277,7 @@ export function Navbar() {
                 {session.user.name.charAt(0).toUpperCase()}
               </span>
             ) : (
-              <User className="h-6 w-6 stroke-[1.5]" />
+              <User className="h-5 w-5 sm:h-6 sm:w-6 stroke-[1.5]" />
             )}
           </Link>
 
@@ -298,15 +298,15 @@ export function Navbar() {
           {/* EXACT NAVY BLUE CIRCULAR CART BUTTON + PRICE */}
           <Link
             href="/cart"
-            className="flex items-center gap-2.5 group cursor-pointer transition-transform active:scale-95"
+            className="flex items-center gap-2 group cursor-pointer transition-transform active:scale-95"
           >
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#182C61] dark:bg-primary text-white shadow-sm transition-transform group-hover:scale-105">
-              <ShoppingCart className="h-5 w-5 stroke-[2]" />
-              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-white text-[#182C61] dark:text-primary border border-[#182C61] dark:border-primary text-[10px] font-bold shadow-xs px-0.5 leading-none">
+            <div className="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#182C61] dark:bg-primary text-white shadow-sm transition-transform group-hover:scale-105">
+              <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2]" />
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-white text-[#182C61] dark:text-primary border border-[#182C61] dark:border-primary text-[9px] sm:text-[10px] font-bold shadow-xs px-0.5 leading-none">
                 {count}
               </span>
             </div>
-            <span className="text-[14px] font-bold text-gray-800 dark:text-foreground tracking-tight hidden xs:inline-block">
+            <span className="text-[14px] font-bold text-gray-800 dark:text-foreground tracking-tight hidden sm:inline-block">
               {formatBDT(total)}
             </span>
           </Link>
