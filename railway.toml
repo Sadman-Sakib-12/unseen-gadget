@@ -1,6 +1,5 @@
 [build]
-builder = "NIXPACKS"
-buildCommand = "pnpm --filter @unseen-gadget/database build && pnpm --filter @unseen-gadget/validations build && pnpm --filter @unseen-gadget/backend build"
+buildCommand = "turbo run build --filter=@unseen-gadget/backend..."
 
 [deploy]
 startCommand = "node apps/backend/dist/index.js"
