@@ -18,7 +18,16 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
   const accessToken = signAccessToken(admin.id, admin.tokenVersion);
   const refreshToken = signRefreshToken(admin.id, admin.tokenVersion);
   setAdminAuthCookies(res, accessToken, refreshToken);
-  ApiResponseUtil.created(res, admin, "Admin registered successfully");
+  ApiResponseUtil.created(
+    res,
+    {
+      ...admin,
+      accessToken,
+      refreshToken,
+      token: accessToken,
+    },
+    "Admin registered successfully"
+  );
 });
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
@@ -27,7 +36,16 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   const accessToken = signAccessToken(admin.id, admin.tokenVersion);
   const refreshToken = signRefreshToken(admin.id, admin.tokenVersion);
   setAdminAuthCookies(res, accessToken, refreshToken);
-  ApiResponseUtil.success(res, admin, "Login successful");
+  ApiResponseUtil.success(
+    res,
+    {
+      ...admin,
+      accessToken,
+      refreshToken,
+      token: accessToken,
+    },
+    "Login successful"
+  );
 });
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
@@ -42,14 +60,23 @@ export const me = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const refresh = asyncHandler(async (req: Request, res: Response) => {
-  const refreshToken = req.cookies?.[ADMIN_REFRESH_COOKIE_NAME] as string | undefined;
+  const refreshToken = (req.cookies?.[ADMIN_REFRESH_COOKIE_NAME] || req.body?.refreshToken) as string | undefined;
   if (!refreshToken) throw new UnauthorizedError("Missing refresh token");
 
   const { admin } = await adminAuthService.refresh(refreshToken);
   const accessToken = signAccessToken(admin.id, admin.tokenVersion);
   const rotatedRefreshToken = signRefreshToken(admin.id, admin.tokenVersion);
   setAdminAuthCookies(res, accessToken, rotatedRefreshToken);
-  ApiResponseUtil.success(res, admin, "Session refreshed");
+  ApiResponseUtil.success(
+    res,
+    {
+      ...admin,
+      accessToken,
+      refreshToken: rotatedRefreshToken,
+      token: accessToken,
+    },
+    "Session refreshed"
+  );
 });
 
 export const changePassword = asyncHandler(async (req: Request, res: Response) => {

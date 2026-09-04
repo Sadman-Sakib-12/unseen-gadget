@@ -20,10 +20,10 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (isAuthLoaded && !isAuthenticated) {
+    if (isAuthLoaded && !isAuthenticated && !user) {
       router.push('/login');
     }
-  }, [isAuthLoaded, isAuthenticated, router]);
+  }, [isAuthLoaded, isAuthenticated, user, router]);
 
   const userRole = (
     typeof user?.role === 'object' && user?.role !== null
@@ -99,7 +99,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     return false;
   }, [pathname, userRole, userPermissions]);
 
-  if (!isAuthLoaded || !isAuthenticated) {
+  if ((!isAuthLoaded && !user) || (!isAuthenticated && !user)) {
     return (
       <div className="flex h-dvh w-full items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-4">

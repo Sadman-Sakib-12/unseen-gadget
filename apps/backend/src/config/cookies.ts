@@ -22,7 +22,7 @@ function baseOptions(maxAge: number): AuthCookieOptions {
   return {
     httpOnly: true,
     secure: isProduction,
-    sameSite: "lax",
+    sameSite: isProduction ? "none" : "lax",
     path: "/",
     maxAge,
   };
@@ -37,7 +37,7 @@ export const refreshCookieOptions = (): AuthCookieOptions =>
 export const clearCookieOptions = (): Omit<AuthCookieOptions, "maxAge"> => ({
   httpOnly: true,
   secure: isProduction,
-  sameSite: "lax",
+  sameSite: isProduction ? "none" : "lax",
   path: "/",
 });
 

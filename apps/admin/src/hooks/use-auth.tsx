@@ -61,21 +61,54 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAuthLoaded, setIsAuthLoaded] = useState(false);
   const router = useRouter();
 
+  // 1. Initial hydration from localStorage (synchronous on client mount)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('admin_user');
+      if (storedUser) {
+        try {
+          setUser(normalizeAdminUser(JSON.parse(storedUser)));
+        } catch {
+          // invalid stored json
+        }
+      }
+    }
+  }, []);
+
+  // 2. Validate session with backend
   useEffect(() => {
     let active = true;
     const checkAuth = async () => {
       try {
+        const storedToken = typeof window !== 'undefined' ? localStorage.getItem('admin_access_token') : null;
+        const headers: Record<string, string> = {};
+        if (storedToken) {
+          headers['Authorization'] = `Bearer ${storedToken}`;
+        }
+
         const res = await fetch(`${API_URL}/api/admin/auth/me`, {
+          headers,
           credentials: 'include',
         });
         if (res.ok) {
           const data = await res.json();
           if (active && data.success) {
-            setUser(normalizeAdminUser(data.data));
+            const normalized = normalizeAdminUser(data.data);
+            setUser(normalized);
+            if (typeof window !== 'undefined' && normalized) {
+              localStorage.setItem('admin_user', JSON.stringify(normalized));
+            }
           }
+        } else if (res.status === 401) {
+          // Token is actually invalid or expired
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('admin_access_token');
+            localStorage.removeItem('admin_user');
+          }
+          if (active) setUser(null);
         }
       } catch {
-        // Not authenticated
+        // Network error - retain cached user so offline/temporary blips don't log admin out
       } finally {
         if (active) setIsAuthLoaded(true);
       }
@@ -94,7 +127,13 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.success) {
-        setUser(normalizeAdminUser(data.data));
+        const normalized = normalizeAdminUser(data.data);
+        setUser(normalized);
+        const token = data.data?.accessToken || data.data?.token;
+        if (typeof window !== 'undefined') {
+          if (token) localStorage.setItem('admin_access_token', token);
+          if (normalized) localStorage.setItem('admin_user', JSON.stringify(normalized));
+        }
         return { success: true };
       }
       return { success: false, error: data.message || data.error?.message || 'Invalid email or password' };
@@ -105,12 +144,21 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = useCallback(async () => {
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('admin_access_token') : null;
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       await fetch(`${API_URL}/api/admin/auth/logout`, {
         method: 'POST',
+        headers,
         credentials: 'include',
       });
     } catch {
       // Ignore errors
+    }
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('admin_access_token');
+      localStorage.removeItem('admin_user');
     }
     setUser(null);
     router.push('/login');
@@ -159,18 +207,22 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (isAuthLoaded && !isAuthenticated) {
+    if (isAuthLoaded && !isAuthenticated && !user) {
       router.push('/login');
     } else if (allowedRoles && user && !allowedRoles.includes(user.role)) {
       router.push('/dashboard');
     }
   }, [isAuthLoaded, isAuthenticated, allowedRoles, user, router]);
 
-  if (!isAuthLoaded) {
-    return null;
+  if (!isAuthLoaded && !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
+      </div>
+    );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !user) {
     return null;
   }
 

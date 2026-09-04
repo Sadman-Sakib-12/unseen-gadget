@@ -20,6 +20,17 @@ export const adminApiClient = axios.create({
   timeout: 30000,
 });
 
+adminApiClient.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("admin_access_token");
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
 export async function apiRequest<T = unknown>(
   endpoint: string,
   options: RequestInit = {}
