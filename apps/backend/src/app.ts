@@ -42,6 +42,7 @@ const healthHandler: RequestHandler = (_req, res) => {
     },
   });
 };
+app.get("/", healthHandler);
 app.get("/api/health", healthHandler);
 
 // Locally uploaded images (fallback when Cloudinary is not configured)
