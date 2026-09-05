@@ -7,20 +7,24 @@ export class EmailClient {
 
   constructor(config: EmailConfig = {}) {
     this.config = config;
-    if (config.host) {
-      const isGmail = config.host.toLowerCase().includes("gmail");
-      this.transporter = isGmail
-        ? nodemailer.createTransport({
-            service: "gmail",
-            auth: config.user ? { user: config.user, pass: config.pass } : undefined,
-          })
-        : nodemailer.createTransport({
-            host: config.host,
-            port: config.port ?? 587,
-            secure: (config.port ?? 587) === 465,
-            auth: config.user ? { user: config.user, pass: config.pass } : undefined,
-            tls: { rejectUnauthorized: false },
-          });
+    if (config.host || config.user) {
+      const host = config.host || "smtp.gmail.com";
+      const port = Number(config.port) || 587;
+      const isSecure = port === 465;
+
+      this.transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure: isSecure,
+        family: 4, // Force IPv4 to avoid cloud container IPv6 DNS timeout hangs
+        auth: config.user && config.pass ? { user: config.user, pass: config.pass } : undefined,
+        tls: {
+          rejectUnauthorized: false,
+        },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 15000,
+      } as any);
     }
   }
 
