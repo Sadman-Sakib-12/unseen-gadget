@@ -12,7 +12,7 @@ import {
 import { comparePassword, hashPassword } from "../utils/password";
 import { generateToken } from "../utils/random";
 import { verifyToken, type RefreshTokenPayload } from "../utils/jwt";
-import { sendMail, renderLoginOtpEmail } from "./email.service";
+import { sendMail } from "./email.service";
 
 export interface RegisterInput {
   email: string;
@@ -96,61 +96,12 @@ export async function login(input: LoginInput, sessionId?: string): Promise<Logi
     throw new ForbiddenError("Account is blocked or inactive");
   }
 
-  // Step 1: If OTP is not provided, generate 6-digit code, save and send email
-  if (!input.otp) {
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const verificationTokenExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        verificationToken: otpCode,
-        verificationTokenExpires,
-      },
-    });
-
-    try {
-      const emailContent = renderLoginOtpEmail(user.name || "Customer", otpCode);
-      await sendMail({
-        to: user.email,
-        ...emailContent,
-      });
-    } catch (mailErr) {
-      console.error("[Auth] Failed to send login OTP email:", mailErr);
-    }
-
-    return {
-      requiresOtp: true,
-      email: user.email,
-      message: "A 6-digit verification code has been sent to your email.",
-    };
-  }
-
-  // Step 2: If OTP is provided, verify it
-  if (!user.verificationToken || user.verificationToken !== input.otp.trim()) {
-    throw new BadRequestError("Invalid verification code. Please check your email.");
-  }
-
-  if (user.verificationTokenExpires && user.verificationTokenExpires.getTime() < Date.now()) {
-    throw new BadRequestError("Verification code has expired. Please request a new one.");
-  }
-
-  // Clear OTP and update verification
-  const updated = await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      verificationToken: null,
-      verificationTokenExpires: null,
-      emailVerified: user.emailVerified || new Date(),
-    },
-  });
-
   // Guest cart merge: merge any guest cart items into the customer's cart
   if (sessionId) {
     await mergeGuestCartIntoUserCart(user.id, sessionId);
   }
 
-  return { requiresOtp: false, user: toPublicUser(updated) };
+  return { requiresOtp: false, user: toPublicUser(user) };
 }
 
 export async function logout(userId: string): Promise<void> {
