@@ -323,6 +323,7 @@ export default function Home() {
               {nPs[0] ? (
                 <Link
                   href={`/product/${nPs[0].slug}`}
+                  aria-label={`Featured New Arrival: ${nPs[0].name}`}
                   className="group flex flex-col items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-transparent to-primary/15 p-5 text-center transition hover:shadow-md border border-border min-w-0"
                 >
                   <p className="text-[9px] font-bold uppercase tracking-widest text-primary">

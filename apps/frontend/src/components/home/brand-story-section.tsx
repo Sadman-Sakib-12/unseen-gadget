@@ -45,6 +45,7 @@ export function BrandStorySection({
             )}
             <Link
               href={data.welcome.href}
+              aria-label={`${readMoreLabel} - ${data.welcome.title}`}
               className="btn-outline mt-3 !h-8 !px-3.5 !text-[11.5px] inline-flex items-center gap-1.5"
             >
               {readMoreLabel} <ChevronRight className="h-3 w-3" />
@@ -66,6 +67,7 @@ export function BrandStorySection({
             )}
             <Link
               href={data.apple.href}
+              aria-label={`${readMoreLabel} - ${data.apple.title}`}
               className="btn-outline mt-3 !h-8 !px-3.5 !text-[11.5px] inline-flex items-center gap-1.5"
             >
               {readMoreLabel} <ChevronRight className="h-3 w-3" />

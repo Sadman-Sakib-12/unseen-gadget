@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
@@ -80,14 +81,18 @@ export function HeroBannerCarousel({ banners }: HeroBannerCarouselProps) {
               <SwiperSlide key={banner.id || index} className="!h-full w-full">
                 <Link
                   href={banner.href || "#"}
+                  aria-label={banner.title || banner.cta || "Featured Promotion Banner"}
                   className="group/slide relative block h-full w-full overflow-hidden bg-gradient-to-br from-[#182C61] via-slate-900 to-[#0d1738]"
                 >
                   {/* Banner Image */}
                   {hasImage ? (
-                    <img
-                      src={banner.image}
+                    <Image
+                      src={banner.image!}
                       alt={banner.title || "Hero Banner"}
-                      className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover/slide:scale-[1.02]"
+                      fill
+                      priority={index === 0}
+                      sizes="(max-width: 1024px) 100vw, 66vw"
+                      className="object-cover transition duration-500 group-hover/slide:scale-[1.02]"
                     />
                   ) : (
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/5 to-muted" />
@@ -155,14 +160,17 @@ export function HeroBannerCarousel({ banners }: HeroBannerCarouselProps) {
               <Link
                 key={b.id || idx}
                 href={b.href || "#"}
+                aria-label={b.title || b.cta || "Side Promo Banner"}
                 className="group/side relative block overflow-hidden rounded-xl sm:rounded-2xl bg-muted h-[115px] xs:h-[135px] sm:h-[160px] md:h-[180px] lg:h-[214px] lg:flex-1"
               >
                 {/* Banner Image */}
                 {hasImg ? (
-                  <img
-                    src={b.image}
+                  <Image
+                    src={b.image!}
                     alt={b.title || "Side banner"}
-                    className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover/side:scale-[1.02]"
+                    fill
+                    sizes="(max-width: 1024px) 50vw, 33vw"
+                    className="object-cover transition duration-500 group-hover/side:scale-[1.02]"
                   />
                 ) : (
                   <div className="absolute inset-0 bg-gradient-to-br from-card to-muted/80" />

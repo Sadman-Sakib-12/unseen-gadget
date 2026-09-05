@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -102,6 +103,7 @@ export function ProductCard({ product }: { product: MockProduct }) {
       {/* Image area */}
       <Link
         href={`/product/${product.slug}`}
+        aria-label={product.name}
         className="relative block bg-card p-3"
       >
         {product.discount != null && product.discount > 0 && (
@@ -130,10 +132,12 @@ export function ProductCard({ product }: { product: MockProduct }) {
 
         <div className="relative mx-auto aspect-square w-full flex items-center justify-center">
           {product.image ? (
-            <img
+            <Image
               src={product.image}
               alt={product.name}
-              className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+              className="object-contain transition-transform duration-300 group-hover:scale-105 p-2"
               loading="lazy"
             />
           ) : (

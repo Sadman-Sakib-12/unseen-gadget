@@ -95,7 +95,7 @@ export function GoogleTranslate() {
       <div id="google_translate_element" />
       <Script
         src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
       />
     </>
   );

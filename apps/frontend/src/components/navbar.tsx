@@ -202,7 +202,7 @@ export function Navbar() {
         </button>
 
         {/* 1. BRAND LOGO (Left: Exact Navy Color) */}
-        <Link href="/" className="shrink-0 flex items-center pr-1 sm:pr-2">
+        <Link href="/" aria-label={storeName} className="shrink-0 flex items-center pr-1 sm:pr-2">
           {logoUrl ? (
             <img src={logoUrl} alt={storeName} className="h-8 sm:h-9 max-w-[140px] sm:max-w-[180px] object-contain" />
           ) : (
@@ -298,6 +298,7 @@ export function Navbar() {
           {/* EXACT NAVY BLUE CIRCULAR CART BUTTON + PRICE */}
           <Link
             href="/cart"
+            aria-label={`${t("nav.cart") || "Cart"} (${count} items)`}
             className="flex items-center gap-2 group cursor-pointer transition-transform active:scale-95"
           >
             <div className="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#182C61] dark:bg-primary text-white shadow-sm transition-transform group-hover:scale-105">
