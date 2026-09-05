@@ -202,7 +202,7 @@ export function Navbar() {
         </button>
 
         {/* 1. BRAND LOGO (Left: Exact Navy Color) */}
-        <Link href="/" aria-label={storeName} className="shrink-0 flex items-center pr-1 sm:pr-2">
+        <Link href="/" aria-label={storeName || "Unseen Gadget Home"} className="shrink-0 flex items-center pr-1 sm:pr-2">
           {logoUrl ? (
             <img src={logoUrl} alt={storeName} className="h-8 sm:h-9 max-w-[140px] sm:max-w-[180px] object-contain" />
           ) : (
@@ -263,7 +263,7 @@ export function Navbar() {
           {/* USER ACCOUNT ICON */}
           <Link
             href={session?.user ? "/account" : "/login"}
-            aria-label={session?.user ? (session.user.name || "My Account") : t("nav.myAccount")}
+            aria-label={session?.user ? (session.user.name || "My Account") : (t("nav.myAccount") || "My Account")}
             className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center text-gray-700 dark:text-gray-300 transition-colors hover:text-[#182C61] dark:hover:text-primary"
           >
             {session?.user?.avatar ? (

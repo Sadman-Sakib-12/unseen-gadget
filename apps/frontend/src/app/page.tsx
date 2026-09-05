@@ -239,8 +239,14 @@ export default function Home() {
       {isSecOn("hero") && (
         <section className="py-2">
           <div className={W}>
-            {isLoadingBanners ? (
-              <div className="h-[200px] xs:h-[230px] sm:h-[300px] md:h-[360px] lg:h-[440px] w-full rounded-2xl bg-muted/60 animate-pulse" />
+            {isLoadingBanners && bannerData.length === 0 ? (
+              <div className="grid gap-2.5 sm:gap-3 lg:grid-cols-3">
+                <div className="h-[200px] xs:h-[230px] sm:h-[300px] md:h-[360px] lg:h-[440px] w-full rounded-xl sm:rounded-2xl bg-muted/60 animate-pulse lg:col-span-2" />
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:flex lg:flex-col lg:h-[440px]">
+                  <div className="h-[115px] xs:h-[135px] sm:h-[160px] md:h-[180px] lg:h-[214px] rounded-xl sm:rounded-2xl bg-muted/60 animate-pulse lg:flex-1" />
+                  <div className="h-[115px] xs:h-[135px] sm:h-[160px] md:h-[180px] lg:h-[214px] rounded-xl sm:rounded-2xl bg-muted/60 animate-pulse lg:flex-1" />
+                </div>
+              </div>
             ) : bannerData.length > 0 ? (
               <HeroBannerCarousel banners={bannerData} />
             ) : null}

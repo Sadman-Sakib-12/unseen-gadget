@@ -77,7 +77,7 @@ export function Footer() {
         <div className="grid grid-cols-2 gap-8 lg:grid-cols-[2fr_1fr_1fr_1fr_1.5fr]">
           {/* Brand + social */}
           <div className="col-span-2 lg:col-span-1">
-            <Link href="/">
+            <Link href="/" aria-label="Unseen Gadget Home">
               <span className="text-[22px] font-black leading-none tracking-tight text-foreground">
                 <span className="text-primary">Unseen Gadget</span>bd
                 <sup className="ml-px text-[9px] font-bold text-muted-foreground">.com</sup>
