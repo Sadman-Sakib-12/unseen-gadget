@@ -26,10 +26,10 @@ const GRADIENT_OPTIONS = [
 ];
 
 const ICON_OPTIONS = [
-  { value: "zap", label: "⚡ Lightning Zap" },
-  { value: "tag", label: "🏷️ Discount Tag" },
-  { value: "gift", label: "🎁 Gift Box" },
-  { value: "sparkles", label: "✨ Magic Sparkles" },
+  { value: "zap", label: "Lightning Zap" },
+  { value: "tag", label: "Discount Tag" },
+  { value: "gift", label: "Gift Box" },
+  { value: "sparkles", label: "Magic Sparkles" },
 ];
 
 export function PromotionForm({ promotion, onSave, onCancel }: PromotionFormProps) {

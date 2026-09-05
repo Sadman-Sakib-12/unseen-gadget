@@ -257,7 +257,7 @@ export function Navbar() {
             <LanguageSwitcher />
           </div>
 
-          {/* DARK / LIGHT THEME TOGGLE (🌙 / ☀️) */}
+          {/* DARK / LIGHT THEME TOGGLE */}
           <ThemeSwitcher className="h-8 w-8 sm:h-9 sm:w-9" />
 
           {/* USER ACCOUNT ICON */}

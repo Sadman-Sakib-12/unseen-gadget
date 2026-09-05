@@ -103,8 +103,8 @@ export function BannerFormCard({
                 value={placement}
                 onChange={(e) => setPlacement(e.target.value as "slider" | "side")}
                 options={[
-                  { value: "slider", label: "🎠 Main Hero Slider (Left Carousel)" },
-                  { value: "side", label: "🖼️ Side Banner (Right 2 Small Cards)" },
+                  { value: "slider", label: "Main Hero Slider (Left Carousel)" },
+                  { value: "side", label: "Side Banner (Right 2 Small Cards)" },
                 ]}
               />
             </div>

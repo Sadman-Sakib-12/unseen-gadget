@@ -5,7 +5,7 @@ import { env } from "./config/env";
 const HOST = "0.0.0.0";
 
 const server = app.listen(env.PORT, HOST, () => {
-  console.log(`🚀 Unseen Gadget API running on http://${HOST}:${env.PORT} (${env.NODE_ENV})`);
+  console.log(`Unseen Gadget API running on http://${HOST}:${env.PORT} (${env.NODE_ENV})`);
 });
 
 function shutdown(signal: string): void {
