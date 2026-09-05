@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="w-full">
       {/* Mobile-only Brand Header */}
-      <div className="lg:hidden flex items-center justify-between gap-2 mb-6 pb-3 border-b border-zinc-200">
+      <div className="lg:hidden flex items-center justify-between gap-2 mb-6 pb-3 border-b border-zinc-200 dark:border-zinc-800">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-900 text-white">
             <svg
@@ -70,26 +70,26 @@ export default function ForgotPasswordPage() {
             </svg>
           </div>
           <span className="text-base font-bold">
-            <span className="text-zinc-900">Unseen </span>
-            <span className="text-blue-600">Gadget</span>
+            <span className="text-zinc-900 dark:text-zinc-100">Unseen </span>
+            <span className="text-blue-600 dark:text-blue-400">Gadget</span>
           </span>
         </Link>
-        <Link href="/" className="text-xs font-semibold text-zinc-500 hover:text-zinc-900">
+        <Link href="/" className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200">
           Home
         </Link>
       </div>
 
       {isSubmitted ? (
         <div className="space-y-6 text-center py-4">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shadow-sm">
             <CheckCircle2 className="h-7 w-7" />
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-2xl font-extrabold text-zinc-900">
+            <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
               {language === 'bn' ? 'ইমেইল পাঠানো হয়েছে' : 'Check Your Inbox'}
             </h1>
-            <p className="text-xs text-zinc-500 max-w-sm mx-auto leading-relaxed">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto leading-relaxed">
               {language === 'bn'
                 ? `আমরা ${email} ঠিকানায় একটি পাসওয়ার্ড রিসেট লিঙ্ক পাঠিয়েছি। আপনার ইনবক্স অথবা স্প্যাম ফোল্ডার চেক করুন।`
                 : `We have sent password reset instructions to ${email}. Please check your inbox or spam folder.`}
@@ -100,7 +100,7 @@ export default function ForgotPasswordPage() {
             <button
               type="button"
               onClick={() => setIsSubmitted(false)}
-              className="text-xs text-zinc-600 hover:text-zinc-900 font-semibold underline underline-offset-4"
+              className="text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 font-semibold underline underline-offset-4 cursor-pointer"
             >
               {language === 'bn' ? 'অন্য ইমেইল দিয়ে চেষ্টা করুন' : 'Try another email'}
             </button>
@@ -108,7 +108,7 @@ export default function ForgotPasswordPage() {
             <div>
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-900 hover:underline"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 {language === 'bn' ? 'লগইন পেজে ফিরুন' : 'Back to Login'}
@@ -123,7 +123,7 @@ export default function ForgotPasswordPage() {
             <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
               {language === 'bn' ? 'পাসওয়ার্ড উদ্ধার' : 'ACCOUNT RECOVERY'}
             </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 mt-0.5">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100 mt-0.5">
               {language === 'bn' ? 'পাসওয়ার্ড ভুলে গেছেন?' : 'Forgot Password?'}
             </h1>
             <p className="mt-1 text-xs text-zinc-400">
@@ -136,8 +136,8 @@ export default function ForgotPasswordPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-0.5">
-              <div className="flex items-center gap-2.5 border-b border-zinc-300 focus-within:border-zinc-900 py-1.5 transition-colors group">
-                <Mail className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 shrink-0" />
+              <div className="flex items-center gap-2.5 border-b border-zinc-300 dark:border-zinc-700 focus-within:border-zinc-900 dark:focus-within:border-zinc-100 py-1.5 transition-colors group">
+                <Mail className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 dark:group-focus-within:text-zinc-200 shrink-0" />
                 <input
                   id="email"
                   name="email"
@@ -146,7 +146,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={language === 'bn' ? 'আপনার ইমেইল অ্যাড্রেস' : 'Enter your email address'}
-                  className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-0"
+                  className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-0"
                 />
               </div>
             </div>
@@ -171,10 +171,10 @@ export default function ForgotPasswordPage() {
           </form>
 
           {/* Back to Login Link */}
-          <div className="mt-8 text-center border-t border-zinc-200 pt-4">
+          <div className="mt-8 text-center border-t border-zinc-200 dark:border-zinc-800 pt-4">
             <Link
               href="/login"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-black transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               {language === 'bn' ? 'লগইন পেজে ফিরে যান' : 'Back to Login'}

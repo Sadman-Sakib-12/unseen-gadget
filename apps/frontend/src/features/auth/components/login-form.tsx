@@ -192,7 +192,7 @@ export function LoginForm() {
   return (
     <div className="w-full">
       {/* Mobile-only Brand Header */}
-      <div className="lg:hidden flex items-center justify-between gap-2 mb-8 pb-4 border-b border-zinc-200">
+      <div className="lg:hidden flex items-center justify-between gap-2 mb-8 pb-4 border-b border-zinc-200 dark:border-zinc-800">
         <Link href="/" className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 text-white">
             <svg
@@ -208,11 +208,11 @@ export function LoginForm() {
             </svg>
           </div>
           <span className="text-lg font-bold">
-            <span className="text-zinc-900">Unseen </span>
-            <span className="text-blue-600">Gadget</span>
+            <span className="text-zinc-900 dark:text-zinc-100">Unseen </span>
+            <span className="text-blue-600 dark:text-blue-400">Gadget</span>
           </span>
         </Link>
-        <Link href="/" className="text-xs font-semibold text-zinc-500 hover:text-zinc-900">
+        <Link href="/" className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200">
           Home
         </Link>
       </div>
@@ -224,7 +224,7 @@ export function LoginForm() {
             <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
               {language === 'bn' ? 'স্বাগতম' : 'WELCOME BACK'}
             </span>
-            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-0.5">
+            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100 mt-0.5">
               {language === 'bn' ? 'লগইন' : 'Login'}
             </h1>
             <p className="mt-1 text-xs text-zinc-400">
@@ -236,8 +236,8 @@ export function LoginForm() {
           <form onSubmit={handleCredentialsSubmit} className="space-y-4">
             {/* Email / Username Input - Clean single underline style matching screenshot */}
             <div className="space-y-1">
-              <div className="flex items-center gap-2.5 border-b border-zinc-300 focus-within:border-zinc-900 py-2 transition-colors group">
-                <Mail className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 shrink-0" />
+              <div className="flex items-center gap-2.5 border-b border-zinc-300 dark:border-zinc-700 focus-within:border-zinc-900 dark:focus-within:border-zinc-100 py-2 transition-colors group">
+                <Mail className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 dark:group-focus-within:text-zinc-200 shrink-0" />
                 <input
                   id="email"
                   name="email"
@@ -246,15 +246,15 @@ export function LoginForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={language === 'bn' ? 'ইউজারনেম বা ইমেইল' : 'Username / Email'}
-                  className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-0"
+                  className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-0"
                 />
               </div>
             </div>
 
             {/* Password Input - Clean single underline style matching screenshot */}
             <div className="space-y-1">
-              <div className="flex items-center gap-2.5 border-b border-zinc-300 focus-within:border-zinc-900 py-2 transition-colors group">
-                <Lock className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 shrink-0" />
+              <div className="flex items-center gap-2.5 border-b border-zinc-300 dark:border-zinc-700 focus-within:border-zinc-900 dark:focus-within:border-zinc-100 py-2 transition-colors group">
+                <Lock className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 dark:group-focus-within:text-zinc-200 shrink-0" />
                 <input
                   id="password"
                   name="password"
@@ -263,12 +263,12 @@ export function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={language === 'bn' ? 'পাসওয়ার্ড' : 'Password'}
-                  className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-0"
+                  className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-0"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-zinc-400 hover:text-zinc-700 transition-colors shrink-0"
+                  className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors shrink-0"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
@@ -285,13 +285,13 @@ export function LoginForm() {
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
-                  className="w-3.5 h-3.5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer accent-zinc-900"
+                  className="w-3.5 h-3.5 rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-blue-500 focus:ring-zinc-900 cursor-pointer accent-zinc-900 dark:accent-blue-500"
                 />
-                <span className="text-xs text-zinc-500">{t("auth.rememberMe")}</span>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">{t("auth.rememberMe")}</span>
               </label>
               <Link
                 href="/forgot-password"
-                className="text-xs font-semibold text-zinc-600 hover:text-black transition-colors"
+                className="text-xs font-semibold text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
               >
                 {t("auth.forgotPassword")}
               </Link>
@@ -319,10 +319,10 @@ export function LoginForm() {
             {/* Divider */}
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-zinc-200"></div>
+                <div className="w-full border-t border-zinc-200 dark:border-zinc-800"></div>
               </div>
               <div className="relative flex justify-center text-[10px] uppercase tracking-wider">
-                <span className="px-3 bg-white text-zinc-400 font-semibold">{t("auth.orSignUpWith")}</span>
+                <span className="px-3 bg-white dark:bg-zinc-900 text-zinc-400 font-semibold">{t("auth.orSignUpWith")}</span>
               </div>
             </div>
 
@@ -331,7 +331,7 @@ export function LoginForm() {
               <button
                 type="button"
                 onClick={() => signIn('google', { callbackUrl: '/account' })}
-                className="flex items-center justify-center gap-2 py-2 px-3 bg-white border border-zinc-200 rounded-full text-zinc-700 text-xs font-medium hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-2xs"
+                className="flex items-center justify-center gap-2 py-2 px-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-full text-zinc-700 dark:text-zinc-200 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-750 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all shadow-2xs cursor-pointer"
               >
                 <svg className="h-3.5 w-3.5" viewBox="0 0 24 24">
                   <path
@@ -357,7 +357,7 @@ export function LoginForm() {
               <button
                 type="button"
                 onClick={() => signIn('facebook', { callbackUrl: '/account' })}
-                className="flex items-center justify-center gap-2 py-2 px-3 bg-white border border-zinc-200 rounded-full text-zinc-700 text-xs font-medium hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-2xs"
+                className="flex items-center justify-center gap-2 py-2 px-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-full text-zinc-700 dark:text-zinc-200 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-750 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all shadow-2xs cursor-pointer"
               >
                 <svg className="h-3.5 w-3.5" fill="#1877F2" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -368,9 +368,9 @@ export function LoginForm() {
           </form>
 
           {/* Sign Up Link */}
-          <p className="mt-6 text-center text-xs text-zinc-500">
+          <p className="mt-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
             {t("auth.dontHaveAccount")}{' '}
-            <Link href="/register" className="font-bold text-zinc-900 hover:underline transition-colors">
+            <Link href="/register" className="font-bold text-blue-600 dark:text-blue-400 hover:underline transition-colors">
               {t("auth.signUp")}
             </Link>
           </p>
@@ -382,25 +382,25 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 mb-4 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 mb-4 transition-colors cursor-pointer"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               {language === 'bn' ? 'ইমেইল পরিবর্তন করুন' : 'Back to email'}
             </button>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 dark:bg-zinc-800 text-white">
                 <KeyRound className="h-5 w-5" />
               </div>
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
                   {language === 'bn' ? 'ভেরিফিকেশন' : 'VERIFICATION'}
                 </span>
-                <h1 className="text-xl sm:text-2xl font-black text-zinc-900 leading-tight">
+                <h1 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-zinc-100 leading-tight">
                   {language === 'bn' ? 'সিকিউরিটি কোড দিন' : 'Enter Code'}
                 </h1>
               </div>
             </div>
-            <p className="mt-3 text-xs leading-relaxed text-zinc-500">
+            <p className="mt-3 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
               {language === 'bn'
                 ? `আমরা ${email} ঠিকানায় একটি ৬-সংখ্যার কোড পাঠিয়েছি। কোডটি নিচে লিখুন:`
                 : `We sent a 6-digit code to ${email}. Enter it below to log in:`}
@@ -422,7 +422,7 @@ export function LoginForm() {
                   value={digit}
                   onChange={(e) => handleOtpChange(idx, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                  className="h-12 w-11 sm:h-14 sm:w-12 rounded-xl border-2 border-zinc-200 bg-white text-center text-xl font-bold text-zinc-900 transition-all focus:border-zinc-900 focus:bg-zinc-50 focus:outline-none focus:ring-4 focus:ring-zinc-900/10 shadow-xs"
+                  className="h-12 w-11 sm:h-14 sm:w-12 rounded-xl border-2 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-center text-xl font-bold text-zinc-900 dark:text-zinc-100 transition-all focus:border-zinc-900 dark:focus:border-blue-500 focus:bg-zinc-50 dark:focus:bg-zinc-800/80 focus:outline-none focus:ring-4 focus:ring-zinc-900/10 dark:focus:ring-blue-500/20 shadow-xs"
                 />
               ))}
             </div>
@@ -449,7 +449,7 @@ export function LoginForm() {
             {/* Resend Code Section */}
             <div className="text-center pt-2">
               {resendTimer > 0 ? (
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
                   {language === 'bn'
                     ? `পুনরায় কোড পাঠাতে অপেক্ষা করুন: ${resendTimer} সেকেন্ড`
                     : `Resend code in ${resendTimer}s`}
@@ -459,7 +459,7 @@ export function LoginForm() {
                   type="button"
                   onClick={handleResendOtp}
                   disabled={isResending}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-900 hover:underline transition-colors disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   <RefreshCw className={`h-3 w-3 ${isResending ? 'animate-spin' : ''}`} />
                   <span>{language === 'bn' ? 'কোড আবার পাঠান' : 'Resend Verification Code'}</span>

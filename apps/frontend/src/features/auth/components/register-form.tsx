@@ -69,7 +69,7 @@ export function RegisterForm() {
   return (
     <div className="w-full">
       {/* Mobile-only Brand Header */}
-      <div className="lg:hidden flex items-center justify-between gap-2 mb-6 pb-3 border-b border-zinc-200">
+      <div className="lg:hidden flex items-center justify-between gap-2 mb-6 pb-3 border-b border-zinc-200 dark:border-zinc-800">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-900 text-white">
             <svg
@@ -85,11 +85,11 @@ export function RegisterForm() {
             </svg>
           </div>
           <span className="text-base font-bold">
-            <span className="text-zinc-900">Unseen </span>
-            <span className="text-blue-600">Gadget</span>
+            <span className="text-zinc-900 dark:text-zinc-100">Unseen </span>
+            <span className="text-blue-600 dark:text-blue-400">Gadget</span>
           </span>
         </Link>
-        <Link href="/" className="text-xs font-semibold text-zinc-500 hover:text-zinc-900">
+        <Link href="/" className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200">
           Home
         </Link>
       </div>
@@ -99,7 +99,7 @@ export function RegisterForm() {
         <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
           {language === 'bn' ? 'নতুন অ্যাকাউন্ট' : 'START FOR FREE'}
         </span>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 mt-0.5">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100 mt-0.5">
           {language === 'bn' ? 'অ্যাকাউন্ট খুলুন' : 'Create Account'}
         </h1>
         <p className="mt-0.5 text-xs text-zinc-400">
@@ -111,53 +111,53 @@ export function RegisterForm() {
       <form onSubmit={handleSubmit} className="space-y-3.5">
         {/* Full Name Input */}
         <div className="space-y-0.5">
-          <div className="flex items-center gap-2.5 border-b border-zinc-300 focus-within:border-zinc-900 py-1.5 transition-colors group">
-            <User className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 shrink-0" />
+          <div className="flex items-center gap-2.5 border-b border-zinc-300 dark:border-zinc-700 focus-within:border-zinc-900 dark:focus-within:border-zinc-100 py-1.5 transition-colors group">
+            <User className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 dark:group-focus-within:text-zinc-200 shrink-0" />
             <input
               id="name"
               name="name"
               type="text"
               required
               placeholder={t('auth.fullNamePlaceholder')}
-              className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-0"
+              className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-0"
             />
           </div>
         </div>
 
         {/* Email Input */}
         <div className="space-y-0.5">
-          <div className="flex items-center gap-2.5 border-b border-zinc-300 focus-within:border-zinc-900 py-1.5 transition-colors group">
-            <Mail className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 shrink-0" />
+          <div className="flex items-center gap-2.5 border-b border-zinc-300 dark:border-zinc-700 focus-within:border-zinc-900 dark:focus-within:border-zinc-100 py-1.5 transition-colors group">
+            <Mail className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 dark:group-focus-within:text-zinc-200 shrink-0" />
             <input
               id="email"
               name="email"
               type="email"
               required
               placeholder={t('auth.emailPlaceholder')}
-              className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-0"
+              className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-0"
             />
           </div>
         </div>
 
         {/* Phone Input */}
         <div className="space-y-0.5">
-          <div className="flex items-center gap-2.5 border-b border-zinc-300 focus-within:border-zinc-900 py-1.5 transition-colors group">
-            <Smartphone className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 shrink-0" />
+          <div className="flex items-center gap-2.5 border-b border-zinc-300 dark:border-zinc-700 focus-within:border-zinc-900 dark:focus-within:border-zinc-100 py-1.5 transition-colors group">
+            <Smartphone className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 dark:group-focus-within:text-zinc-200 shrink-0" />
             <input
               id="phone"
               name="phone"
               type="tel"
               required
               placeholder={t('auth.phonePlaceholder')}
-              className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-0"
+              className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-0"
             />
           </div>
         </div>
 
         {/* Password Input with Strength Indicator */}
         <div className="space-y-0.5">
-          <div className="flex items-center gap-2.5 border-b border-zinc-300 focus-within:border-zinc-900 py-1.5 transition-colors group">
-            <Lock className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 shrink-0" />
+          <div className="flex items-center gap-2.5 border-b border-zinc-300 dark:border-zinc-700 focus-within:border-zinc-900 dark:focus-within:border-zinc-100 py-1.5 transition-colors group">
+            <Lock className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 dark:group-focus-within:text-zinc-200 shrink-0" />
             <input
               id="password"
               name="password"
@@ -166,12 +166,12 @@ export function RegisterForm() {
               placeholder={t('auth.createPasswordPlaceholder')}
               value={passwordValue}
               onChange={(e) => setPasswordValue(e.target.value)}
-              className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-0"
+              className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-0"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-zinc-400 hover:text-zinc-700 transition-colors shrink-0"
+              className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors shrink-0"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? (
@@ -188,21 +188,21 @@ export function RegisterForm() {
               <div className="flex gap-1">
                 <div
                   className={`h-1 flex-1 rounded-full transition-all ${
-                    passwordStrength >= 1 ? 'bg-red-500' : 'bg-zinc-200'
+                    passwordStrength >= 1 ? 'bg-red-500' : 'bg-zinc-200 dark:bg-zinc-700'
                   }`}
                 />
                 <div
                   className={`h-1 flex-1 rounded-full transition-all ${
-                    passwordStrength >= 2 ? 'bg-amber-500' : 'bg-zinc-200'
+                    passwordStrength >= 2 ? 'bg-amber-500' : 'bg-zinc-200 dark:bg-zinc-700'
                   }`}
                 />
                 <div
                   className={`h-1 flex-1 rounded-full transition-all ${
-                    passwordStrength >= 3 ? 'bg-emerald-500' : 'bg-zinc-200'
+                    passwordStrength >= 3 ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'
                   }`}
                 />
               </div>
-              <p className="text-[10px] text-zinc-500">
+              <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
                 {passwordStrength === 1 && (language === 'bn' ? 'দুর্বল পাসওয়ার্ড' : 'Weak password')}
                 {passwordStrength === 2 && (language === 'bn' ? 'মোটামুটি পাসওয়ার্ড' : 'Medium password')}
                 {passwordStrength === 3 && (language === 'bn' ? 'শক্তিশালী পাসওয়ার্ড' : 'Strong password')}
@@ -213,8 +213,8 @@ export function RegisterForm() {
 
         {/* Confirm Password Input */}
         <div className="space-y-0.5">
-          <div className="flex items-center gap-2.5 border-b border-zinc-300 focus-within:border-zinc-900 py-1.5 transition-colors group">
-            <Lock className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 shrink-0" />
+          <div className="flex items-center gap-2.5 border-b border-zinc-300 dark:border-zinc-700 focus-within:border-zinc-900 dark:focus-within:border-zinc-100 py-1.5 transition-colors group">
+            <Lock className="h-4 w-4 text-zinc-400 group-focus-within:text-zinc-800 dark:group-focus-within:text-zinc-200 shrink-0" />
             <input
               id="confirmPassword"
               name="confirmPassword"
@@ -223,12 +223,12 @@ export function RegisterForm() {
               placeholder={t('auth.confirmPasswordPlaceholder')}
               value={confirmPasswordValue}
               onChange={(e) => setConfirmPasswordValue(e.target.value)}
-              className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-0"
+              className="w-full bg-transparent border-none p-0 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-0"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="text-zinc-400 hover:text-zinc-700 transition-colors shrink-0"
+              className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors shrink-0"
               aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
             >
               {showConfirmPassword ? (
@@ -244,7 +244,7 @@ export function RegisterForm() {
             </p>
           )}
           {confirmPasswordValue && passwordValue === confirmPasswordValue && (
-            <p className="text-[10px] text-emerald-600 pt-0.5 font-medium">
+            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 pt-0.5 font-medium">
               {language === 'bn' ? '✓ পাসওয়ার্ড মিলেছে' : '✓ Passwords match'}
             </p>
           )}
@@ -256,11 +256,11 @@ export function RegisterForm() {
             type="checkbox"
             id="terms"
             required
-            className="mt-0.5 w-3.5 h-3.5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer accent-zinc-900"
+            className="mt-0.5 w-3.5 h-3.5 rounded border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-blue-500 focus:ring-zinc-900 cursor-pointer accent-zinc-900 dark:accent-blue-500"
           />
-          <label htmlFor="terms" className="text-[11px] text-zinc-500 cursor-pointer leading-tight">
+          <label htmlFor="terms" className="text-[11px] text-zinc-500 dark:text-zinc-400 cursor-pointer leading-tight">
             {t('auth.agreeTerms')}{' '}
-            <Link href="/terms" className="font-semibold text-zinc-800 hover:underline">
+            <Link href="/terms" className="font-semibold text-zinc-800 hover:underline dark:text-zinc-200">
               {t('auth.termsAndConditions')}
             </Link>
           </label>
@@ -288,10 +288,10 @@ export function RegisterForm() {
         {/* Divider */}
         <div className="relative my-3">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-zinc-200"></div>
+            <div className="w-full border-t border-zinc-200 dark:border-zinc-800"></div>
           </div>
           <div className="relative flex justify-center text-[10px] uppercase tracking-wider">
-            <span className="px-3 bg-white text-zinc-400 font-semibold">{t('auth.orSignUpWith')}</span>
+            <span className="px-3 bg-white dark:bg-zinc-900 text-zinc-400 font-semibold">{t('auth.orSignUpWith')}</span>
           </div>
         </div>
 
@@ -299,7 +299,7 @@ export function RegisterForm() {
         <div className="grid grid-cols-2 gap-2.5">
           <button
             type="button"
-            className="flex items-center justify-center gap-2 py-2 px-3 bg-white border border-zinc-200 rounded-full text-zinc-700 text-xs font-medium hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-2xs"
+            className="flex items-center justify-center gap-2 py-2 px-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-full text-zinc-700 dark:text-zinc-200 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-750 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all shadow-2xs cursor-pointer"
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24">
               <path
@@ -324,7 +324,7 @@ export function RegisterForm() {
 
           <button
             type="button"
-            className="flex items-center justify-center gap-2 py-2 px-3 bg-white border border-zinc-200 rounded-full text-zinc-700 text-xs font-medium hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-2xs"
+            className="flex items-center justify-center gap-2 py-2 px-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-full text-zinc-700 dark:text-zinc-200 text-xs font-medium hover:bg-zinc-50 dark:hover:bg-zinc-750 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all shadow-2xs cursor-pointer"
           >
             <svg className="h-3.5 w-3.5" fill="#1877F2" viewBox="0 0 24 24">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -335,9 +335,9 @@ export function RegisterForm() {
       </form>
 
       {/* Sign In Link */}
-      <p className="mt-5 text-center text-xs text-zinc-500">
+      <p className="mt-5 text-center text-xs text-zinc-500 dark:text-zinc-400">
         {t('auth.alreadyHaveAccount')}{' '}
-        <Link href="/login" className="font-bold text-zinc-900 hover:underline transition-colors">
+        <Link href="/login" className="font-bold text-blue-600 dark:text-blue-400 hover:underline transition-colors">
           {t('auth.signIn')}
         </Link>
       </p>

@@ -345,7 +345,6 @@ export default function ProductDetails({ product }: { product: ProductDetailsDat
                   {t("common.youSave")}: {formatBDT(savings)}
                 </p>
               )}
-              <p className="mt-0.5 text-[11.5px] text-muted-foreground">{t("common.negotiable")}</p>
             </div>
 
             {/* Stock status */}
