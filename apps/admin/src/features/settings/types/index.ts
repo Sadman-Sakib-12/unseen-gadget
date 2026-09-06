@@ -2,6 +2,8 @@ export interface GeneralSettings {
   storeName: string;
   storeEmail: string;
   storePhone: string;
+  supportPhone?: string;
+  supportLabel?: string;
   storeAddress: string;
   currency: string;
   timezone: string;

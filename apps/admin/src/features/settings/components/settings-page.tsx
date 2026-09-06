@@ -84,6 +84,10 @@ export function SettingsPage() {
         method: "PUT",
         body: JSON.stringify({ value: general }),
       });
+      await apiRequest("/cms/general", {
+        method: "PUT",
+        body: JSON.stringify(general),
+      }).catch(() => {});
     } catch (e: unknown) {
       console.error("Failed to save general settings:", e);
     }

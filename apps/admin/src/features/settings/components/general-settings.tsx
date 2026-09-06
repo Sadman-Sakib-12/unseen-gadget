@@ -137,6 +137,20 @@ export function GeneralSettingsComponent({ settings, onSave }: GeneralSettingsPr
                 {...register('storePhone')}
               />
             </Field>
+            <Field label="Navbar Support Phone (হটলাইন)">
+              <Input
+                type="text"
+                placeholder="e.g. +880 1886-054504"
+                {...register('supportPhone')}
+              />
+            </Field>
+            <Field label="Navbar Support Label">
+              <Input
+                type="text"
+                placeholder="e.g. Support or হটলাইন"
+                {...register('supportLabel')}
+              />
+            </Field>
             <Field label="Currency">
               <Select
                 {...register('currency')}
