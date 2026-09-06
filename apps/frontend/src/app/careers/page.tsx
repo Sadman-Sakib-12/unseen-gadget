@@ -3,18 +3,9 @@
 import { useState, useEffect } from "react";
 import { Briefcase, MapPin, Clock, ChevronRight, Users, Zap, Heart, Send } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
 import { useTranslation } from "@/hooks/use-translation";
 import { apiRequest } from "@/lib/api";
-
-interface JobOpening {
-  id: string;
-  title: string;
-  location: string;
-  type: string;
-  department?: string;
-  description?: string;
-}
+import { ApplyModal, type JobOpening } from "./apply-modal";
 
 const perks = [
   { icon: Zap, label: "Competitive Salary", desc: "We pay above market rate" },
@@ -27,6 +18,7 @@ export default function CareersPage() {
   const { t } = useTranslation();
   const [jobs, setJobs] = useState<JobOpening[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedJob, setSelectedJob] = useState<JobOpening | null>(null);
 
   useEffect(() => {
     apiRequest("/job")
@@ -113,7 +105,7 @@ export default function CareersPage() {
                       <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">{job.description}</p>
                     </div>
                     <button
-                      onClick={() => toast.success(t("careers.applyNow"))}
+                      onClick={() => setSelectedJob(job)}
                       className="btn-primary shrink-0"
                     >
                       {t("careers.applyNow")}
@@ -142,6 +134,12 @@ export default function CareersPage() {
           </div>
         </div>
       </section>
+
+      <ApplyModal
+        job={selectedJob}
+        isOpen={selectedJob !== null}
+        onClose={() => setSelectedJob(null)}
+      />
     </>
   );
 }

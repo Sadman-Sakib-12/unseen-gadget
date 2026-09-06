@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,11 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { Notification } from "@/features/notifications/types";
-
 import { apiRequest } from "@/lib/api";
 
 interface NotificationFormProps {
   isOpen: boolean;
+  initialData?: Notification | null;
   onClose: () => void;
   onSave: (notification: Notification) => void;
 }
@@ -31,17 +31,32 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export function NotificationForm({ isOpen, onClose, onSave }: NotificationFormProps) {
+export function NotificationForm({ isOpen, initialData, onClose, onSave }: NotificationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    id: "",
     title: "",
     message: "",
     type: "system",
-    time: "",
-    read: false,
     actionUrl: null as string | null,
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title || "",
+        message: initialData.message || "",
+        type: (initialData.type || "system").toLowerCase(),
+        actionUrl: initialData.actionUrl || null,
+      });
+    } else {
+      setFormData({
+        title: "",
+        message: "",
+        type: "system",
+        actionUrl: null,
+      });
+    }
+  }, [initialData, isOpen]);
 
   const update = (patch: Partial<typeof formData>) =>
     setFormData((prev) => ({ ...prev, ...patch }));
@@ -53,35 +68,72 @@ export function NotificationForm({ isOpen, onClose, onSave }: NotificationFormPr
       const typeMap: Record<string, string> = {
         order: "ORDER",
         payment: "PAYMENT",
-        shipping: "DELIVERY",
+        shipping: "SHIPPING",
         alert: "ALERT",
         system: "SYSTEM",
       };
-      const res = await apiRequest("/admin/notifications", {
-        method: "POST",
-        body: JSON.stringify({
-          title: formData.title,
-          message: formData.message,
-          type: typeMap[formData.type] || "SYSTEM",
-        }),
-      });
-      if (res.success && res.data) {
-        onSave(res.data as Notification);
+
+      if (initialData) {
+        const res = await apiRequest(`/admin/notifications/${initialData.id}`, {
+          method: "PUT",
+          body: JSON.stringify({
+            title: formData.title,
+            message: formData.message,
+            type: typeMap[formData.type] || "SYSTEM",
+          }),
+        });
+        if (res.success && res.data) {
+          onSave(res.data as Notification);
+        } else {
+          onSave({
+            ...initialData,
+            title: formData.title,
+            message: formData.message,
+            type: formData.type as any,
+          });
+        }
       } else {
-        onSave({
-          ...formData,
-          id: `NOTIF-${Date.now().toString().slice(-3)}`,
-          time: new Date().toISOString(),
-          actionUrl: null,
-        } as Notification);
+        const res = await apiRequest("/admin/notifications", {
+          method: "POST",
+          body: JSON.stringify({
+            title: formData.title,
+            message: formData.message,
+            type: typeMap[formData.type] || "SYSTEM",
+          }),
+        });
+        if (res.success && res.data) {
+          onSave(res.data as Notification);
+        } else {
+          onSave({
+            id: `NOTIF-${Date.now().toString().slice(-3)}`,
+            title: formData.title,
+            message: formData.message,
+            type: formData.type as any,
+            time: new Date().toISOString(),
+            read: false,
+            actionUrl: null,
+          });
+        }
       }
     } catch {
-      onSave({
-        ...formData,
-        id: `NOTIF-${Date.now().toString().slice(-3)}`,
-        time: new Date().toISOString(),
-        actionUrl: null,
-      } as Notification);
+      if (initialData) {
+        onSave({
+          ...initialData,
+          title: formData.title,
+          message: formData.message,
+          type: formData.type as any,
+        });
+      } else {
+        onSave({
+          id: `NOTIF-${Date.now().toString().slice(-3)}`,
+          title: formData.title,
+          message: formData.message,
+          type: formData.type as any,
+          time: new Date().toISOString(),
+          read: false,
+          actionUrl: null,
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -90,8 +142,12 @@ export function NotificationForm({ isOpen, onClose, onSave }: NotificationFormPr
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogHeader close>
-        <DialogTitle>Send Notification</DialogTitle>
-        <DialogDescription>Create a new system notification for your team.</DialogDescription>
+        <DialogTitle>{initialData ? "Edit Notification" : "Send Notification"}</DialogTitle>
+        <DialogDescription>
+          {initialData
+            ? "Update notification content and details."
+            : "Create a new system notification for your team."}
+        </DialogDescription>
       </DialogHeader>
       <DialogContent>
         <form id="notification-form" onSubmit={handleSubmit} className="space-y-5">
@@ -137,7 +193,7 @@ export function NotificationForm({ isOpen, onClose, onSave }: NotificationFormPr
           Cancel
         </Button>
         <Button type="submit" form="notification-form" disabled={isSubmitting}>
-          {isSubmitting ? "Sending..." : "Send Notification"}
+          {isSubmitting ? "Saving..." : initialData ? "Save Changes" : "Send Notification"}
         </Button>
       </DialogFooter>
     </Dialog>

@@ -5,14 +5,18 @@ import { Bell, BellRing, MessageSquareText, TriangleAlert, Plus } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/ui/stat-card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { toast } from "sonner";
 import { NotificationsList } from "./notifications-list";
 import { NotificationForm } from "./notification-form";
-import { apiRequest } from "@/lib/api";
+import { api, apiRequest } from "@/lib/api";
 import type { Notification } from "@/features/notifications/types";
 
 export function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [editingNotification, setEditingNotification] = useState<Notification | null>(null);
+  const [confirmClearAll, setConfirmClearAll] = useState(false);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -24,16 +28,23 @@ export function NotificationsPage() {
           setNotifications(res.data as Notification[]);
         }
       } catch (e: unknown) {
-        // Admin-only endpoint may fail for non-admin users
         console.error("Failed to fetch notifications:", e);
       }
     };
-    fetchNotifications();
+    void fetchNotifications();
   }, []);
 
   const handleSave = (notification: Notification) => {
-    setNotifications((prev) => [notification, ...prev]);
+    setNotifications((prev) => {
+      const exists = prev.some((n) => n.id === notification.id);
+      if (exists) {
+        return prev.map((n) => (n.id === notification.id ? notification : n));
+      }
+      return [notification, ...prev];
+    });
+    setEditingNotification(null);
     setShowForm(false);
+    toast.success(editingNotification ? "Notification updated" : "Notification sent");
   };
 
   const markRead = async (id: string) => {
@@ -51,8 +62,30 @@ export function NotificationsPage() {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     try {
       await apiRequest("/admin/notifications/read-all", { method: "PATCH" });
+      toast.success("All notifications marked as read");
     } catch (e) {
       console.error("Failed to mark all notifications read:", e);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    try {
+      await api.notifications.delete(id);
+      toast.success("Notification deleted");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to delete notification");
+    }
+  };
+
+  const handleClearAll = async () => {
+    setNotifications([]);
+    setConfirmClearAll(false);
+    try {
+      await api.notifications.clearAll();
+      toast.success("All notifications cleared");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to clear notifications");
     }
   };
 
@@ -66,7 +99,12 @@ export function NotificationsPage() {
         title="Notifications"
         description="System notifications and alerts"
         actions={
-          <Button onClick={() => setShowForm(true)}>
+          <Button
+            onClick={() => {
+              setEditingNotification(null);
+              setShowForm(true);
+            }}
+          >
             <Plus className="h-4 w-4" />
             Send Notification
           </Button>
@@ -100,9 +138,39 @@ export function NotificationsPage() {
         />
       </div>
 
-      <NotificationsList data={notifications} onMarkRead={markRead} onMarkAllRead={markAllRead} />
+      <NotificationsList
+        data={notifications}
+        onMarkRead={markRead}
+        onMarkAllRead={markAllRead}
+        onEdit={(n) => {
+          setEditingNotification(n);
+          setShowForm(true);
+        }}
+        onDelete={handleDelete}
+        onClearAll={() => setConfirmClearAll(true)}
+      />
 
-      <NotificationForm isOpen={showForm} onClose={() => setShowForm(false)} onSave={handleSave} />
+      {/* Send / Edit Notification Form */}
+      <NotificationForm
+        isOpen={showForm}
+        initialData={editingNotification}
+        onClose={() => {
+          setShowForm(false);
+          setEditingNotification(null);
+        }}
+        onSave={handleSave}
+      />
+
+      {/* Clear All Confirmation */}
+      <ConfirmDialog
+        open={confirmClearAll}
+        onOpenChange={(open) => !open && setConfirmClearAll(false)}
+        title="Clear All Notifications?"
+        description="Are you sure you want to permanently delete all notifications? This action cannot be undone."
+        confirmLabel="Clear All"
+        destructive
+        onConfirm={() => void handleClearAll()}
+      />
     </div>
   );
 }

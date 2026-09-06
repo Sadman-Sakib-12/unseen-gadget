@@ -113,6 +113,8 @@ router.post(
 
 router.get("/customers", AdminCustomerController.listCustomers);
 router.get("/customers/:customerId", AdminCustomerController.getCustomer);
+router.put("/customers/:customerId", AdminCustomerController.updateCustomer);
+router.delete("/customers/:customerId", AdminCustomerController.deleteCustomer);
 
 router.get("/coupons", AdminCouponController.listCoupons);
 router.post("/coupons", AdminCouponController.createCoupon);

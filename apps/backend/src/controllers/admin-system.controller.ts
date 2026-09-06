@@ -123,6 +123,34 @@ export const markAllNotificationsRead = asyncHandler(async (_req: Request, res: 
   ApiResponseUtil.success(res, { updated: true }, "All notifications marked as read");
 });
 
+export const updateNotification = asyncHandler(async (req: Request, res: Response) => {
+  const existing = await prisma.notification.findUnique({ where: { id: req.params.id } });
+  if (!existing) throw new NotFoundError("Notification not found");
+  const { title, message, type, actionUrl } = req.body;
+  const notification = await prisma.notification.update({
+    where: { id: existing.id },
+    data: {
+      ...(title ? { title } : {}),
+      ...(message ? { message } : {}),
+      ...(type ? { type } : {}),
+      ...(actionUrl !== undefined ? { actionUrl } : {}),
+    },
+  });
+  ApiResponseUtil.success(res, notification, "Notification updated");
+});
+
+export const deleteNotification = asyncHandler(async (req: Request, res: Response) => {
+  const existing = await prisma.notification.findUnique({ where: { id: req.params.id } });
+  if (!existing) throw new NotFoundError("Notification not found");
+  await prisma.notification.delete({ where: { id: existing.id } });
+  ApiResponseUtil.success(res, { deleted: true }, "Notification deleted");
+});
+
+export const clearAllNotifications = asyncHandler(async (_req: Request, res: Response) => {
+  await prisma.notification.deleteMany({});
+  ApiResponseUtil.success(res, { deleted: true }, "All notifications cleared");
+});
+
 // ===================== Promotions (admin) =====================
 
 function promotionData(body: Record<string, unknown>) {

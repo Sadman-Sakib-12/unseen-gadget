@@ -189,9 +189,21 @@ export const listJobs = asyncHandler(async (req: Request, res: Response) => {
   }
   const jobs = await prisma.jobOpening.findMany({
     where: wantAll && isAdmin ? {} : { active: true },
+    include: isAdmin ? { _count: { select: { applications: true } } } : undefined,
     orderBy: { createdAt: "desc" },
   });
   ApiResponseUtil.success(res, jobs);
+});
+
+export const getJobApplications = asyncHandler(async (req: Request, res: Response) => {
+  const job = await prisma.jobOpening.findUnique({ where: { id: req.params.id } });
+  if (!job) throw new NotFoundError("Job not found");
+
+  const applications = await prisma.jobApplication.findMany({
+    where: { jobId: req.params.id },
+    orderBy: { createdAt: "desc" },
+  });
+  ApiResponseUtil.success(res, applications);
 });
 
 export const getJob = asyncHandler(async (req: Request, res: Response) => {
@@ -904,6 +916,7 @@ export const CmsController = {
   deletePromotion,
   listJobs,
   getJob,
+  getJobApplications,
   createJob,
   updateJob,
   deleteJob,

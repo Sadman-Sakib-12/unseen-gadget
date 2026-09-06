@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Briefcase, Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { Briefcase, Loader2, Plus, Pencil, Trash2, Users, ExternalLink, Mail, Phone, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,7 +17,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCmsResource } from "@/features/cms/hooks/use-cms-resource";
-import type { Job } from "@unseen-gadget/types";
+import { apiRequest } from "@/lib/api";
+import type { Job, JobApplication } from "@unseen-gadget/types";
 
 const lineToItems = (value: string): string[] =>
   value
@@ -53,6 +54,11 @@ export function JobsManager() {
   const [draft, setDraft] = useState<Job>(emptyJob());
   const [removing, setRemoving] = useState<Job | null>(null);
 
+  // Applications viewing state
+  const [viewingJobApplications, setViewingJobApplications] = useState<Job | null>(null);
+  const [applications, setApplications] = useState<JobApplication[]>([]);
+  const [applicationsLoading, setApplicationsLoading] = useState(false);
+
   const startCreate = () => {
     setEditing(null);
     setDraft(emptyJob());
@@ -74,6 +80,19 @@ export function JobsManager() {
     if (editing) await update(job);
     else await create(job);
     setOpen(false);
+  };
+
+  const openApplications = async (job: Job) => {
+    setViewingJobApplications(job);
+    setApplicationsLoading(true);
+    try {
+      const res = await apiRequest<JobApplication[]>(`/cms/jobs/${job.id}/applications`);
+      setApplications(res.data || []);
+    } catch {
+      setApplications([]);
+    } finally {
+      setApplicationsLoading(false);
+    }
   };
 
   return (
@@ -102,6 +121,7 @@ export function JobsManager() {
                 <th className="px-4 py-3">Title</th>
                 <th className="px-4 py-3">Department</th>
                 <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3">Applications</th>
                 <th className="px-4 py-3">Active</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
@@ -112,6 +132,17 @@ export function JobsManager() {
                   <td className="px-4 py-3 font-medium text-gray-900">{job.title}</td>
                   <td className="px-4 py-3 text-gray-600">{job.department}</td>
                   <td className="px-4 py-3 text-gray-600">{job.type}</td>
+                  <td className="px-4 py-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1.5 text-xs font-medium"
+                      onClick={() => openApplications(job)}
+                    >
+                      <Users className="h-3.5 w-3.5 text-primary" />
+                      <span>{job._count?.applications ?? 0}</span>
+                    </Button>
+                  </td>
                   <td className="px-4 py-3">
                     <Switch
                       checked={job.active}
@@ -142,6 +173,7 @@ export function JobsManager() {
         </div>
       )}
 
+      {/* Edit / Add Job Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogHeader close>
           <DialogTitle>{editing ? "Edit Job" : "Add Job"}</DialogTitle>
@@ -227,6 +259,100 @@ export function JobsManager() {
           </Button>
           <Button type="submit" form="job-form">
             {editing ? "Update Job" : "Add Job"}
+          </Button>
+        </DialogFooter>
+      </Dialog>
+
+      {/* Applications Dialog */}
+      <Dialog
+        open={viewingJobApplications !== null}
+        onOpenChange={(open) => !open && setViewingJobApplications(null)}
+        size="3xl"
+      >
+        <DialogHeader close>
+          <DialogTitle>Applications: {viewingJobApplications?.title}</DialogTitle>
+          <DialogDescription>
+            Candidates who submitted an application for this role.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogContent className="max-h-[70vh] overflow-y-auto">
+          {applicationsLoading ? (
+            <div className="flex items-center justify-center py-12 text-gray-400">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : applications.length === 0 ? (
+            <EmptyState
+              icon={Users}
+              title="No applications yet"
+              description="No candidates have submitted an application for this position yet."
+            />
+          ) : (
+            <div className="space-y-4">
+              {applications.map((app) => (
+                <div
+                  key={app.id}
+                  className="rounded-xl border border-border bg-gray-50/60 p-4 space-y-3"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 text-sm">{app.name}</h4>
+                      <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                        <a
+                          href={`mailto:${app.email}`}
+                          className="flex items-center gap-1 hover:text-primary transition-colors"
+                        >
+                          <Mail className="h-3.5 w-3.5" />
+                          {app.email}
+                        </a>
+                        {app.phone && (
+                          <a
+                            href={`tel:${app.phone}`}
+                            className="flex items-center gap-1 hover:text-primary transition-colors"
+                          >
+                            <Phone className="h-3.5 w-3.5" />
+                            {app.phone}
+                          </a>
+                        )}
+                        <span className="flex items-center gap-1 text-gray-400">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {new Date(app.createdAt).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
+                      </div>
+                    </div>
+
+                    {app.resume && (
+                      <a
+                        href={app.resume.startsWith("http") ? app.resume : `https://${app.resume}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        View Resume / Link
+                      </a>
+                    )}
+                  </div>
+
+                  {app.coverLetter && (
+                    <div className="rounded-lg border border-border bg-white p-3 text-xs text-gray-700">
+                      <p className="font-semibold text-gray-500 mb-1 text-[11px] uppercase tracking-wider">
+                        Cover Letter / Message:
+                      </p>
+                      <p className="whitespace-pre-wrap leading-relaxed">{app.coverLetter}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setViewingJobApplications(null)}>
+            Close
           </Button>
         </DialogFooter>
       </Dialog>

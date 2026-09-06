@@ -229,6 +229,22 @@ export interface Job {
   responsibilities: string[];
   requirements: string[];
   active: boolean;
+  _count?: {
+    applications: number;
+  };
+}
+
+export interface JobApplication {
+  id: string;
+  jobId: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  coverLetter?: string | null;
+  resume?: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type PostStatus = "draft" | "published" | "archived";

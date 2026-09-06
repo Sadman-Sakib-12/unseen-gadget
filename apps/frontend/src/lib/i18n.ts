@@ -185,6 +185,16 @@ export const en: Record<string, string> = {
   "footer.newsletter": "Subscribe",
   "footer.paymentMethods": "We accept",
 
+  // Careers
+  "careers.title": "Careers",
+  "careers.kicker": "Join Our Team",
+  "careers.heading": "Build the Future of Tech Retail",
+  "careers.subtitle": "Join a team of passionate individuals dedicated to delivering the best gadgets and customer experience across Bangladesh.",
+  "careers.openPositions": "Open Positions",
+  "careers.applyNow": "Apply Now",
+  "careers.noFit": "Don't see a perfect fit?",
+  "careers.noFitHint": "Send your CV to {email} and tell us how you can contribute.",
+
   // States
   "state.loading": "Loading…",
   "state.empty": "Nothing here yet",

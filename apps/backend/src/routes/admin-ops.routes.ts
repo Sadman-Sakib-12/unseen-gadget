@@ -179,6 +179,17 @@ router.patch(
   validateParams(idParamsSchema),
   system.markNotificationRead,
 );
+router.put(
+  "/notifications/:id",
+  validateParams(idParamsSchema),
+  system.updateNotification,
+);
+router.delete("/notifications/clear-all", system.clearAllNotifications);
+router.delete(
+  "/notifications/:id",
+  validateParams(idParamsSchema),
+  system.deleteNotification,
+);
 
 // ---------- Promotions ----------
 router.get("/promotions", system.listAdminPromotions);

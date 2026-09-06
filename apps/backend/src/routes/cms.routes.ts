@@ -64,6 +64,12 @@ router.put(
   validateBody(cmsJobUpdateSchema),
   cmsController.updateJob,
 );
+router.get(
+  "/jobs/:id/applications",
+  authenticateAdmin,
+  validateParams(idParamsSchema),
+  cmsController.getJobApplications,
+);
 router.delete("/jobs/:id", authenticateAdmin, validateParams(idParamsSchema), cmsController.deleteJob);
 
 // Pages

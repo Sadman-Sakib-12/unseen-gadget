@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { BatteryCharging, Eye } from 'lucide-react';
+import { BatteryCharging, Eye, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SearchInput } from '@/components/ui/search-input';
@@ -22,11 +22,13 @@ import type { Customer } from '@/features/customers/types';
 interface CustomersTableProps {
   data: Customer[];
   onView?: (customer: Customer) => void;
+  onEdit?: (customer: Customer) => void;
+  onDelete?: (customer: Customer) => void;
 }
 
 const PAGE_SIZE = 10;
 
-export function CustomersTable({ data, onView }: CustomersTableProps) {
+export function CustomersTable({ data, onView, onEdit, onDelete }: CustomersTableProps) {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -120,20 +122,46 @@ export function CustomersTable({ data, onView }: CustomersTableProps) {
                 <TableCell className="whitespace-nowrap text-sm text-gray-500">
                   {formatShortDate(customer.joinDate)}
                 </TableCell>
-                {onView ? (
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onView(customer)}
-                      className="text-gray-600"
-                    >
-                      <Eye className="h-4 w-4" />
-                      <span className="sr-only">View {customer.name}</span>
-                      View
-                    </Button>
-                  </TableCell>
-                ) : null}
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                    {onView && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onView(customer)}
+                        className="text-gray-500 hover:text-gray-900"
+                        title={`View ${customer.name}`}
+                        aria-label={`View ${customer.name}`}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {onEdit && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(customer)}
+                        className="text-gray-500 hover:text-gray-900"
+                        title={`Edit ${customer.name}`}
+                        aria-label={`Edit ${customer.name}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDelete(customer)}
+                        className="text-gray-400 hover:text-red-600"
+                        title={`Delete ${customer.name}`}
+                        aria-label={`Delete ${customer.name}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

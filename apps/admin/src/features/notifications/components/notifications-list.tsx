@@ -10,6 +10,8 @@ import {
   User,
   AlertTriangle,
   Settings,
+  Pencil,
+  Trash2,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,9 +36,19 @@ interface NotificationsListProps {
   data: Notification[];
   onMarkRead?: (id: string) => void;
   onMarkAllRead?: () => void;
+  onEdit?: (notification: Notification) => void;
+  onDelete?: (id: string) => void;
+  onClearAll?: () => void;
 }
 
-export function NotificationsList({ data, onMarkRead, onMarkAllRead }: NotificationsListProps) {
+export function NotificationsList({
+  data,
+  onMarkRead,
+  onMarkAllRead,
+  onEdit,
+  onDelete,
+  onClearAll,
+}: NotificationsListProps) {
   const [filter, setFilter] = useState<string>("all");
   const filtered = data.filter((n) => filter === "all" || n.type === filter);
   const unreadCount = data.filter((n) => !n.read).length;
@@ -55,6 +67,19 @@ export function NotificationsList({ data, onMarkRead, onMarkAllRead }: Notificat
               Mark all read
             </Button>
           ) : null}
+
+          {data.length > 0 && onClearAll ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-red-600 hover:bg-red-50 hover:text-red-700"
+              onClick={onClearAll}
+            >
+              <Trash2 className="h-4 w-4" />
+              Clear all
+            </Button>
+          ) : null}
+
           <Select
             className="w-full sm:w-48"
             value={filter}
@@ -105,18 +130,49 @@ export function NotificationsList({ data, onMarkRead, onMarkAllRead }: Notificat
                       {formatDateTime(notification.time)}
                     </p>
                   </div>
-                  {!notification.read && onMarkRead ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 shrink-0 text-gray-400 hover:text-gray-700"
-                      aria-label={`Mark ${notification.title} as read`}
-                      onClick={() => onMarkRead(notification.id)}
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
-                  ) : null}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {!notification.read && onMarkRead ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-blue-600 hover:text-blue-800"
+                        aria-label={`Mark ${notification.title} as read`}
+                        title="Mark as read"
+                        onClick={() => onMarkRead(notification.id)}
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                    ) : null}
+
+                    {onEdit ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-gray-400 hover:text-gray-700"
+                        aria-label={`Edit ${notification.title}`}
+                        title="Edit notification"
+                        onClick={() => onEdit(notification)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    ) : null}
+
+                    {onDelete ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-gray-400 hover:text-red-600"
+                        aria-label={`Delete ${notification.title}`}
+                        title="Delete notification"
+                        onClick={() => onDelete(notification.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    ) : null}
+                  </div>
                 </div>
               );
             })}

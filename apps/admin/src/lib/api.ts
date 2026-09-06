@@ -140,6 +140,9 @@ export const api = {
     list: (opts?: Record<string, string>) =>
       apiRequest("/admin/customers" + (opts ? `?${new URLSearchParams(opts)}` : "")),
     get: (id: string) => apiRequest(`/admin/customers/${id}`),
+    update: (id: string, data: Record<string, unknown>) =>
+      apiRequest(`/admin/customers/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    delete: (id: string) => apiRequest(`/admin/customers/${id}`, { method: "DELETE" }),
   },
 
   // CMS
@@ -273,6 +276,8 @@ export const api = {
       apiRequest("/admin/notifications", { method: "POST", body: JSON.stringify(data) }),
     read: (id: string) => apiRequest(`/admin/notifications/${id}/read`, { method: "PATCH", body: JSON.stringify({ read: true }) }),
     readAll: () => apiRequest("/admin/notifications/read-all", { method: "PATCH", body: JSON.stringify({ readAll: true }) }),
+    delete: (id: string) => apiRequest(`/admin/notifications/${id}`, { method: "DELETE" }),
+    clearAll: () => apiRequest("/admin/notifications/clear-all", { method: "DELETE" }),
   },
 
   // Promotions (admin)
