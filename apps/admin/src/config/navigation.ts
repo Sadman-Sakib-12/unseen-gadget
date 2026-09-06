@@ -110,6 +110,7 @@ export const NAV_ITEMS: NavItem[] = [
           { title: "Privacy Policy", href: "/cms/pages/privacy" },
         ],
       },
+      { title: "Banners (Slider)", href: "/blog/banners" },
       { title: "Featured Categories", href: "/cms/categories" },
       {
         title: "Blog & Layout",

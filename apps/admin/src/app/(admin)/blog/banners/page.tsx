@@ -46,7 +46,7 @@ export default function BannersPage() {
   useEffect(() => {
     if (!bannersRes) return;
     const rawData = (bannersRes as any)?.data ?? bannersRes;
-    if (Array.isArray(rawData) && rawData.length > 0) {
+    if (Array.isArray(rawData)) {
       const normalized: Banner[] = rawData.map((b: Partial<Banner>, index: number) => ({
         id: b.id || `banner-${index + 1}`,
         title: b.title || '',
@@ -58,6 +58,8 @@ export default function BannersPage() {
         status: (b.status as 'Active' | 'Draft') || 'Active',
       }));
       setBanners(normalized);
+    } else {
+      setBanners([]);
     }
   }, [bannersRes]);
 

@@ -81,47 +81,14 @@ export function useMyOrders() {
   });
 }
 
-// Default CMS Banners for instant LCP render (no client-side waterfall delay)
-export const DEFAULT_INITIAL_BANNERS = [
-  {
-    id: "1",
-    cta: "Go Shopping",
-    href: "/brand/apple",
-    image: "https://res.cloudinary.com/r3fekpys/image/upload/v1788111757/unseen-gadget/products/gaxkglo4loczewi0q1vw.png",
-    title: "Apple Shopping Events",
-    status: "Active",
-    subtitle: "Hurry and get discounts on all Apple devices up to 20%",
-    placement: "slider",
-  },
-  {
-    id: "2",
-    cta: "Shop Now",
-    href: "/category/computers/macbooks",
-    image: "https://res.cloudinary.com/r3fekpys/image/upload/v1788115503/unseen-gadget/products/ku8b4bkemfu4hscl3ek8.png",
-    title: "MacBook Air M5",
-    status: "Active",
-    subtitle: "Experience the future of laptops with M5 chip",
-    placement: "side",
-  },
-  {
-    id: "3",
-    cta: "Explore",
-    href: "/category/cases-protectors/ipad",
-    image: "https://res.cloudinary.com/r3fekpys/image/upload/v1788115575/unseen-gadget/products/ureamnsuaza0yggqxt28.jpg",
-    title: "iPad Accessories",
-    status: "Active",
-    subtitle: "Personalize your iPad with top branded accessories",
-    placement: "side",
-  },
-];
+
 
 // CMS Queries
 export function useBanners() {
   return useQuery({
     queryKey: ["cms", "banners"],
     queryFn: () => apiRequest("/cms/banners"),
-    initialData: { success: true, data: DEFAULT_INITIAL_BANNERS },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 2,
   });
 }
 

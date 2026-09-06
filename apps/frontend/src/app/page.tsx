@@ -88,7 +88,7 @@ export default function Home() {
 
   const isSecOn = (id: string) => activeSections[id] !== false;
 
-  // Real Banners from Admin CMS (/cms/banners)
+  // Real Banners strictly from Admin CMS (/cms/banners)
   const bannerData = useMemo<BannerItem[]>(() => {
     const raw = (bannersRes as any)?.data ?? bannersRes;
     if (Array.isArray(raw)) {

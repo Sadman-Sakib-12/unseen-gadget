@@ -27,7 +27,7 @@ interface HeroBannerCarouselProps {
 
 export function HeroBannerCarousel({ banners }: HeroBannerCarouselProps) {
   const activeBanners = (banners || []).filter(
-    (b) => !b.status || b.status === "Active"
+    (b) => !b.status || b.status.toLowerCase() === "active"
   );
 
   if (activeBanners.length === 0) {
