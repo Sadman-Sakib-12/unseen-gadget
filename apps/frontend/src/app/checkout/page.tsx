@@ -14,6 +14,7 @@ import { type CartItem, normalizeCartItem, calculateOrderShipping } from "@/type
 import { CheckoutCustomerForm } from "./components/checkout-customer-form";
 import { CheckoutPaymentSection } from "./components/checkout-payment-section";
 import { CheckoutOrderSummary } from "./components/checkout-order-summary";
+import { type AppliedCoupon, getStoredCoupon, clearStoredCoupon } from "@/components/coupon-box";
 
 const PAYMENT_METHODS = [
   { id: "cod", label: "Cash on Delivery", desc: "Pay when you receive your order" },
@@ -37,6 +38,7 @@ export default function CheckoutPage() {
 
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [paymentConfig, setPaymentConfig] = useState<PaymentConfig>({
     acceptCashOnDelivery: true,
     acceptMobileBanking: true,
@@ -45,6 +47,13 @@ export default function CheckoutPage() {
   });
 
   const { data: session, status } = useSession();
+
+  useEffect(() => {
+    const stored = getStoredCoupon();
+    if (stored) {
+      setAppliedCoupon(stored);
+    }
+  }, []);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -153,7 +162,8 @@ export default function CheckoutPage() {
   const insideCost = useMemo(() => calculateOrderShipping(shownItems, "inside-dhaka"), [shownItems]);
   const outsideCost = useMemo(() => calculateOrderShipping(shownItems, "outside-dhaka"), [shownItems]);
   const shippingCost = deliveryZone === "outside-dhaka" ? outsideCost : insideCost;
-  const total = subtotal + shippingCost;
+  const couponDiscount = appliedCoupon ? Math.min(appliedCoupon.discountAmount, subtotal) : 0;
+  const total = Math.max(0, subtotal + shippingCost - couponDiscount);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -213,6 +223,7 @@ export default function CheckoutPage() {
           quantity: item.quantity,
           price: item.price,
         })),
+        couponCode: appliedCoupon?.code,
       });
 
       if ((payment === "bkash" || payment === "nagad") && trxId.trim() && res?.data?.id) {
@@ -228,6 +239,7 @@ export default function CheckoutPage() {
         }).catch(() => {});
       }
 
+      clearStoredCoupon();
       await apiRequest("/cart/current/clear", { method: "POST" }).catch(() => {});
 
       toast.success(
@@ -351,6 +363,10 @@ export default function CheckoutPage() {
                 subtotal={subtotal}
                 savings={savings}
                 shippingCost={shippingCost}
+                couponDiscount={couponDiscount}
+                appliedCoupon={appliedCoupon}
+                onApplyCoupon={setAppliedCoupon}
+                onRemoveCoupon={() => setAppliedCoupon(null)}
                 total={total}
                 count={count}
                 placing={placing}

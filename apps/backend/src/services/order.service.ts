@@ -30,8 +30,9 @@ export async function checkout(userId: string | null | undefined, orderData: {
   shippingAddress: string;
   paymentMethod: string;
   items: { productId: string; variantId?: string; quantity: number; price: number }[];
+  couponCode?: string;
 }) {
-  const { customerName, customerEmail, customerPhone, shippingAddress, paymentMethod, items } = orderData;
+  const { customerName, customerEmail, customerPhone, shippingAddress, paymentMethod, items, couponCode } = orderData;
   const prismaPaymentMethod = mapPaymentMethod(paymentMethod);
 
   // Extract unique product IDs and validate
@@ -98,6 +99,41 @@ export async function checkout(userId: string | null | undefined, orderData: {
 
     const base = baseShippingCost > 0 ? baseShippingCost : 60;
     shippingCost = isOutsideDhaka ? base + 50 : base;
+  }
+
+  // Coupon verification and discount calculation
+  let appliedCoupon: any = null;
+  let discountAmount = 0;
+  if (couponCode && couponCode.trim()) {
+    const trimmedCode = couponCode.trim();
+    const coupon = await prisma.coupon.findFirst({
+      where: { code: trimmedCode, status: "ACTIVE" },
+    });
+    if (!coupon) {
+      throw new BadRequestError("Invalid or inactive coupon code");
+    }
+    const now = new Date();
+    if (coupon.expiryDate && new Date(coupon.expiryDate) < now) {
+      throw new BadRequestError("Coupon has expired");
+    }
+    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+      throw new BadRequestError("Coupon usage limit reached");
+    }
+    if (coupon.minimumOrder && subtotal < coupon.minimumOrder) {
+      throw new BadRequestError(
+        `Minimum order amount for coupon "${trimmedCode}" is BDT ${coupon.minimumOrder}`
+      );
+    }
+    if (coupon.discountType === "PERCENTAGE") {
+      discountAmount = Math.round((coupon.discountValue / 100) * subtotal);
+    } else if (coupon.discountType === "FIXED") {
+      discountAmount = coupon.discountValue;
+    }
+    if (coupon.maximumDiscount != null) {
+      discountAmount = Math.min(discountAmount, coupon.maximumDiscount);
+    }
+    discountAmount = Math.min(discountAmount, subtotal);
+    appliedCoupon = coupon;
   }
 
   // Separate and consolidate demand by inventory target:
@@ -205,7 +241,7 @@ export async function checkout(userId: string | null | undefined, orderData: {
 
     // 2. CREATE ORDER
     // -------------------------------------------------------------
-    const total = subtotal + shippingCost; // discount defaults to 0
+    const total = Math.max(0, subtotal + shippingCost - discountAmount);
 
     const newOrder = await tx.order.create({
       data: {
@@ -216,11 +252,22 @@ export async function checkout(userId: string | null | undefined, orderData: {
         shippingAddress,
         status: "PENDING",
         subtotal,
+        discount: discountAmount,
         shippingCost,
         total,
+        couponId: appliedCoupon ? appliedCoupon.id : null,
         paymentMethod: prismaPaymentMethod,
       },
     });
+
+    if (appliedCoupon) {
+      await tx.coupon.update({
+        where: { id: appliedCoupon.id },
+        data: {
+          usedCount: { increment: 1 },
+        },
+      });
+    }
 
     // 3. CREATE ORDER ITEMS & STOCK MOVEMENTS
     // -------------------------------------------------------------

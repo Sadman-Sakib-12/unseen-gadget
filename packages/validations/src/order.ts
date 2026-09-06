@@ -24,6 +24,7 @@ export const orderCreateSchema = z.object({
       })
     )
     .min(1, "At least one item is required"),
+  couponCode: z.string().optional(),
 });
 
 export type OrderCreateInput = z.infer<typeof orderCreateSchema>;

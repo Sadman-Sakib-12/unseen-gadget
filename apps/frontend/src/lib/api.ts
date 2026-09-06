@@ -379,6 +379,7 @@ export const orderApi = {
     shippingAddress: string;
     paymentMethod: "cod" | "bkash" | "nagad" | "COD" | "BKASH" | "NAGAD" | "SSLCOMMERZ" | string;
     items: { productId: string | number; variantId?: string | number; quantity: number; price: number }[];
+    couponCode?: string;
   }) =>
     apiRequest("/order/checkout", {
       method: "POST",
@@ -396,6 +397,15 @@ export const orderApi = {
   }),
 
   payment: (paymentId: string) => apiRequest(`/payments/${paymentId}`),
+};
+
+// Coupon APIs
+export const couponApi = {
+  validate: (data: { code: string; amount: number; items?: any[] }) =>
+    apiRequest("/coupons/validate", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
 
 // Payment APIs

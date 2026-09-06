@@ -2,12 +2,17 @@ import Link from "next/link";
 import { ArrowLeft, Shield } from "lucide-react";
 import { formatBDT } from "@/components/price";
 import type { CartItem } from "@/types/cart";
+import { CouponBox, type AppliedCoupon } from "@/components/coupon-box";
 
 interface CheckoutOrderSummaryProps {
   items: CartItem[];
   subtotal: number;
   savings: number;
   shippingCost: number;
+  couponDiscount?: number;
+  appliedCoupon?: AppliedCoupon | null;
+  onApplyCoupon?: (coupon: AppliedCoupon) => void;
+  onRemoveCoupon?: () => void;
   total: number;
   count: number;
   placing: boolean;
@@ -19,6 +24,10 @@ export function CheckoutOrderSummary({
   subtotal,
   savings,
   shippingCost,
+  couponDiscount = 0,
+  appliedCoupon = null,
+  onApplyCoupon,
+  onRemoveCoupon,
   total,
   count,
   placing,
@@ -76,6 +85,12 @@ export function CheckoutOrderSummary({
                 <span className="font-medium text-success">-{formatBDT(savings)}</span>
               </div>
             )}
+            {couponDiscount > 0 && appliedCoupon && (
+              <div className="flex justify-between text-xs text-emerald-600 dark:text-emerald-400">
+                <span className="font-medium">Coupon ({appliedCoupon.code})</span>
+                <span className="font-bold">-{formatBDT(couponDiscount)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-xs">
               <span className="text-muted-foreground">{t("cart.shipping")}</span>
               <span
@@ -93,6 +108,18 @@ export function CheckoutOrderSummary({
               <span className="text-lg font-bold text-foreground">{formatBDT(total)}</span>
             </div>
           </div>
+
+          {onApplyCoupon && onRemoveCoupon && (
+            <div className="my-3 border-t border-border pt-3">
+              <CouponBox
+                subtotal={subtotal}
+                appliedCoupon={appliedCoupon}
+                onApply={onApplyCoupon}
+                onRemove={onRemoveCoupon}
+                disabled={placing}
+              />
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-2">

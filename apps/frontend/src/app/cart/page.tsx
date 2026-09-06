@@ -22,6 +22,7 @@ import { useState, useEffect } from "react";
 import { apiRequest } from "@/lib/api";
 
 import { type CartItem, normalizeCartItem, calculateOrderShipping } from "@/types/cart";
+import { CouponBox, type AppliedCoupon, getStoredCoupon } from "@/components/coupon-box";
 
 function formatBDT(amount: number) {
   return `৳${amount.toLocaleString("en-BD", { minimumFractionDigits: 0 })}`;
@@ -35,6 +36,7 @@ export default function CartPage() {
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
 
   const fetchCart = () => {
     apiRequest("/cart/current")
@@ -56,6 +58,10 @@ export default function CartPage() {
 
   useEffect(() => {
     fetchCart();
+    const stored = getStoredCoupon();
+    if (stored) {
+      setAppliedCoupon(stored);
+    }
   }, []);
 
   const items = hydrated ? cart : [];
@@ -68,7 +74,8 @@ export default function CartPage() {
     return sum;
   }, 0);
   const shipping = calculateOrderShipping(items);
-  const total = subtotal + shipping;
+  const couponDiscount = appliedCoupon ? Math.min(appliedCoupon.discountAmount, subtotal) : 0;
+  const total = Math.max(0, subtotal + shipping - couponDiscount);
 
   const updateQuantity = (id: string, quantity: number) => {
     if (quantity < 1) return;
@@ -245,6 +252,16 @@ export default function CartPage() {
                         </span>
                       </div>
                     )}
+                    {couponDiscount > 0 && appliedCoupon && (
+                      <div className="flex justify-between text-xs text-emerald-600 dark:text-emerald-400">
+                        <span className="font-medium">
+                          Coupon ({appliedCoupon.code})
+                        </span>
+                        <span className="font-bold">
+                          -{formatBDT(couponDiscount)}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">
                         {t("cart.shipping")}
@@ -261,6 +278,16 @@ export default function CartPage() {
                         {formatBDT(total)}
                       </span>
                     </div>
+                  </div>
+
+                  <div className="my-4 border-t border-border pt-3">
+                    <CouponBox
+                      subtotal={subtotal}
+                      appliedCoupon={appliedCoupon}
+                      onApply={(coupon) => setAppliedCoupon(coupon)}
+                      onRemove={() => setAppliedCoupon(null)}
+                      disabled={count === 0}
+                    />
                   </div>
 
                   <button

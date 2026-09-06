@@ -7,7 +7,7 @@ import { orderCreateSchema } from "@unseen-gadget/validations";
 
 export const checkout = asyncHandler(async (req: Request, res: Response) => {
   const validated = req.validated.body as z.infer<typeof orderCreateSchema>;
-  const { customerName, customerEmail, customerPhone, shippingAddress, paymentMethod, items } = validated;
+  const { customerName, customerEmail, customerPhone, shippingAddress, paymentMethod, items, couponCode } = validated;
 
   const order = await orderService.checkout(req.user?.id, {
     customerName,
@@ -16,6 +16,7 @@ export const checkout = asyncHandler(async (req: Request, res: Response) => {
     shippingAddress,
     paymentMethod,
     items,
+    couponCode,
   });
 
   ApiResponseUtil.success(res, order, "Order created successfully");
