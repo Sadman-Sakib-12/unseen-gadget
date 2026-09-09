@@ -243,7 +243,7 @@ export const cmsPageUpdateSchema = z.object({
 });
 
 export const cmsSettingValueSchema = z.union([
-  z.object({ value: z.unknown() }),
+  z.object({ value: z.unknown().refine((val) => val !== undefined, { message: "value must be defined" }) }),
   z.record(z.string(), z.unknown()),
   z.array(z.unknown()),
 ]);

@@ -120,28 +120,37 @@ export default function NavbarPage() {
         apiRequest('/cms/navbar').catch(() => null),
         apiRequest('/cms/general').catch(() => null),
       ]);
-      const currentNav = (navRes?.data && typeof navRes.data === 'object') ? navRes.data : {};
-      const currentGen = (genRes?.data && typeof genRes.data === 'object') ? genRes.data : {};
+      const currentNav = (navRes?.data && typeof navRes.data === 'object') ? (navRes.data as any) : {};
+      const currentGen = (genRes?.data && typeof genRes.data === 'object') ? (genRes.data as any) : {};
+
+      const brandLogo = logo ? logo.trim() : null;
+      const brandStoreName = storeName.trim() || 'Unseen Gadget';
+      const phone = supportPhone.trim();
+      const label = supportLabel.trim() || 'Support';
+
+      const navPayload = {
+        ...currentNav,
+        logo: brandLogo,
+        storeName: brandStoreName,
+        supportPhone: phone,
+        supportLabel: label,
+        links,
+      };
+
+      const genPayload = {
+        ...currentGen,
+        logo: brandLogo,
+        storeName: brandStoreName,
+      };
 
       await Promise.all([
         apiRequest('/cms/navbar', {
           method: 'PUT',
-          body: JSON.stringify({
-            ...currentNav,
-            logo: logo ? logo.trim() : null,
-            storeName: storeName.trim() || 'Unseen Gadget',
-            supportPhone: supportPhone.trim(),
-            supportLabel: supportLabel.trim() || 'Support',
-            links,
-          }),
+          body: JSON.stringify({ value: navPayload }),
         }),
         apiRequest('/cms/general', {
           method: 'PUT',
-          body: JSON.stringify({
-            ...currentGen,
-            logo: logo ? logo.trim() : null,
-            storeName: storeName.trim() || 'Unseen Gadget',
-          }),
+          body: JSON.stringify({ value: genPayload }),
         }),
       ]);
 
@@ -149,11 +158,7 @@ export default function NavbarPage() {
       apiRequest('/admin/settings/general', {
         method: 'PUT',
         body: JSON.stringify({
-          value: {
-            ...currentGen,
-            logo: logo ? logo.trim() : null,
-            storeName: storeName.trim() || 'Unseen Gadget',
-          },
+          value: genPayload,
         }),
       }).catch(() => {});
 
@@ -168,29 +173,50 @@ export default function NavbarPage() {
   const handleSaveSupportContact = async () => {
     setSavingContact(true);
     try {
-      // 1. Update CMS Navbar (preserving logo & storeName)
+      const [navRes, genRes] = await Promise.all([
+        apiRequest('/cms/navbar').catch(() => null),
+        apiRequest('/cms/general').catch(() => null),
+      ]);
+      const currentNav = (navRes?.data && typeof navRes.data === 'object') ? (navRes.data as any) : {};
+      const currentGen = (genRes?.data && typeof genRes.data === 'object') ? (genRes.data as any) : {};
+
+      const brandLogo = logo ? logo.trim() : (currentNav.logo ?? null);
+      const brandStoreName = storeName.trim() || currentNav.storeName || 'Unseen Gadget';
+      const phone = supportPhone.trim();
+      const label = supportLabel.trim() || 'Support';
+
+      const navPayload = {
+        ...currentNav,
+        logo: brandLogo,
+        storeName: brandStoreName,
+        supportPhone: phone,
+        supportLabel: label,
+        links: links.length ? links : (currentNav.links || []),
+      };
+
+      const genPayload = {
+        ...currentGen,
+        supportPhone: phone,
+        supportLabel: label,
+        storePhone: phone || currentGen.storePhone,
+      };
+
+      // 1. Update CMS Navbar
       await apiRequest('/cms/navbar', {
         method: 'PUT',
-        body: JSON.stringify({
-          logo: logo ? logo.trim() : null,
-          storeName: storeName.trim() || 'Unseen Gadget',
-          supportPhone: supportPhone.trim(),
-          supportLabel: supportLabel.trim() || 'Support',
-          links,
-        }),
+        body: JSON.stringify({ value: navPayload }),
       });
 
       // 2. Also sync to CMS General so both match 100%
-      const genRes = await apiRequest('/cms/general').catch(() => null);
-      const currentGen = (genRes?.data && typeof genRes.data === 'object') ? (genRes.data as any) : {};
       await apiRequest('/cms/general', {
         method: 'PUT',
-        body: JSON.stringify({
-          ...currentGen,
-          supportPhone: supportPhone.trim(),
-          supportLabel: supportLabel.trim() || 'Support',
-          storePhone: supportPhone.trim() || currentGen.storePhone,
-        }),
+        body: JSON.stringify({ value: genPayload }),
+      }).catch(() => {});
+
+      // 3. Also sync to /admin/settings/general
+      apiRequest('/admin/settings/general', {
+        method: 'PUT',
+        body: JSON.stringify({ value: genPayload }),
       }).catch(() => {});
 
       toast.success('Navbar Support Contact updated successfully!');
@@ -207,11 +233,13 @@ export default function NavbarPage() {
       await apiRequest('/cms/navbar', {
         method: 'PUT',
         body: JSON.stringify({
-          logo: logo ? logo.trim() : null,
-          storeName: storeName.trim() || 'Unseen Gadget',
-          supportPhone: supportPhone.trim(),
-          supportLabel: supportLabel.trim() || 'Support',
-          links: updatedLinks,
+          value: {
+            logo: logo ? logo.trim() : null,
+            storeName: storeName.trim() || 'Unseen Gadget',
+            supportPhone: supportPhone.trim(),
+            supportLabel: supportLabel.trim() || 'Support',
+            links: updatedLinks,
+          },
         }),
       });
     } catch (e) {
@@ -364,6 +392,7 @@ export default function NavbarPage() {
 
           <div className="mt-4 flex justify-end">
             <Button
+              type="button"
               onClick={handleSaveBrand}
               disabled={savingBrand}
               className="gap-2"
@@ -417,6 +446,7 @@ export default function NavbarPage() {
           </div>
           <div className="mt-4 flex justify-end">
             <Button
+              type="button"
               onClick={handleSaveSupportContact}
               disabled={savingContact}
               className="gap-2"

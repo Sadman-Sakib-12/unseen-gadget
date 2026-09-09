@@ -98,7 +98,7 @@ export function SettingsPage() {
     try {
       const cmsRes = await apiRequest("/cms/general", {
         method: "PUT",
-        body: JSON.stringify(general),
+        body: JSON.stringify({ value: general }),
       });
       if (cmsRes?.success) savedAny = true;
     } catch (e: any) {
@@ -109,15 +109,17 @@ export function SettingsPage() {
     // 3. Also sync logo & identity to /cms/navbar so both CMS endpoints stay in sync
     try {
       const navRes = await apiRequest("/cms/navbar").catch(() => null);
-      const currentNav = (navRes?.data && typeof navRes.data === "object") ? navRes.data : {};
+      const currentNav = (navRes?.data && typeof navRes.data === "object") ? (navRes.data as any) : {};
       await apiRequest("/cms/navbar", {
         method: "PUT",
         body: JSON.stringify({
-          ...currentNav,
-          logo: general.logo,
-          storeName: general.storeName,
-          supportPhone: general.supportPhone || general.storePhone,
-          supportLabel: general.supportLabel,
+          value: {
+            ...currentNav,
+            logo: general.logo,
+            storeName: general.storeName,
+            supportPhone: general.supportPhone || general.storePhone,
+            supportLabel: general.supportLabel,
+          },
         }),
       });
     } catch (e) {
