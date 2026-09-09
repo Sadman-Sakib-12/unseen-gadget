@@ -5,8 +5,10 @@ import {
   loginSchema,
   registerSchema,
   resendOtpSchema,
+  resendVerificationOtpSchema,
   resetPasswordSchema,
   verifyEmailSchema,
+  verifyOtpSchema,
 } from "@unseen-gadget/validations";
 import * as authController from "../controllers/auth.controller";
 import { authenticateCustomer } from "../middlewares/auth";
@@ -16,8 +18,16 @@ import { validateBody } from "../middlewares/validate";
 const router = Router();
 
 router.post("/register", authRateLimiter, validateBody(registerSchema), authController.register);
+router.post("/verify-otp", authRateLimiter, validateBody(verifyOtpSchema), authController.verifyOtp);
+router.post(
+  "/resend-verification-otp",
+  authRateLimiter,
+  validateBody(resendVerificationOtpSchema),
+  authController.resendVerificationOtp,
+);
 router.post("/verify-email", validateBody(verifyEmailSchema), authController.verifyEmail);
 router.post("/login", authRateLimiter, validateBody(loginSchema), authController.login);
+
 router.post("/resend-otp", authRateLimiter, validateBody(resendOtpSchema), authController.resendOtp);
 router.post("/refresh", authController.refresh);
 router.get("/me", authenticateCustomer, authController.me);

@@ -101,3 +101,24 @@ export function renderLoginOtpEmail(name: string, otpCode: string): EmailTemplat
   `;
   return { subject, text, html };
 }
+
+export function renderRegistrationOtpEmail(name: string, otpCode: string): EmailTemplateResult {
+  const subject = `${otpCode} is your Unseen Gadget registration verification code`;
+  const text = `Hello ${name || "Customer"},\n\nWelcome to Unseen Gadget! Your email verification code is: ${otpCode}\n\nThis code will expire in 10 minutes.\n\nUnseen Gadget Team`;
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; border: 1px solid #eaeaea; border-radius: 12px; background: #ffffff;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #182C61; margin: 0; font-size: 22px; font-weight: bold;">Unseen Gadget</h2>
+        <p style="color: #666; font-size: 13px; margin-top: 4px;">Email Verification</p>
+      </div>
+      <p style="font-size: 14px; color: #333; line-height: 1.5;">Hi <strong>${name || "Customer"}</strong>,</p>
+      <p style="font-size: 14px; color: #555; line-height: 1.5;">Thank you for registering with Unseen Gadget! Please enter the following 6-digit verification code to verify your email address:</p>
+      <div style="background: #f0f4ff; border: 1px dashed #3b82f6; border-radius: 8px; padding: 16px; text-align: center; margin: 24px 0;">
+        <span style="font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #182C61; display: inline-block;">${otpCode}</span>
+      </div>
+      <p style="font-size: 12px; color: #777; line-height: 1.5; margin-bottom: 0;">This code is valid for <strong>10 minutes</strong>. If you did not request this code, please ignore this email.</p>
+    </div>
+  `;
+  return { subject, text, html };
+}
+

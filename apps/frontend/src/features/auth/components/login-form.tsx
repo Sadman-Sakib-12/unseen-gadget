@@ -23,6 +23,17 @@ export function LoginForm() {
   const otpInputsRef = useRef<(HTMLInputElement | null)[]>([]);
   const router = useRouter();
 
+  // Auto-fill email from query parameter if redirected from registration/verification
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const emailParam = params.get('email');
+      if (emailParam) {
+        setEmail(emailParam);
+      }
+    }
+  }, []);
+
   // Resend countdown timer
   useEffect(() => {
     if (resendTimer <= 0) return;
@@ -40,6 +51,7 @@ export function LoginForm() {
       }, 100);
     }
   }, [step]);
+
 
   // Step 1: Submit Credentials & Request OTP
   const handleCredentialsSubmit = async (e: React.FormEvent) => {

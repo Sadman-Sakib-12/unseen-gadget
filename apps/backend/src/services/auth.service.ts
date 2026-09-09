@@ -12,7 +12,7 @@ import {
 import { comparePassword, hashPassword } from "../utils/password";
 import { generateToken } from "../utils/random";
 import { verifyToken, type RefreshTokenPayload } from "../utils/jwt";
-import { sendMail } from "./email.service";
+import { sendMail, renderRegistrationOtpEmail } from "./email.service";
 
 export interface RegisterInput {
   email: string;
@@ -44,22 +44,117 @@ export function toPublicUser(user: User): PublicUser {
   return rest;
 }
 
-export async function register(input: RegisterInput): Promise<PublicUser> {
-  const existing = await prisma.user.findUnique({ where: { email: input.email } });
+export async function register(input: RegisterInput): Promise<{ email: string; message: string }> {
+  const normalizedEmail = input.email.trim().toLowerCase();
+  const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
   if (existing) {
-    throw new ConflictError("Email is already registered. Please log in.");
+    if (existing.emailVerified) {
+      throw new ConflictError("Email is already registered. Please log in.");
+    }
+    // Update existing unverified user with new credentials and a fresh OTP
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: {
+        name: input.name.trim(),
+        phone: input.phone.trim(),
+        passwordHash: await hashPassword(input.password),
+        verificationToken: otp,
+        verificationTokenExpires: otpExpires,
+      },
+    });
+  } else {
+    await prisma.user.create({
+      data: {
+        email: normalizedEmail,
+        name: input.name.trim(),
+        phone: input.phone.trim(),
+        passwordHash: await hashPassword(input.password),
+        verificationToken: otp,
+        verificationTokenExpires: otpExpires,
+      },
+    });
   }
 
-  const user = await prisma.user.create({
+  const template = renderRegistrationOtpEmail(input.name.trim(), otp);
+  await sendMail({
+    to: normalizedEmail,
+    subject: template.subject,
+    text: template.text,
+    html: template.html,
+  });
+
+  return {
+    email: normalizedEmail,
+    message: "Verification code sent to your email. Please verify to complete registration.",
+  };
+}
+
+export async function verifyRegistrationOtp(email: string, otp: string): Promise<{ message: string; email: string }> {
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+  if (!user) {
+    throw new BadRequestError("User not found with this email");
+  }
+
+  if (user.emailVerified) {
+    return { message: "Email is already verified. Please log in.", email: normalizedEmail };
+  }
+
+  if (!user.verificationToken || user.verificationToken !== otp.trim()) {
+    throw new BadRequestError("Invalid verification code");
+  }
+
+  if (user.verificationTokenExpires && user.verificationTokenExpires.getTime() < Date.now()) {
+    throw new BadRequestError("Verification code has expired. Please request a new one.");
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
     data: {
-      email: input.email,
-      name: input.name,
-      phone: input.phone,
-      passwordHash: await hashPassword(input.password),
+      emailVerified: new Date(),
+      verificationToken: null,
+      verificationTokenExpires: null,
     },
   });
 
-  return toPublicUser(user);
+  return { message: "Email verified successfully. Please log in.", email: normalizedEmail };
+}
+
+export async function resendRegistrationOtp(email: string): Promise<{ message: string }> {
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+  if (!user) {
+    return { message: "If your account is pending verification, a new code has been sent." };
+  }
+
+  if (user.emailVerified) {
+    throw new BadRequestError("Email is already verified. Please log in.");
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      verificationToken: otp,
+      verificationTokenExpires: otpExpires,
+    },
+  });
+
+  const template = renderRegistrationOtpEmail(user.name || "Customer", otp);
+  await sendMail({
+    to: user.email,
+    subject: template.subject,
+    text: template.text,
+    html: template.html,
+  });
+
+  return { message: "A new verification code has been sent to your email." };
 }
 
 export async function verifyEmail(token: string): Promise<PublicUser> {
@@ -86,7 +181,7 @@ export type LoginResult =
   | { requiresOtp: false; user: PublicUser };
 
 export async function login(input: LoginInput, sessionId?: string): Promise<LoginResult> {
-  const user = await prisma.user.findUnique({ where: { email: input.email } });
+  const user = await prisma.user.findUnique({ where: { email: input.email.trim().toLowerCase() } });
   if (!user || !user.passwordHash) {
     throw new UnauthorizedError("Invalid email or password");
   }
@@ -94,6 +189,9 @@ export async function login(input: LoginInput, sessionId?: string): Promise<Logi
   if (!valid) throw new UnauthorizedError("Invalid email or password");
   if (user.status !== "ACTIVE") {
     throw new ForbiddenError("Account is blocked or inactive");
+  }
+  if (!user.emailVerified) {
+    throw new ForbiddenError("Please verify your email address before logging in.");
   }
 
   // Guest cart merge: merge any guest cart items into the customer's cart
@@ -103,6 +201,7 @@ export async function login(input: LoginInput, sessionId?: string): Promise<Logi
 
   return { requiresOtp: false, user: toPublicUser(user) };
 }
+
 
 export async function logout(userId: string): Promise<void> {
   await prisma.user.update({
@@ -289,6 +388,8 @@ export async function updateProfile(
 export const AuthService = {
   register,
   verifyEmail,
+  verifyRegistrationOtp,
+  resendRegistrationOtp,
   login,
   logout,
   refresh,

@@ -6,6 +6,8 @@ import type {
   RegisterInput,
   ResetPasswordInput,
   VerifyEmailInput,
+  VerifyOtpInput,
+  ResendVerificationOtpInput,
 } from "@unseen-gadget/validations";
 import { CUSTOMER_REFRESH_COOKIE_NAME, CART_SESSION_COOKIE_NAME } from "../constants";
 import {
@@ -21,8 +23,20 @@ import * as authService from "../services/auth.service";
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const input = req.validated.body as unknown as RegisterInput;
-  const user = await authService.register(input);
-  ApiResponseUtil.created(res, user, "Registration successful. You can now log in.");
+  const result = await authService.register(input);
+  ApiResponseUtil.created(res, result, result.message);
+});
+
+export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
+  const { email, otp } = req.validated.body as unknown as VerifyOtpInput;
+  const result = await authService.verifyRegistrationOtp(email, otp);
+  ApiResponseUtil.success(res, result, result.message);
+});
+
+export const resendVerificationOtp = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.validated.body as unknown as ResendVerificationOtpInput;
+  const result = await authService.resendRegistrationOtp(email);
+  ApiResponseUtil.success(res, result, result.message);
 });
 
 export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
@@ -30,6 +44,7 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   const user = await authService.verifyEmail(token);
   ApiResponseUtil.success(res, user, "Email verified successfully");
 });
+
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const validated = req.validated.body as unknown as { sessionId?: string } & LoginInput;
@@ -126,6 +141,8 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
 export const AuthController = {
   register,
   verifyEmail,
+  verifyOtp,
+  resendVerificationOtp,
   login,
   logout,
   me,

@@ -204,11 +204,24 @@ export const authApi = {
       body: JSON.stringify(data),
     }),
 
+  verifyOtp: (data: { email: string; otp: string }) =>
+    apiRequest("/auth/verify-otp", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  resendVerificationOtp: (data: { email: string }) =>
+    apiRequest("/auth/resend-verification-otp", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
   verifyEmail: (data: { token: string }) =>
     apiRequest("/auth/verify-email", {
       method: "POST",
       body: JSON.stringify(data),
     }),
+
 
   login: (data: { email: string; password: string; sessionId?: string }) =>
     apiRequest("/auth/login", {
