@@ -298,18 +298,22 @@ export default function ProductDetails({ product }: { product: ProductDetailsDat
 
             {/* Rating + reviews */}
             <div className="mt-3 flex items-center gap-3">
-              <StarRating rating={Number(currentRating)} showValue />
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("reviews");
-                  const elem = document.getElementById("pdp-tabs-container");
-                  if (elem) elem.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="text-[12.5px] text-muted-foreground transition-colors hover:text-primary"
-              >
-                {reviewsCount} {t("pdp.reviews")}
-              </button>
+              {reviewsCount > 0 ? (
+                <>
+                  <StarRating rating={Number(currentRating)} showValue />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("reviews");
+                      const elem = document.getElementById("pdp-tabs-container");
+                      if (elem) elem.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="text-[12.5px] text-muted-foreground transition-colors hover:text-primary"
+                  >
+                    {reviewsCount} {t("pdp.reviews")}
+                  </button>
+                </>
+              ) : null}
               <button
                 type="button"
                 onClick={() => {
@@ -319,7 +323,7 @@ export default function ProductDetails({ product }: { product: ProductDetailsDat
                 }}
                 className="text-[12.5px] font-semibold text-primary transition-colors hover:underline"
               >
-                {t("pdp.writeReview")}
+                {reviewsCount > 0 ? t("pdp.writeReview") : (t("pdp.writeFirstReview") || t("pdp.writeReview"))}
               </button>
             </div>
 

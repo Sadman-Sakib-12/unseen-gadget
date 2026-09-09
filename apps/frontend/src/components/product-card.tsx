@@ -166,16 +166,25 @@ export function ProductCard({ product }: { product: MockProduct }) {
 
         {/* Rating & Reviews */}
         <div className="mt-1 flex items-center min-h-[18px]">
-          {product.rating != null && product.rating > 0 ? (
-            <StarRating
-              rating={Number(product.rating)}
-              reviews={product.reviews ?? (product as any).reviewsCount ?? (product as any).ratingCount}
-              size="h-3 w-3"
-              showValue
-            />
-          ) : (
-            <div className="h-[18px]" />
-          )}
+          {(() => {
+            const reviewsCount = Number(
+              product.reviews ??
+              (product as any).reviewsCount ??
+              (product as any).ratingCount ??
+              0
+            );
+            const ratingValue = Number(product.rating ?? 0);
+            return ratingValue > 0 && reviewsCount > 0 ? (
+              <StarRating
+                rating={ratingValue}
+                reviews={reviewsCount}
+                size="h-3 w-3"
+                showValue
+              />
+            ) : (
+              <div className="h-[18px]" />
+            );
+          })()}
         </div>
 
         <div className="mt-1 flex min-h-[22px] items-baseline gap-1.5">

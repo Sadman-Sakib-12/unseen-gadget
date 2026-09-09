@@ -46,7 +46,7 @@ const mapApiProduct = (p: any): MockProduct => ({
   badge: p.badge || (p.discount ? `${p.discount}% OFF` : undefined),
   colors: Array.isArray(p.colors) ? p.colors : [],
   inStock: p.inStock !== false,
-  rating: Number(p.rating) || 4.9,
+  rating: p.rating != null ? Number(p.rating) : 0,
   reviews: Number(p.reviews) || Number(p.ratingCount) || 0,
   description: p.description,
   features: Array.isArray(p.features) ? p.features : [],
