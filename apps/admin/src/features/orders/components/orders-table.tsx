@@ -427,12 +427,14 @@ export function OrdersTable({ orders, onViewOrder, onStatusChange, onDeleteOrder
                               </DropdownMenuItem>
                             ))}
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onSelect={() => onStatusChange(order.id, 'CANCELLED')}
-                              className="text-red-600 hover:bg-red-50 hover:text-red-700 font-semibold"
-                            >
-                              Cancel order
-                            </DropdownMenuItem>
+                            {order.status !== 'CANCELLED' && (
+                              <DropdownMenuItem
+                                onSelect={() => onStatusChange(order.id, 'CANCELLED')}
+                                className="text-red-600 hover:bg-red-50 hover:text-red-700 font-semibold"
+                              >
+                                Cancel order
+                              </DropdownMenuItem>
+                            )}
                             {onDeleteOrder && (
                               <DropdownMenuItem
                                 onSelect={() => onDeleteOrder(order)}
