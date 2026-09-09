@@ -28,7 +28,15 @@ interface PromotionItem {
   gradient: string;
 }
 
-const CURATED_GRADIENTS = [
+const GRADIENT_MAP: Record<string, string> = {
+  // Admin options & CMS defaults
+  "from-primary to-primary-800": "from-blue-600 via-indigo-600 to-indigo-800",
+  "from-primary-700 to-primary-500": "from-sky-600 via-blue-600 to-indigo-700",
+  "from-violet-700 to-violet-500": "from-violet-600 via-purple-600 to-indigo-800",
+  "from-blue-900 via-indigo-900 to-black": "from-slate-900 via-indigo-950 to-blue-900",
+};
+
+const PRESET_GRADIENTS = [
   "from-blue-600 via-indigo-600 to-indigo-800",
   "from-violet-600 via-purple-600 to-indigo-800",
   "from-teal-600 via-emerald-600 to-cyan-800",
@@ -36,6 +44,34 @@ const CURATED_GRADIENTS = [
   "from-amber-600 via-orange-600 to-red-700",
   "from-cyan-600 via-blue-600 to-indigo-700",
 ];
+
+function resolveGradient(gradient?: string | null, index: number = 0): string {
+  if (gradient && GRADIENT_MAP[gradient.trim()]) {
+    return GRADIENT_MAP[gradient.trim()];
+  }
+  if (gradient && typeof gradient === "string" && gradient.trim().length > 0) {
+    const g = gradient.toLowerCase();
+    if (g.includes("violet") || g.includes("purple")) {
+      return "from-violet-600 via-purple-600 to-indigo-800";
+    }
+    if (g.includes("sky") || g.includes("primary-500") || g.includes("primary-700")) {
+      return "from-sky-600 via-blue-600 to-indigo-700";
+    }
+    if (g.includes("blue") || g.includes("primary")) {
+      return "from-blue-600 via-indigo-600 to-indigo-800";
+    }
+    if (g.includes("black") || g.includes("indigo-900") || g.includes("blue-900")) {
+      return "from-slate-900 via-indigo-950 to-blue-900";
+    }
+    if (g.includes("emerald") || g.includes("teal") || g.includes("green")) {
+      return "from-teal-600 via-emerald-600 to-cyan-800";
+    }
+    if (g.includes("rose") || g.includes("pink") || g.includes("red")) {
+      return "from-rose-600 via-pink-600 to-purple-800";
+    }
+  }
+  return PRESET_GRADIENTS[index % PRESET_GRADIENTS.length];
+}
 
 function resolveIcon(iconName?: string): LucideIcon {
   switch (iconName?.toLowerCase()) {
@@ -76,7 +112,6 @@ export default function PromotionsPage() {
           );
 
           const mapped: PromotionItem[] = activeOnly.map((p: any, idx: number) => {
-            const fallbackGradient = CURATED_GRADIENTS[idx % CURATED_GRADIENTS.length];
             return {
               id: p.id || `promo-${idx}`,
               icon: resolveIcon(p.icon),
@@ -90,7 +125,7 @@ export default function PromotionsPage() {
               desc: p.description || "",
               href: p.ctaHref || "/products",
               cta: p.ctaLabel || "Shop Now",
-              gradient: p.gradient && p.gradient.trim().length > 0 ? p.gradient : fallbackGradient,
+              gradient: resolveGradient(p.gradient, idx),
             };
           });
 
@@ -116,7 +151,7 @@ export default function PromotionsPage() {
         method: "POST",
         body: JSON.stringify({ email }),
       });
-      toast.success(t("footer.newsletter") || "Subscribed to newsletter!");
+      toast.success("Subscribed to newsletter!");
       setEmail("");
     } catch (err: any) {
       toast.error(err.error || err.message || "Failed to subscribe");
@@ -124,6 +159,17 @@ export default function PromotionsPage() {
       setIsSubscribing(false);
     }
   };
+
+  const kickerText = t("listings.promotions.kicker") || "Special Offers & Deals";
+  const titleText = t("listings.promotions.title") || "Promotions";
+  const hintText =
+    t("listings.promotions.hint") ||
+    "Discover the latest deals, bundles, and limited-time discounts across all gadgets.";
+  const newsletterTitle =
+    t("listings.promotions.newsletterTitle") || "Never Miss a Deal";
+  const newsletterHint =
+    t("listings.promotions.newsletterHint") ||
+    "Subscribe to our newsletter to receive exclusive deals, flash sale announcements, and discounts directly in your inbox.";
 
   return (
     <>
@@ -135,9 +181,7 @@ export default function PromotionsPage() {
               {t("shop.breadcrumbHome")}
             </Link>
             <ChevronRight className="h-3 w-3 opacity-50" />
-            <span className="text-foreground font-medium">
-              {t("listings.promotions.title")}
-            </span>
+            <span className="text-foreground font-medium">{titleText}</span>
           </nav>
         </div>
       </div>
@@ -148,13 +192,13 @@ export default function PromotionsPage() {
         <div className="container-gadget relative text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/20 border border-primary/40 px-3.5 py-1 text-xs font-semibold text-primary-300 backdrop-blur-md shadow-sm">
             <Tag className="h-3.5 w-3.5" />
-            {t("listings.promotions.kicker")}
+            {kickerText}
           </div>
           <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            {t("listings.promotions.title")}
+            {titleText}
           </h1>
           <p className="mt-2 max-w-xl mx-auto text-sm text-slate-300/80 leading-relaxed">
-            {t("listings.promotions.hint")}
+            {hintText}
           </p>
         </div>
       </div>
@@ -188,7 +232,7 @@ export default function PromotionsPage() {
               return (
                 <div
                   key={promo.id}
-                  className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${promo.gradient} p-6 text-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col h-full`}
+                  className={`group relative overflow-hidden rounded-2xl bg-slate-900 bg-gradient-to-br ${promo.gradient} p-6 text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col h-full`}
                 >
                   <div className="flex-1 flex flex-col">
                     <div>
@@ -212,7 +256,7 @@ export default function PromotionsPage() {
                   <div className="mt-auto pt-6">
                     <Link
                       href={promo.href}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-slate-900 shadow-sm transition hover:bg-slate-100 group-hover:gap-2"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-slate-900 shadow-md transition hover:bg-slate-100 group-hover:gap-2"
                     >
                       {promo.cta}{" "}
                       <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -239,7 +283,10 @@ export default function PromotionsPage() {
               We update our offers frequently. Check back soon or explore our latest products and deals.
             </p>
             <div className="mt-6">
-              <Link href="/products" className="btn-primary inline-flex items-center gap-1.5 text-xs px-5 py-2.5 rounded-xl">
+              <Link
+                href="/products"
+                className="btn-primary inline-flex items-center gap-1.5 text-xs px-5 py-2.5 rounded-xl"
+              >
                 Explore All Products <ChevronRight className="h-3.5 w-3.5" />
               </Link>
             </div>
@@ -252,10 +299,10 @@ export default function PromotionsPage() {
             <Gift className="h-5 w-5" />
           </div>
           <h2 className="text-xl font-bold text-foreground">
-            {t("listings.promotions.newsletterTitle")}
+            {newsletterTitle}
           </h2>
           <p className="mt-1 max-w-md mx-auto text-sm text-muted-foreground">
-            {t("listings.promotions.newsletterHint")}
+            {newsletterHint}
           </p>
           <div className="mx-auto mt-5 flex max-w-md gap-2">
             <input
@@ -270,9 +317,7 @@ export default function PromotionsPage() {
               disabled={isSubscribing}
               className="btn-primary shrink-0"
             >
-              {isSubscribing
-                ? "Subscribing..."
-                : t("listings.promotions.subscribe")}
+              {isSubscribing ? "Subscribing..." : "Subscribe"}
             </button>
           </div>
         </div>

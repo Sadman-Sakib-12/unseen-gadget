@@ -195,6 +195,14 @@ export const en: Record<string, string> = {
   "careers.noFit": "Don't see a perfect fit?",
   "careers.noFitHint": "Send your CV to {email} and tell us how you can contribute.",
 
+  // Promotions
+  "listings.promotions.kicker": "Special Offers & Deals",
+  "listings.promotions.title": "Promotions",
+  "listings.promotions.hint": "Discover the latest deals, bundles, and limited-time discounts across all gadgets.",
+  "listings.promotions.newsletterTitle": "Never Miss a Deal",
+  "listings.promotions.newsletterHint": "Subscribe to our newsletter to receive exclusive deals, flash sale announcements, and discounts directly in your inbox.",
+  "listings.promotions.subscribe": "Subscribe",
+
   // States
   "state.loading": "Loading…",
   "state.empty": "Nothing here yet",
