@@ -96,9 +96,20 @@ export function Navbar() {
   const [cartCount, setCartCount] = useState(0);
   const [cartTotal, setCartTotal] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("ug_cached_logo") || null;
+    }
+    return null;
+  });
   const [logoError, setLogoError] = useState(false);
-  const [storeName, setStoreName] = useState<string>("Unseen Gadget");
+  const [storeName, setStoreName] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("ug_cached_store_name") || "";
+    }
+    return "";
+  });
+  const [isLoaded, setIsLoaded] = useState(false);
   const [supportPhone, setSupportPhone] = useState<string>("");
   const [supportLabel, setSupportLabel] = useState<string>("Support");
   const { data: session } = useSession();
@@ -130,14 +141,22 @@ export function Navbar() {
 
   useEffect(() => {
     // 1. Fetch Store Identity & Logo from CMS General
-    apiRequest("/cms/general")
+    const p1 = apiRequest("/cms/general")
       .then((res) => {
         if (res.data) {
           if (res.data.logo) {
             setLogoUrl(res.data.logo);
             setLogoError(false);
+            if (typeof window !== "undefined") {
+              localStorage.setItem("ug_cached_logo", res.data.logo);
+            }
           }
-          if (res.data.storeName) setStoreName(res.data.storeName);
+          if (typeof res.data.storeName === "string") {
+            setStoreName(res.data.storeName);
+            if (typeof window !== "undefined") {
+              localStorage.setItem("ug_cached_store_name", res.data.storeName);
+            }
+          }
           if (res.data.supportPhone || res.data.storePhone) {
             setSupportPhone(res.data.supportPhone || res.data.storePhone);
           }
@@ -147,7 +166,7 @@ export function Navbar() {
       .catch(() => {});
 
     // 2. Fetch Navbar CMS Links
-    apiRequest("/cms/navbar")
+    const p2 = apiRequest("/cms/navbar")
       .then((res) => {
         if (res.data) {
           if (Array.isArray(res.data) && res.data.length > 0) {
@@ -156,8 +175,16 @@ export function Navbar() {
             if (res.data.logo) {
               setLogoUrl(res.data.logo);
               setLogoError(false);
+              if (typeof window !== "undefined") {
+                localStorage.setItem("ug_cached_logo", res.data.logo);
+              }
             }
-            if (res.data.storeName) setStoreName(res.data.storeName);
+            if (typeof res.data.storeName === "string") {
+              setStoreName(res.data.storeName);
+              if (typeof window !== "undefined") {
+                localStorage.setItem("ug_cached_store_name", res.data.storeName);
+              }
+            }
             if (res.data.supportPhone) setSupportPhone(res.data.supportPhone);
             if (res.data.supportLabel) setSupportLabel(res.data.supportLabel);
             if (Array.isArray(res.data.links)) setNavLinks(res.data.links);
@@ -165,6 +192,10 @@ export function Navbar() {
         }
       })
       .catch(() => {});
+
+    Promise.allSettled([p1, p2]).finally(() => {
+      setIsLoaded(true);
+    });
 
     // 3. Fetch Category Tree from Database Catalog API
     apiRequest("/catalog/categories")
@@ -209,19 +240,21 @@ export function Navbar() {
         </button>
 
         {/* 1. BRAND LOGO (Left: Exact Navy Color) */}
-        <Link href="/" aria-label={storeName || "Unseen Gadget Home"} className="shrink-0 flex items-center pr-1 sm:pr-2">
+        <Link href="/" aria-label={storeName || "Home"} className="shrink-0 flex items-center pr-1 sm:pr-2 min-h-[36px] min-w-[100px]">
           {logoUrl && !logoError ? (
             <img
               src={logoUrl}
-              alt={storeName}
+              alt={storeName || "Store Logo"}
               onError={() => setLogoError(true)}
               className="h-8 sm:h-9 max-w-[140px] sm:max-w-[180px] object-contain"
             />
-          ) : (
+          ) : !isLoaded ? (
+            <div className="h-8 sm:h-9 w-28 sm:w-36 rounded bg-muted/20 animate-pulse" />
+          ) : storeName ? (
             <span className="text-xl sm:text-[24px] lg:text-[26px] font-black tracking-tight text-[#182C61] dark:text-primary flex items-baseline select-none">
               <span>{storeName}</span>
             </span>
-          )}
+          ) : null}
         </Link>
 
         {/* 2. SEARCH BAR (Center Pill Shape with Exact Navy Blue Circle Search Button) */}
