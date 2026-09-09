@@ -34,7 +34,7 @@ export default function NavbarPage() {
   const [supportPhone, setSupportPhone] = useState('');
   const [supportLabel, setSupportLabel] = useState('Support');
   const [logo, setLogo] = useState<string | null>(null);
-  const [storeName, setStoreName] = useState('Unseen Gadget');
+  const [storeName, setStoreName] = useState('');
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [savingBrand, setSavingBrand] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
@@ -64,7 +64,7 @@ export default function NavbarPage() {
           if (navData.supportPhone) setSupportPhone(navData.supportPhone);
           if (navData.supportLabel) setSupportLabel(navData.supportLabel);
           if (navData.logo) setLogo(navData.logo);
-          if (navData.storeName) setStoreName(navData.storeName);
+          if (typeof navData.storeName === 'string') setStoreName(navData.storeName);
         }
 
         if (genData && typeof genData === 'object') {
@@ -73,7 +73,9 @@ export default function NavbarPage() {
           }
           if (genData.supportLabel) setSupportLabel(genData.supportLabel);
           if (genData.logo && !navData?.logo) setLogo(genData.logo);
-          if (genData.storeName && !navData?.storeName) setStoreName(genData.storeName);
+          if (typeof genData.storeName === 'string' && navData?.storeName === undefined) {
+            setStoreName(genData.storeName);
+          }
         }
       });
   }, []);
@@ -124,7 +126,7 @@ export default function NavbarPage() {
       const currentGen = (genRes?.data && typeof genRes.data === 'object') ? (genRes.data as any) : {};
 
       const brandLogo = logo ? logo.trim() : null;
-      const brandStoreName = storeName.trim() || 'Unseen Gadget';
+      const brandStoreName = storeName.trim();
       const phone = supportPhone.trim();
       const label = supportLabel.trim() || 'Support';
 
@@ -181,7 +183,7 @@ export default function NavbarPage() {
       const currentGen = (genRes?.data && typeof genRes.data === 'object') ? (genRes.data as any) : {};
 
       const brandLogo = logo ? logo.trim() : (currentNav.logo ?? null);
-      const brandStoreName = storeName.trim() || currentNav.storeName || 'Unseen Gadget';
+      const brandStoreName = storeName.trim();
       const phone = supportPhone.trim();
       const label = supportLabel.trim() || 'Support';
 
@@ -235,7 +237,7 @@ export default function NavbarPage() {
         body: JSON.stringify({
           value: {
             logo: logo ? logo.trim() : null,
-            storeName: storeName.trim() || 'Unseen Gadget',
+            storeName: storeName.trim(),
             supportPhone: supportPhone.trim(),
             supportLabel: supportLabel.trim() || 'Support',
             links: updatedLinks,
@@ -326,7 +328,7 @@ export default function NavbarPage() {
               <label className="text-xs font-semibold text-gray-700">Store / Brand Name (দোকানের নাম)</label>
               <Input
                 type="text"
-                placeholder="e.g. Unseen Gadget"
+                placeholder="e.g. Unseen Gadget (বা ফাঁকা রাখুন)"
                 value={storeName}
                 onChange={(e) => setStoreName(e.target.value)}
               />
