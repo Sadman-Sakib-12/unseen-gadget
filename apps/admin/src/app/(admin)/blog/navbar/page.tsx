@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { Pencil, Plus, Trash2, Phone, Save, Loader2 } from 'lucide-react';
+import { Pencil, Plus, Trash2, Phone, Save, Loader2, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
@@ -11,6 +11,8 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { PageHeader } from '@/components/layout/page-header';
 import { apiRequest } from '@/lib/api';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
 
 interface NavLink {
   id: string;
@@ -31,12 +33,17 @@ export default function NavbarPage() {
   const [links, setLinks] = useState<NavLink[]>(initialLinks);
   const [supportPhone, setSupportPhone] = useState('');
   const [supportLabel, setSupportLabel] = useState('Support');
+  const [logo, setLogo] = useState<string | null>(null);
+  const [storeName, setStoreName] = useState('Unseen Gadget');
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [savingBrand, setSavingBrand] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingLink, setEditingLink] = useState<NavLink | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<NavLink | null>(null);
   const [label, setLabel] = useState('');
   const [url, setUrl] = useState('');
+  const logoFileRef = useRef<HTMLInputElement>(null);
 
   // Load existing navbar and general settings
   useEffect(() => {
@@ -56,6 +63,8 @@ export default function NavbarPage() {
           }
           if (navData.supportPhone) setSupportPhone(navData.supportPhone);
           if (navData.supportLabel) setSupportLabel(navData.supportLabel);
+          if (navData.logo) setLogo(navData.logo);
+          if (navData.storeName) setStoreName(navData.storeName);
         }
 
         if (genData && typeof genData === 'object') {
@@ -63,17 +72,108 @@ export default function NavbarPage() {
             setSupportPhone(genData.supportPhone || genData.storePhone);
           }
           if (genData.supportLabel) setSupportLabel(genData.supportLabel);
+          if (genData.logo && !navData?.logo) setLogo(genData.logo);
+          if (genData.storeName && !navData?.storeName) setStoreName(genData.storeName);
         }
       });
   }, []);
 
+  const handleLogoUpload = async (files: FileList | null) => {
+    if (!files || !files[0]) return;
+    setUploadingLogo(true);
+    try {
+      const data = new FormData();
+      data.append('file', files[0]);
+
+      const token = typeof window !== 'undefined' ? localStorage.getItem('admin_access_token') : null;
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(`${API_BASE}/api/admin/upload`, {
+        method: 'POST',
+        credentials: 'include',
+        headers,
+        body: data,
+      });
+      const json = await res.json();
+      if (json.success && json.data?.url) {
+        setLogo(json.data.url);
+        toast.success("Logo uploaded successfully! Click 'Save Brand & Logo' to apply.");
+      } else {
+        toast.error(json.error || json.message || 'Failed to upload logo');
+      }
+    } catch (e: unknown) {
+      const err = e as Error;
+      toast.error(err.message || 'Logo upload failed');
+    } finally {
+      setUploadingLogo(false);
+      if (logoFileRef.current) logoFileRef.current.value = '';
+    }
+  };
+
+  const handleSaveBrand = async () => {
+    setSavingBrand(true);
+    try {
+      const [navRes, genRes] = await Promise.all([
+        apiRequest('/cms/navbar').catch(() => null),
+        apiRequest('/cms/general').catch(() => null),
+      ]);
+      const currentNav = (navRes?.data && typeof navRes.data === 'object') ? navRes.data : {};
+      const currentGen = (genRes?.data && typeof genRes.data === 'object') ? genRes.data : {};
+
+      await Promise.all([
+        apiRequest('/cms/navbar', {
+          method: 'PUT',
+          body: JSON.stringify({
+            ...currentNav,
+            logo: logo ? logo.trim() : null,
+            storeName: storeName.trim() || 'Unseen Gadget',
+            supportPhone: supportPhone.trim(),
+            supportLabel: supportLabel.trim() || 'Support',
+            links,
+          }),
+        }),
+        apiRequest('/cms/general', {
+          method: 'PUT',
+          body: JSON.stringify({
+            ...currentGen,
+            logo: logo ? logo.trim() : null,
+            storeName: storeName.trim() || 'Unseen Gadget',
+          }),
+        }),
+      ]);
+
+      // Also try saving to /admin/settings/general (in case SUPER_ADMIN)
+      apiRequest('/admin/settings/general', {
+        method: 'PUT',
+        body: JSON.stringify({
+          value: {
+            ...currentGen,
+            logo: logo ? logo.trim() : null,
+            storeName: storeName.trim() || 'Unseen Gadget',
+          },
+        }),
+      }).catch(() => {});
+
+      toast.success('Navbar Logo & Brand Name updated successfully!');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to save brand settings');
+    } finally {
+      setSavingBrand(false);
+    }
+  };
+
   const handleSaveSupportContact = async () => {
     setSavingContact(true);
     try {
-      // 1. Update CMS Navbar
+      // 1. Update CMS Navbar (preserving logo & storeName)
       await apiRequest('/cms/navbar', {
         method: 'PUT',
         body: JSON.stringify({
+          logo: logo ? logo.trim() : null,
+          storeName: storeName.trim() || 'Unseen Gadget',
           supportPhone: supportPhone.trim(),
           supportLabel: supportLabel.trim() || 'Support',
           links,
@@ -107,6 +207,8 @@ export default function NavbarPage() {
       await apiRequest('/cms/navbar', {
         method: 'PUT',
         body: JSON.stringify({
+          logo: logo ? logo.trim() : null,
+          storeName: storeName.trim() || 'Unseen Gadget',
           supportPhone: supportPhone.trim(),
           supportLabel: supportLabel.trim() || 'Support',
           links: updatedLinks,
@@ -174,6 +276,108 @@ export default function NavbarPage() {
           </Button>
         }
       />
+
+      {/* ── Brand Logo & Store Name Card ── */}
+      <Card className="border-primary/20 shadow-sm">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <ImageIcon className="h-4 w-4" />
+            </div>
+            <div>
+              <CardTitle className="text-base font-bold">Navbar Store Logo & Brand Name (লোগো ও নাম)</CardTitle>
+              <CardDescription className="text-xs">
+                This logo and store name are displayed on the top navbar across the storefront.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-gray-700">Store / Brand Name (দোকানের নাম)</label>
+              <Input
+                type="text"
+                placeholder="e.g. Unseen Gadget"
+                value={storeName}
+                onChange={(e) => setStoreName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-gray-700">Navbar Logo (লোগো URL অথবা ফাইল আপলোড)</label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  placeholder="https://... or /logo.png"
+                  value={logo || ''}
+                  onChange={(e) => setLogo(e.target.value)}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={logoFileRef}
+                  onChange={(e) => handleLogoUpload(e.target.files)}
+                  style={{ display: 'none' }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={uploadingLogo}
+                  onClick={() => logoFileRef.current?.click()}
+                  className="shrink-0 gap-1.5"
+                >
+                  {uploadingLogo ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4" />
+                  )}
+                  Upload
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {logo ? (
+            <div className="mt-3 flex items-center justify-between rounded-lg border border-border p-2.5 bg-muted/20">
+              <div className="flex items-center gap-3">
+                <img
+                  src={logo}
+                  alt="Navbar Logo Preview"
+                  className="h-9 max-w-[160px] object-contain rounded"
+                />
+                <div>
+                  <p className="text-xs font-medium text-foreground">Active Logo Preview</p>
+                  <p className="text-[11px] text-muted-foreground truncate max-w-xs">{logo}</p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-red-600 h-7"
+                onClick={() => setLogo(null)}
+              >
+                <X className="h-3.5 w-3.5 mr-1" /> Remove
+              </Button>
+            </div>
+          ) : null}
+
+          <div className="mt-4 flex justify-end">
+            <Button
+              onClick={handleSaveBrand}
+              disabled={savingBrand}
+              className="gap-2"
+            >
+              {savingBrand ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Save Brand & Logo
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* ── Support Number / Hotline Card ── */}
       <Card className="border-primary/20 shadow-sm">

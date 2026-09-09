@@ -97,6 +97,7 @@ export function Navbar() {
   const [cartTotal, setCartTotal] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoError, setLogoError] = useState(false);
   const [storeName, setStoreName] = useState<string>("Unseen Gadget");
   const [supportPhone, setSupportPhone] = useState<string>("");
   const [supportLabel, setSupportLabel] = useState<string>("Support");
@@ -132,7 +133,10 @@ export function Navbar() {
     apiRequest("/cms/general")
       .then((res) => {
         if (res.data) {
-          if (res.data.logo) setLogoUrl(res.data.logo);
+          if (res.data.logo) {
+            setLogoUrl(res.data.logo);
+            setLogoError(false);
+          }
           if (res.data.storeName) setStoreName(res.data.storeName);
           if (res.data.supportPhone || res.data.storePhone) {
             setSupportPhone(res.data.supportPhone || res.data.storePhone);
@@ -149,7 +153,10 @@ export function Navbar() {
           if (Array.isArray(res.data) && res.data.length > 0) {
             setNavLinks(res.data);
           } else if (typeof res.data === "object" && res.data !== null) {
-            if (res.data.logo) setLogoUrl(res.data.logo);
+            if (res.data.logo) {
+              setLogoUrl(res.data.logo);
+              setLogoError(false);
+            }
             if (res.data.storeName) setStoreName(res.data.storeName);
             if (res.data.supportPhone) setSupportPhone(res.data.supportPhone);
             if (res.data.supportLabel) setSupportLabel(res.data.supportLabel);
@@ -203,8 +210,13 @@ export function Navbar() {
 
         {/* 1. BRAND LOGO (Left: Exact Navy Color) */}
         <Link href="/" aria-label={storeName || "Unseen Gadget Home"} className="shrink-0 flex items-center pr-1 sm:pr-2">
-          {logoUrl ? (
-            <img src={logoUrl} alt={storeName} className="h-8 sm:h-9 max-w-[140px] sm:max-w-[180px] object-contain" />
+          {logoUrl && !logoError ? (
+            <img
+              src={logoUrl}
+              alt={storeName}
+              onError={() => setLogoError(true)}
+              className="h-8 sm:h-9 max-w-[140px] sm:max-w-[180px] object-contain"
+            />
           ) : (
             <span className="text-xl sm:text-[24px] lg:text-[26px] font-black tracking-tight text-[#182C61] dark:text-primary flex items-baseline select-none">
               <span>{storeName}</span>

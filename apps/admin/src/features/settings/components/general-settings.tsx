@@ -34,14 +34,13 @@ export function GeneralSettingsComponent({ settings, onSave }: GeneralSettingsPr
     defaultValues: settings,
   });
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const logo = watch('logo');
   const favicon = watch('favicon');
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingFavicon, setUploadingFavicon] = useState(false);
   const logoFileRef = useRef<HTMLInputElement>(null);
   const faviconFileRef = useRef<HTMLInputElement>(null);
-
-
 
   // Synchronize form values with incoming settings once fetched
   useEffect(() => {
@@ -55,15 +54,22 @@ export function GeneralSettingsComponent({ settings, onSave }: GeneralSettingsPr
       const data = new FormData();
       data.append("file", files[0]);
 
+      const token = typeof window !== "undefined" ? localStorage.getItem("admin_access_token") : null;
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${API_BASE}/api/admin/upload`, {
         method: "POST",
         credentials: "include",
+        headers,
         body: data,
       });
       const json = await res.json();
       if (json.success && json.data?.url) {
-        setValue("logo", json.data.url);
-        toast.success("Logo uploaded successfully");
+        setValue("logo", json.data.url, { shouldDirty: true });
+        toast.success("Logo uploaded successfully. Don't forget to click Save Settings!");
       } else {
         toast.error(json.error || json.message || "Failed to upload logo");
       }
@@ -83,15 +89,22 @@ export function GeneralSettingsComponent({ settings, onSave }: GeneralSettingsPr
       const data = new FormData();
       data.append("file", files[0]);
 
+      const token = typeof window !== "undefined" ? localStorage.getItem("admin_access_token") : null;
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${API_BASE}/api/admin/upload`, {
         method: "POST",
         credentials: "include",
+        headers,
         body: data,
       });
       const json = await res.json();
       if (json.success && json.data?.url) {
-        setValue("favicon", json.data.url);
-        toast.success("Favicon uploaded successfully");
+        setValue("favicon", json.data.url, { shouldDirty: true });
+        toast.success("Favicon uploaded successfully. Don't forget to click Save Settings!");
       } else {
         toast.error(json.error || json.message || "Failed to upload favicon");
       }
@@ -104,11 +117,18 @@ export function GeneralSettingsComponent({ settings, onSave }: GeneralSettingsPr
     }
   };
 
-  const onSubmit = (data: GeneralSettings) => {
-    onSave(data);
-    setSaved(true);
-    toast.success("General settings saved successfully!");
-    window.setTimeout(() => setSaved(false), 2500);
+  const onSubmit = async (data: GeneralSettings) => {
+    setSaving(true);
+    try {
+      await onSave(data);
+      setSaved(true);
+      toast.success("General settings saved successfully!");
+      window.setTimeout(() => setSaved(false), 2500);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save general settings");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -302,7 +322,10 @@ export function GeneralSettingsComponent({ settings, onSave }: GeneralSettingsPr
               <CheckCircle2 className="h-4 w-4" />
               Settings saved
             </span>
-            <Button type="submit" className="min-w-[120px]">Save Settings</Button>
+            <Button type="submit" disabled={saving} className="min-w-[120px]">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : null}
+              {saving ? "Saving..." : "Save Settings"}
+            </Button>
           </div>
         </form>
       </CardContent>

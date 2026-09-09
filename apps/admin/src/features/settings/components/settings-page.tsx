@@ -79,17 +79,53 @@ export function SettingsPage() {
 
   const updateGeneral = async (general: Settings["general"]) => {
     setSettings((prev) => ({ ...prev, general }));
+    let savedAny = false;
+    let lastError: Error | null = null;
+
+    // 1. Try saving to /admin/settings/general (requires SUPER_ADMIN role)
     try {
-      await apiRequest("/admin/settings/general", {
+      const res = await apiRequest("/admin/settings/general", {
         method: "PUT",
         body: JSON.stringify({ value: general }),
       });
-      await apiRequest("/cms/general", {
+      if (res?.success) savedAny = true;
+    } catch (e: any) {
+      console.warn("Could not save to /admin/settings/general:", e);
+      lastError = e;
+    }
+
+    // 2. Always sync to /cms/general so storefront & navbar gets updated
+    try {
+      const cmsRes = await apiRequest("/cms/general", {
         method: "PUT",
         body: JSON.stringify(general),
-      }).catch(() => {});
-    } catch (e: unknown) {
-      console.error("Failed to save general settings:", e);
+      });
+      if (cmsRes?.success) savedAny = true;
+    } catch (e: any) {
+      console.error("Failed to save /cms/general:", e);
+      if (!savedAny) lastError = e;
+    }
+
+    // 3. Also sync logo & identity to /cms/navbar so both CMS endpoints stay in sync
+    try {
+      const navRes = await apiRequest("/cms/navbar").catch(() => null);
+      const currentNav = (navRes?.data && typeof navRes.data === "object") ? navRes.data : {};
+      await apiRequest("/cms/navbar", {
+        method: "PUT",
+        body: JSON.stringify({
+          ...currentNav,
+          logo: general.logo,
+          storeName: general.storeName,
+          supportPhone: general.supportPhone || general.storePhone,
+          supportLabel: general.supportLabel,
+        }),
+      });
+    } catch (e) {
+      console.warn("Could not sync logo to /cms/navbar:", e);
+    }
+
+    if (!savedAny && lastError) {
+      throw lastError;
     }
   };
 
