@@ -169,7 +169,7 @@ export function ProductCard({ product }: { product: MockProduct }) {
           {product.rating != null && product.rating > 0 ? (
             <StarRating
               rating={Number(product.rating)}
-              reviews={product.reviews}
+              reviews={product.reviews ?? (product as any).reviewsCount ?? (product as any).ratingCount}
               size="h-3 w-3"
               showValue
             />
