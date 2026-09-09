@@ -10,6 +10,7 @@ import { Heart, Lock, ShoppingCart } from "lucide-react";
 import type { MockProduct } from "./product-types";
 import { formatBDT } from "./price";
 import { ColorSwatches } from "./color-swatches";
+import { StarRating } from "./star-rating";
 import { apiRequest } from "@/lib/api";
 import { useTranslation } from "@/hooks/use-translation";
 
@@ -163,7 +164,21 @@ export function ProductCard({ product }: { product: MockProduct }) {
           </h3>
         </Link>
 
-        <div className="mt-1.5 flex min-h-[22px] items-baseline gap-1.5">
+        {/* Rating & Reviews */}
+        <div className="mt-1 flex items-center min-h-[18px]">
+          {product.rating != null && product.rating > 0 ? (
+            <StarRating
+              rating={Number(product.rating)}
+              reviews={product.reviews}
+              size="h-3 w-3"
+              showValue
+            />
+          ) : (
+            <div className="h-[18px]" />
+          )}
+        </div>
+
+        <div className="mt-1 flex min-h-[22px] items-baseline gap-1.5">
           <span className="text-[15px] font-bold text-foreground">
             {formatBDT(product.price)}
           </span>

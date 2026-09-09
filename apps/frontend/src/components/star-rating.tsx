@@ -13,19 +13,21 @@ export function StarRating({
 }) {
   return (
     <div className="flex items-center gap-1.5">
-      <div className="flex items-center">
+      <div className="flex items-center gap-0.5">
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
             className={`${size} ${
-              i < Math.floor(rating) ? "fill-amber-400 text-amber-400" : "text-border"
+              i < Math.round(rating)
+                ? "fill-amber-400 text-amber-400"
+                : "fill-muted/30 text-muted-foreground/30"
             }`}
           />
         ))}
       </div>
       {(showValue || (reviews ?? 0) > 0) && (
-        <span className="text-[11.5px] text-muted-foreground">
-          {showValue ? ` ${rating} ` : " "}
+        <span className="text-[11.5px] font-medium text-muted-foreground">
+          {showValue ? `${Number(rating).toFixed(1)} ` : ""}
           {reviews != null && reviews > 0 ? `(${reviews})` : ""}
         </span>
       )}
